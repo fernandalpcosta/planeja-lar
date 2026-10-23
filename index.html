@@ -51,6 +51,15 @@ input:focus-visible,select:focus-visible,button:focus-visible,summary:focus-visi
 button{font:inherit;font-size:13px;cursor:pointer;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:6px 10px}
 button.link{border:0;background:none;color:var(--accent-ink);padding:2px 4px}
 button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.styles{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.style-card{position:relative;border:1px solid var(--line);border-radius:8px;padding:10px;cursor:pointer;display:grid;gap:2px;align-content:start;background:var(--bg)}
+.style-card input{position:absolute;opacity:0;pointer-events:none;width:1px;height:1px}
+.style-card:has(input:checked){border-color:var(--accent);background:var(--accent-soft);box-shadow:inset 0 0 0 1px var(--accent)}
+.style-card:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:1px}
+.style-card .n{font-weight:600;color:var(--ink);font-size:13.5px}
+.style-card .c{font-family:var(--f-mono);font-size:13px;color:var(--accent-ink)}
+.style-card .d{font-size:12px;color:var(--ink-3);line-height:1.35}
+.style-card.wide{grid-column:1/-1}
 details.costs summary{cursor:pointer;font-size:13px;color:var(--accent-ink);font-weight:500}
 details.costs .row{margin-top:8px}
 
@@ -163,6 +172,8 @@ tr.ret td{background:var(--accent-soft)}
             <label>Dívidas caras (cartão, cheque especial)<input id="dividas" type="number" step="500" min="0"></label>
             <label>Quanto investem por mês hoje<input id="aporte" type="number" step="100" min="0"></label>
           </div>
+          <label>Gasto com viagens por ano hoje<input id="viagensHoje" type="number" step="1000" min="0"></label>
+          <p class="hint">Fora dos gastos mensais. O app separa esse valor numa caixa de viagens.</p>
           <label class="check"><input id="seguro" type="checkbox">Temos seguro de vida</label>
           <label class="check"><input id="plano" type="checkbox">Temos plano de saúde</label>
           <label class="check"><input id="irCompleta" type="checkbox">Fazemos a declaração completa do IR</label>
@@ -186,6 +197,11 @@ tr.ret td{background:var(--accent-soft)}
               <option value="capital">Capital (São Paulo)</option>
             </select>
           </label>
+          <div>
+            <p class="hint" style="margin-bottom:6px;color:var(--ink-2);font-size:13px">Estilo de vida</p>
+            <div class="styles" id="styles" role="radiogroup" aria-label="Estilo de vida"></div>
+          </div>
+          <label>Viagens por ano no sonho<input id="viagens" type="number" step="1000" min="0"></label>
           <div class="row">
             <label>Viver de renda em (anos)<input id="anos" type="number" min="3" max="40"></label>
             <label>Moradia no futuro
@@ -199,7 +215,7 @@ tr.ret td{background:var(--accent-soft)}
               <label>Mercado e casa<input id="c_mercado" type="number" step="100"></label>
               <label>Plano de saúde (casal)<input id="c_saude" type="number" step="100"></label>
               <label>Carros e transporte<input id="c_transp" type="number" step="100"></label>
-              <label>Lazer e viagens<input id="c_lazer" type="number" step="100"></label>
+              <label>Lazer e restaurantes<input id="c_lazer" type="number" step="100"></label>
               <label>Outros e imprevistos<input id="c_outros" type="number" step="100"></label>
               <label>Aluguel (se alugar)<input id="c_aluguel" type="number" step="100"></label>
               <label>Custo extra por filho/mês<input id="c_filho" type="number" step="100"></label>
@@ -319,22 +335,37 @@ const CIDADES = {
   capital: {c_moradia:3000,c_mercado:3300,c_saude:3000,c_transp:2000,c_lazer:3000,c_outros:1800,c_aluguel:7000,e_inf:4500,e_fund:6000,e_med:7000}
 };
 const FACUL = {publica:2000, particular:5500, top:9000};
+const ESTILOS = {
+  essencial:  {nome:'Essencial',   desc:'Vida simples e sem aperto. Uma viagem nacional por ano.', mult:0.8, alug:0.8, viagens:8000},
+  confortavel:{nome:'Confortável', desc:'Restaurantes de vez em quando. Duas viagens nacionais por ano.', mult:1, alug:1, viagens:20000},
+  viajante:   {nome:'Viajante',    desc:'Dia a dia confortável, uma viagem internacional e duas nacionais por ano.', mult:1, alug:1, viagens:45000},
+  alto:       {nome:'Alto padrão', desc:'Casa maior, mais lazer e duas viagens internacionais por ano.', mult:1.4, alug:1.5, viagens:70000}
+};
+const BASE_KEYS = ['c_moradia','c_mercado','c_saude','c_transp','c_lazer','c_outros'];
+const COST_KEYS = BASE_KEYS.concat(['c_aluguel','e_inf','e_fund','e_med','viagens']);
+const r100 = v => Math.round(v/100)*100;
+function applyStyle(s){
+  const st=ESTILOS[s.estilo]; if(!st) return;
+  const b=CIDADES[s.cidade];
+  BASE_KEYS.forEach(k=>{ s[k]=r100(b[k]*st.mult); });
+  s.c_aluguel=r100(b.c_aluguel*st.alug); s.e_inf=b.e_inf; s.e_fund=b.e_fund; s.e_med=b.e_med; s.viagens=st.viagens;
+}
 const EXEMPLO = Object.assign({
-  idade1:32, idade2:31, renda1:12000, renda2:10000, gastos:11000, parcela:0, parcelaAnos:0,
+  idade1:32, idade2:31, renda1:12000, renda2:10000, gastos:10000, parcela:0, parcelaAnos:0,
   patrimonio:300000, liquidez:60000, dividas:0, aporte:7000, seguro:false, plano:true, irCompleta:false,
   cidade:'litnorte', anos:20, moradia:'propria', c_filho:1500,
-  vinc1:'clt', vinc2:'clt', retorno:5, swr:4.5, crescRenda:1, vol:9, inss:0, inssIdade:65,
+  vinc1:'clt', vinc2:'clt', estilo:'confortavel', viagens:20000, viagensHoje:12000, retorno:5, swr:4.5, crescRenda:1, vol:9, inss:0, inssIdade:65,
   kids:[{ano:2031, escola:'particular', facul:'particular'}]
 }, CIDADES.litnorte);
 const KEY = 'planeja-lar-v1';
 let S;
 try{ S = JSON.parse(localStorage.getItem(KEY)) || null; }catch(e){ S = null; }
 let isExample = !S;
-if(S){ S.vinc1 = S.vinc1||'clt'; S.vinc2 = S.vinc2||'clt'; }
+if(S){ S.vinc1 = S.vinc1||'clt'; S.vinc2 = S.vinc2||'clt'; if(!S.estilo){ S.estilo='custom'; S.viagens=S.viagens||0; S.viagensHoje=S.viagensHoje||0; } }
 if(!S) S = JSON.parse(JSON.stringify(EXEMPLO));
 
 const $ = id => document.getElementById(id);
-const NUM_IDS = ['idade1','idade2','renda1','renda2','gastos','parcela','parcelaAnos','patrimonio','liquidez','dividas','aporte','anos','retorno','swr','crescRenda','vol','inss','inssIdade','c_moradia','c_mercado','c_saude','c_transp','c_lazer','c_outros','c_aluguel','c_filho','e_inf','e_fund','e_med'];
+const NUM_IDS = ['idade1','idade2','renda1','renda2','gastos','parcela','parcelaAnos','patrimonio','liquidez','dividas','aporte','anos','retorno','swr','crescRenda','vol','inss','inssIdade','c_moradia','c_mercado','c_saude','c_transp','c_lazer','c_outros','c_aluguel','c_filho','e_inf','e_fund','e_med','viagens','viagensHoje'];
 const SEL_IDS = ['cidade','moradia','vinc1','vinc2'];
 const CHK_IDS = ['seguro','plano','irCompleta'];
 
@@ -352,6 +383,16 @@ function fillForm(){
   SEL_IDS.forEach(id=>{ $(id).value = S[id]; });
   CHK_IDS.forEach(id=>{ $(id).checked = !!S[id]; });
   renderKids();
+  renderStyles();
+}
+function renderStyles(){
+  const b=CIDADES[S.cidade];
+  const opts=Object.entries(ESTILOS).map(([id,st])=>{
+    const m=BASE_KEYS.reduce((t,k)=>t+r100(b[k]*st.mult),0)+(S.moradia==='aluguel'?r100(b.c_aluguel*st.alug):0)+st.viagens/12;
+    return `<label class="style-card"><input type="radio" name="estilo" value="${id}" id="est_${id}"${S.estilo===id?' checked':''}><span class="n">${st.nome}</span><span class="c">${brl(m)}/mês</span><span class="d">${st.desc}</span></label>`;
+  });
+  opts.push(`<label class="style-card wide"><input type="radio" name="estilo" value="custom" id="est_custom"${S.estilo==='custom'?' checked':''}><span class="n">Personalizado</span><span class="d">Seus próprios valores. Fica marcado quando vocês editam algum custo.</span></label>`);
+  $('styles').innerHTML=opts.join('');
 }
 function renderKids(){
   const box = $('kids'); box.innerHTML='';
@@ -378,7 +419,7 @@ function readForm(){
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
 
 /* ---------- modelo ---------- */
-function coreCost(s){ return s.c_moradia+s.c_mercado+s.c_saude+s.c_transp+s.c_lazer+s.c_outros+(s.moradia==='aluguel'?s.c_aluguel:0); }
+function coreCost(s){ return (s.viagens||0)/12+s.c_moradia+s.c_mercado+s.c_saude+s.c_transp+s.c_lazer+s.c_outros+(s.moradia==='aluguel'?s.c_aluguel:0); }
 function kidYearCost(s,k,year){
   const a = year - k.ano; if(a<0||a>22) return 0;
   let c = 0;
@@ -413,13 +454,13 @@ function cashflows(s,years){
   for(let i=0;i<years;i++){
     const y=Y0+i;
     const income=(s.renda1+s.renda2)*12*Math.pow(1+g,i);
-    const exp=s.gastos*12+(i<s.parcelaAnos?s.parcela*12:0)+kidsCost(s,y);
+    const exp=s.gastos*12+(s.viagensHoje||0)+(i<s.parcelaAnos?s.parcela*12:0)+kidsCost(s,y);
     out.push({i,y,income,exp,surplus:income-exp});
   }
   return out;
 }
 function investShare(s){
-  const sur0=(s.renda1+s.renda2)-s.gastos-(s.parcelaAnos>0?s.parcela:0)-kidsCost(s,Y0)/12;
+  const sur0=(s.renda1+s.renda2)-s.gastos-(s.viagensHoje||0)/12-(s.parcelaAnos>0?s.parcela:0)-kidsCost(s,Y0)/12;
   if(sur0<=0) return {share:0,sur0};
   return {share:Math.min(1, s.aporte/sur0), sur0};
 }
@@ -599,6 +640,7 @@ function renderPlan(R,reserveMonths){
   s.kids.forEach((k,i)=>{ if(k.ano+18>Y0) items.push(['info','Contínuo',`Caixa da educação${s.kids.length>1?' do filho '+(i+1):''}`,`Separem o dinheiro da faculdade em Tesouro Educa+ ou IPCA+ com vencimento perto de ${k.ano+18}, para não misturar com a aposentadoria.`]); });
   if(s.moradia==='aluguel') items.push(['warn','Decidir em 2 anos','Avaliar casa própria',`Pagar aluguel no futuro soma ${short(s.c_aluguel*12/(s.swr/100))} à meta. Comparem com comprar à vista ou quitar um imóvel antes de ${Y0+R.N}.`]);
   if(s.parcelaAnos>R.N) items.push(['warn','Contínuo','Amortizar o financiamento','O financiamento termina depois da data de viver de renda e encarece a meta. Amortizem e reduzam o prazo, não a parcela.']);
+  if(s.viagensHoje>0||s.viagens>0) items.push(['info','Todo mês','Manter uma caixa de viagens',`${s.viagensHoje>0?`Separem <span class="num">${brl(s.viagensHoje/12)}</span>/mês numa conta só para viagens, em CDB de liquidez diária ou Tesouro Selic, fora da reserva de emergência. Assim a viagem não sai do aporte nem vira dívida no cartão. Para viagens ao exterior, comprem a moeda aos poucos ao longo do ano. `:''}${s.viagens>0?`No sonho, o plano reserva <span class="num">${brl(s.viagens)}</span> por ano para viagens, já incluídos na meta.`:''}`]);
   items.push(['info','Próximos anos','Testar o destino','Passem temporadas na cidade fora da alta estação. Visitem escolas e confiram hospitais e o tempo de deslocamento.']);
   items.push(['info','Todo ano','Revisar o plano','Atualizem patrimônio, renda e custos aqui. Se a meta ficar à frente, dá para antecipar a data. Se ficar atrás, ajustem cedo.']);
   $('plan').innerHTML=items.map(it=>`<li><div><span class="pill ${it[0]}">${it[1]}</span></div><div><h3>${it[2]}</h3><p>${it[3]}</p></div></li>`).join('');
@@ -619,7 +661,7 @@ function renderAlloc(R){
   $('allocBar').innerHTML=mix.map((p,i)=>`<span style="width:${p}%;background:${cats[i][0]}" title="${cats[i][1]} ${p}%"></span>`).join('');
   $('alloc').innerHTML=mix.map((p,i)=>`<div><span class="sw" style="background:${cats[i][0]}"></span><span class="p">${p}%</span><span>${cats[i][1]}<small>${cats[i][2]}</small></span></div>`).join('');
   const share = R.T.total>0? R.T.edu/R.T.total : 0;
-  $('eduBox').innerHTML = S.kids.length? `<p class="hint" style="font-size:13px;color:var(--ink-2)">Fora dessa divisão: a reserva de emergência e o caixa da educação (${short(R.T.edu)}, cerca de ${pct(share)} da meta), em títulos com vencimento casado com a faculdade.${S.irCompleta?' Uma parte do núcleo pode ficar em PGBL pelo benefício fiscal.':''}</p>`:'';
+  $('eduBox').innerHTML = S.kids.length? `<p class="hint" style="font-size:13px;color:var(--ink-2)">Fora dessa divisão: a reserva de emergência${S.viagensHoje>0?', a caixa de viagens':''} e o caixa da educação (${short(R.T.edu)}, cerca de ${pct(share)} da meta), em títulos com vencimento casado com a faculdade.${S.irCompleta?' Uma parte do núcleo pode ficar em PGBL pelo benefício fiscal.':''}</p>`:'';
 }
 
 function renderLevers(R){
@@ -648,13 +690,14 @@ function renderTable(R){
 /* ---------- eventos ---------- */
 let raf;
 function onChange(e){
-  if(e && e.target.id==='cidade'){ Object.assign(S, CIDADES[e.target.value]); readFormExcept(Object.keys(CIDADES.litnorte)); fillForm(); }
-  else readForm();
+  if(e && e.target.name==='estilo'){ readForm(); S.estilo=e.target.value; applyStyle(S); fillForm(); }
+  else if(e && e.target.id==='cidade'){ readForm(); if(S.estilo==='custom'){ const v=S.viagens; Object.assign(S, CIDADES[S.cidade]); S.viagens=v; } else applyStyle(S); fillForm(); }
+  else { readForm(); if(e && COST_KEYS.includes(e.target.id) && S.estilo!=='custom'){ S.estilo='custom'; renderStyles(); } if(e && e.target.id==='moradia') renderStyles(); }
   isExample=false; save();
   cancelAnimationFrame(raf); raf=requestAnimationFrame(render);
 }
-function readFormExcept(skip){ const keep={}; skip.forEach(k=>keep[k]=S[k]); readForm(); Object.assign(S,keep); }
-$('f').addEventListener('input', e=>{ if(e.target.id!=='cidade') onChange(e); });
+$('f').addEventListener('input', e=>{ if(e.target.tagName!=='SELECT' && e.target.name!=='estilo') onChange(e); });
+$('f').addEventListener('change', e=>{ if(e.target.name==='estilo') onChange(e); });
 $('f').addEventListener('change', e=>{ if(e.target.tagName==='SELECT') onChange(e); });
 $('f').addEventListener('submit', e=>e.preventDefault());
 $('kids').addEventListener('click', e=>{ const i=e.target.dataset.rm; if(i!==undefined){ readForm(); S.kids.splice(+i,1); renderKids(); onChange(); }});
