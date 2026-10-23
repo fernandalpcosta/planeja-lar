@@ -1,0 +1,631 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Planeja Lar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Young+Serif&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: painel de entradas à esquerda (fixo ao rolar), resultado à direita: veredito → números → gráfico → plano → carteira → alavancas → tabela */
+:root{
+  --bg:#f3f6f5; --surface:#fcfcfb; --sunk:#e8eeec; --ink:#14272b; --ink-2:#4a5d61; --ink-3:#7a8b8e; --line:#d5dfdd;
+  --accent:#008a7c; --accent-ink:#00695f; --accent-soft:#d9efeb;
+  --amber:#b4651e; --amber-soft:#f6e6d6;
+  --good:#1f7a3f; --good-soft:#dcf0e2; --warn:#a15c00; --warn-soft:#fbecd3; --bad:#b3261e; --bad-soft:#f9dedb;
+  --f-display:"Young Serif", Georgia, "Times New Roman", serif;
+  --f-body:"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono:"IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0b1416; --surface:#0f1a1d; --sunk:#16252a; --ink:#e4eeec; --ink-2:#a9bbbc; --ink-3:#768a8c; --line:#24363b;
+  --accent:#2aa598; --accent-ink:#5cc4b8; --accent-soft:#123a37; --amber:#cf7f35; --amber-soft:#3a2716;
+  --good:#5cc27f; --good-soft:#163222; --warn:#e3a34a; --warn-soft:#3a2a12; --bad:#ef7b72; --bad-soft:#3d1a18; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0b1416; --surface:#0f1a1d; --sunk:#16252a; --ink:#e4eeec; --ink-2:#a9bbbc; --ink-3:#768a8c; --line:#24363b;
+  --accent:#2aa598; --accent-ink:#5cc4b8; --accent-soft:#123a37; --amber:#cf7f35; --amber-soft:#3a2716;
+  --good:#5cc27f; --good-soft:#163222; --warn:#e3a34a; --warn-soft:#3a2a12; --bad:#ef7b72; --bad-soft:#3d1a18; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
+.wrap{max-width:1280px;margin:0 auto;padding-block:24px 64px;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
+header.top{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:12px;margin-bottom:20px}
+h1{font-family:var(--f-display);font-weight:400;font-size:clamp(28px,4vw,40px);line-height:1.1;margin:0;text-wrap:balance}
+.sub{color:var(--ink-2);margin:6px 0 0;max-width:60ch}
+.grid{display:grid;grid-template-columns:minmax(300px,380px) minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:900px){.grid{grid-template-columns:minmax(0,1fr)}}
+aside.inputs{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px);max-height:calc(100vh - 24px);overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:4px 0}
+@media (max-width:900px){aside.inputs{position:static;max-height:none}}
+fieldset{border:0;border-bottom:1px solid var(--line);margin:0;padding:16px 18px;display:grid;gap:10px}
+fieldset:last-of-type{border-bottom:0}
+legend{float:left;width:100%;padding:0;margin-bottom:4px;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--accent-ink)}
+legend span{color:var(--ink-3);font-weight:500;margin-right:6px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+label{display:grid;gap:3px;font-size:13px;color:var(--ink-2);min-width:0}
+input,select{font:inherit;font-size:14px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:7px 9px;width:100%;min-width:0;font-variant-numeric:tabular-nums}
+input:focus-visible,select:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.check{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink)}
+.check input{width:auto;accent-color:var(--accent)}
+.hint{font-size:12px;color:var(--ink-3);margin:0}
+.kid{border:1px dashed var(--line);border-radius:8px;padding:10px;display:grid;gap:8px}
+.kid-h{display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:600}
+button{font:inherit;font-size:13px;cursor:pointer;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:6px 10px}
+button.link{border:0;background:none;color:var(--accent-ink);padding:2px 4px}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+details.costs summary{cursor:pointer;font-size:13px;color:var(--accent-ink);font-weight:500}
+details.costs .row{margin-top:8px}
+
+main{display:grid;gap:20px;min-width:0}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:20px;min-width:0}
+.card h2{font-family:var(--f-display);font-weight:400;font-size:22px;margin:0 0 4px}
+.card .lede{color:var(--ink-2);margin:0 0 16px;font-size:14px}
+.verdict{display:grid;grid-template-columns:auto minmax(0,1fr);gap:20px;align-items:center}
+@media (max-width:560px){.verdict{grid-template-columns:minmax(0,1fr)}}
+.ring{width:132px;height:132px}
+.verdict h2{font-size:26px;line-height:1.2;text-wrap:balance}
+.verdict p{margin:6px 0 0;color:var(--ink-2);max-width:62ch}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:3px 9px;border-radius:999px;white-space:nowrap}
+.pill.good{background:var(--good-soft);color:var(--good)} .pill.warn{background:var(--warn-soft);color:var(--warn)} .pill.bad{background:var(--bad-soft);color:var(--bad)} .pill.info{background:var(--accent-soft);color:var(--accent-ink)}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+@media (max-width:760px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kpi{background:var(--surface);padding:14px 16px;display:grid;gap:2px;align-content:start}
+.kpi .k{font-size:12px;color:var(--ink-2)}
+.kpi .v{font-family:var(--f-mono);font-size:22px;font-weight:500;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.kpi .d{font-size:12px;color:var(--ink-3)}
+.chart-wrap{position:relative}
+.legend{display:flex;flex-wrap:wrap;gap:16px;font-size:13px;color:var(--ink-2);margin-bottom:8px}
+.legend i{display:inline-block;width:18px;height:0;border-top:2px solid;vertical-align:middle;margin-right:6px}
+svg text{font-family:var(--f-body)}
+.tip{position:absolute;pointer-events:none;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:12px;box-shadow:0 6px 20px rgba(0,0,0,.12);min-width:180px}
+.tip b{font-family:var(--f-mono);font-weight:500}
+.tip .r{display:flex;justify-content:space-between;gap:12px}
+.plan{list-style:none;margin:0;padding:0;display:grid;gap:0}
+.plan li{display:grid;grid-template-columns:110px minmax(0,1fr);gap:14px;padding:14px 0;border-top:1px solid var(--line)}
+.plan li:first-child{border-top:0}
+@media (max-width:560px){.plan li{grid-template-columns:minmax(0,1fr);gap:6px}}
+.plan h3{margin:0;font-size:15px;font-weight:600}
+.plan p{margin:3px 0 0;color:var(--ink-2);font-size:14px}
+.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;color:var(--ink)}
+.alloc-bar{display:flex;height:14px;border-radius:7px;overflow:hidden;gap:2px;margin:6px 0 14px;background:var(--surface)}
+.alloc-bar span{display:block;height:100%}
+.alloc{display:grid;gap:8px}
+.alloc div{display:grid;grid-template-columns:14px 52px minmax(0,1fr);gap:10px;align-items:baseline;font-size:14px}
+.alloc .sw{width:12px;height:12px;border-radius:3px;align-self:center}
+.alloc .p{font-family:var(--f-mono)}
+.alloc small{color:var(--ink-3);display:block}
+.levers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:640px){.levers{grid-template-columns:minmax(0,1fr)}}
+.lever{background:var(--sunk);border-radius:8px;padding:14px}
+.lever .k{font-size:13px;color:var(--ink-2)}
+.lever .v{font-family:var(--f-mono);font-size:20px;margin:2px 0}
+.lever p{margin:0;font-size:13px;color:var(--ink-2)}
+.tbl{overflow-x:auto;margin-top:12px}
+table{border-collapse:collapse;width:100%;font-size:13px;font-variant-numeric:tabular-nums;min-width:640px}
+th,td{padding:6px 8px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+th:first-child,td:first-child,th:nth-child(2),td:nth-child(2){text-align:left}
+th{font-weight:600;color:var(--ink-2);font-size:12px}
+td.ev{color:var(--ink-2);white-space:normal;min-width:140px}
+tr.ret td{background:var(--accent-soft)}
+.foot{font-size:12px;color:var(--ink-3);max-width:80ch}
+.ex{font-size:12px;background:var(--warn-soft);color:var(--warn);padding:2px 8px;border-radius:4px;font-weight:600}
+@media (prefers-reduced-motion:no-preference){.ring circle.fg{transition:stroke-dashoffset .5s ease}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>Planeja Lar</h1>
+      <p class="sub">Conte onde vocês estão hoje e como querem viver. O app calcula quanto patrimônio o sonho exige, se o ritmo atual chega lá e o que fazer a partir deste mês.</p>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <span class="ex" id="exTag">Dados de exemplo</span>
+      <button id="reset" type="button">Voltar ao exemplo</button>
+    </div>
+  </header>
+
+  <div class="grid">
+    <aside class="inputs" aria-label="Seus dados">
+      <form id="f" autocomplete="off">
+        <fieldset>
+          <legend><span>1</span>Situação hoje</legend>
+          <div class="row">
+            <label>Sua idade<input id="idade1" type="number" min="18" max="80"></label>
+            <label>Idade do(a) parceiro(a)<input id="idade2" type="number" min="18" max="80"></label>
+          </div>
+          <div class="row">
+            <label>Sua renda líquida/mês<input id="renda1" type="number" step="100" min="0"></label>
+            <label>Renda líquida do(a) parceiro(a)<input id="renda2" type="number" step="100" min="0"></label>
+          </div>
+          <p class="hint">Inclua 13º, férias e PLR divididos por 12.</p>
+          <label>Gastos mensais atuais (sem financiamento)<input id="gastos" type="number" step="100" min="0"></label>
+          <div class="row">
+            <label>Parcela de financiamento/mês<input id="parcela" type="number" step="100" min="0"></label>
+            <label>Anos restantes<input id="parcelaAnos" type="number" min="0" max="35"></label>
+          </div>
+          <div class="row">
+            <label>Patrimônio investido<input id="patrimonio" type="number" step="1000" min="0"></label>
+            <label>…em liquidez diária<input id="liquidez" type="number" step="1000" min="0"></label>
+          </div>
+          <div class="row">
+            <label>Dívidas caras (cartão, cheque especial)<input id="dividas" type="number" step="500" min="0"></label>
+            <label>Quanto investem por mês hoje<input id="aporte" type="number" step="100" min="0"></label>
+          </div>
+          <label class="check"><input id="seguro" type="checkbox">Temos seguro de vida</label>
+          <label class="check"><input id="plano" type="checkbox">Temos plano de saúde</label>
+          <label class="check"><input id="irCompleta" type="checkbox">Fazemos a declaração completa do IR</label>
+        </fieldset>
+
+        <fieldset>
+          <legend><span>2</span>Filhos</legend>
+          <div id="kids" style="display:grid;gap:10px"></div>
+          <button type="button" id="addKid">+ Adicionar filho(a)</button>
+          <p class="hint">Para filhos que já nasceram, use o ano de nascimento real e não conte os custos deles nos gastos atuais.</p>
+        </fieldset>
+
+        <fieldset>
+          <legend><span>3</span>O sonho</legend>
+          <label>Onde querem viver
+            <select id="cidade">
+              <option value="litnorte">Litoral Norte (Ubatuba, Caraguá, S. Sebastião)</option>
+              <option value="baixada">Baixada Santista (Santos, Guarujá)</option>
+              <option value="litsul">Litoral Sul (Itanhaém, Peruíbe)</option>
+              <option value="interior">Interior (Campinas, S. J. Campos, Ribeirão)</option>
+              <option value="capital">Capital (São Paulo)</option>
+            </select>
+          </label>
+          <div class="row">
+            <label>Viver de renda em (anos)<input id="anos" type="number" min="3" max="40"></label>
+            <label>Moradia no futuro
+              <select id="moradia"><option value="propria">Casa própria quitada</option><option value="aluguel">Aluguel</option></select>
+            </label>
+          </div>
+          <details class="costs" id="costsBox">
+            <summary>Custo de vida do casal no destino: <span id="coreSum" class="num"></span>/mês</summary>
+            <div class="row">
+              <label>Moradia e contas<input id="c_moradia" type="number" step="100"></label>
+              <label>Mercado e casa<input id="c_mercado" type="number" step="100"></label>
+              <label>Plano de saúde (casal)<input id="c_saude" type="number" step="100"></label>
+              <label>Carros e transporte<input id="c_transp" type="number" step="100"></label>
+              <label>Lazer e viagens<input id="c_lazer" type="number" step="100"></label>
+              <label>Outros e imprevistos<input id="c_outros" type="number" step="100"></label>
+              <label>Aluguel (se alugar)<input id="c_aluguel" type="number" step="100"></label>
+              <label>Custo extra por filho/mês<input id="c_filho" type="number" step="100"></label>
+            </div>
+            <p class="hint" style="margin-top:8px">Mensalidade escolar (particular)</p>
+            <div class="row" style="grid-template-columns:1fr 1fr 1fr">
+              <label>Infantil<input id="e_inf" type="number" step="100"></label>
+              <label>Fundamental<input id="e_fund" type="number" step="100"></label>
+              <label>Médio<input id="e_med" type="number" step="100"></label>
+            </div>
+            <p class="hint" style="margin-top:8px">Valores de referência estimados para 2026. Ajuste com orçamentos reais das escolas e corretoras.</p>
+          </details>
+        </fieldset>
+
+        <fieldset>
+          <legend><span>4</span>Premissas</legend>
+          <div class="row">
+            <label>Rendimento real (% a.a.)<input id="retorno" type="number" step="0.5" min="0" max="15"></label>
+            <label>Retirada segura (% a.a.)<input id="swr" type="number" step="0.25" min="2" max="8"></label>
+          </div>
+          <div class="row">
+            <label>Aumento real da renda (% a.a.)<input id="crescRenda" type="number" step="0.5" min="-5" max="10"></label>
+            <label>Volatilidade da carteira (%)<input id="vol" type="number" step="1" min="0" max="30"></label>
+          </div>
+          <div class="row">
+            <label>INSS do casal/mês (hoje)<input id="inss" type="number" step="100" min="0"></label>
+            <label>A partir da sua idade<input id="inssIdade" type="number" min="55" max="75"></label>
+          </div>
+          <p class="hint">Tudo é calculado em dinheiro de hoje: o rendimento é o que sobra acima do IPCA, já sem imposto. Tesouro IPCA+ tem pago 6–7% real bruto.</p>
+        </fieldset>
+      </form>
+    </aside>
+
+    <main>
+      <section class="card verdict" aria-live="polite">
+        <svg class="ring" viewBox="0 0 132 132" role="img" aria-label="Progresso até a meta">
+          <circle cx="66" cy="66" r="56" fill="none" stroke="var(--sunk)" stroke-width="12"/>
+          <circle class="fg" id="ringFg" cx="66" cy="66" r="56" fill="none" stroke="var(--accent)" stroke-width="12" stroke-linecap="round" transform="rotate(-90 66 66)" stroke-dasharray="351.86" stroke-dashoffset="351.86"/>
+          <text id="ringTxt" x="66" y="70" text-anchor="middle" font-size="26" fill="var(--ink)" style="font-family:var(--f-mono)">0%</text>
+          <text x="66" y="90" text-anchor="middle" font-size="11" fill="var(--ink-3)">da meta</text>
+        </svg>
+        <div>
+          <div id="vPill"></div>
+          <h2 id="vTitle" style="margin-top:8px"></h2>
+          <p id="vText"></p>
+        </div>
+      </section>
+
+      <section class="kpis" id="kpis"></section>
+
+      <section class="card">
+        <h2>Caminho do patrimônio</h2>
+        <p class="lede">Em reais de hoje. A linha cheia mostra onde vocês chegam no ritmo atual. A tracejada mostra o ritmo que fecha a meta.</p>
+        <div class="legend">
+          <span><i style="border-color:var(--accent)"></i>Ritmo atual</span>
+          <span><i style="border-color:var(--amber);border-top-style:dashed"></i>Ritmo necessário</span>
+          <span><i style="border-color:var(--ink-3);border-top-style:dotted"></i>Meta</span>
+        </div>
+        <div class="chart-wrap" id="chartWrap">
+          <svg id="chart" width="100%" height="320" role="img" aria-label="Gráfico da evolução do patrimônio"></svg>
+          <div class="tip" id="tip" hidden></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Plano de ação</h2>
+        <p class="lede">Gerado a partir dos seus dados, em ordem de prioridade.</p>
+        <ol class="plan" id="plan"></ol>
+      </section>
+
+      <section class="card">
+        <h2>Onde investir</h2>
+        <p class="lede" id="allocLede"></p>
+        <div class="alloc-bar" id="allocBar"></div>
+        <div class="alloc" id="alloc"></div>
+        <div id="eduBox" style="margin-top:16px"></div>
+      </section>
+
+      <section class="card">
+        <h2>Se não fechar, mexa em uma destas alavancas</h2>
+        <p class="lede">Cada alavanca sozinha leva o plano até 100% da meta.</p>
+        <div class="levers" id="levers"></div>
+      </section>
+
+      <section class="card">
+        <details>
+          <summary style="cursor:pointer;font-weight:600">Ano a ano</summary>
+          <div class="tbl"><table id="tbl"></table></div>
+        </details>
+      </section>
+
+      <p class="foot">Estudo educativo com premissas simplificadas, não é recomendação de investimento. Valores em reais de 2026, corrigidos pela inflação. A meta usa a regra de retirada segura sobre o custo do casal e soma, à parte, o custo restante dos filhos e do financiamento após a data de viver de renda. Para executar, procure um planejador CFP sem conflito de interesse.</p>
+    </main>
+  </div>
+</div>
+
+<script>
+(function(){
+const Y0 = 2026;
+const CIDADES = {
+  litnorte:{c_moradia:2300,c_mercado:3200,c_saude:2400,c_transp:2200,c_lazer:2000,c_outros:1500,c_aluguel:4500,e_inf:2200,e_fund:2800,e_med:3300},
+  baixada: {c_moradia:2500,c_mercado:3000,c_saude:2600,c_transp:2000,c_lazer:2500,c_outros:1500,c_aluguel:5000,e_inf:2800,e_fund:3500,e_med:4200},
+  litsul:  {c_moradia:1800,c_mercado:2700,c_saude:2200,c_transp:1800,c_lazer:1700,c_outros:1200,c_aluguel:2800,e_inf:1500,e_fund:1900,e_med:2300},
+  interior:{c_moradia:2400,c_mercado:2900,c_saude:2500,c_transp:2000,c_lazer:2300,c_outros:1500,c_aluguel:4200,e_inf:2800,e_fund:3600,e_med:4300},
+  capital: {c_moradia:3000,c_mercado:3300,c_saude:3000,c_transp:2000,c_lazer:3000,c_outros:1800,c_aluguel:7000,e_inf:4500,e_fund:6000,e_med:7000}
+};
+const FACUL = {publica:2000, particular:5500, top:9000};
+const EXEMPLO = Object.assign({
+  idade1:32, idade2:31, renda1:12000, renda2:10000, gastos:11000, parcela:0, parcelaAnos:0,
+  patrimonio:300000, liquidez:60000, dividas:0, aporte:7000, seguro:false, plano:true, irCompleta:false,
+  cidade:'litnorte', anos:20, moradia:'propria', c_filho:1500,
+  retorno:5, swr:4.5, crescRenda:1, vol:9, inss:0, inssIdade:65,
+  kids:[{ano:2031, escola:'particular', facul:'particular'}]
+}, CIDADES.litnorte);
+const KEY = 'planeja-lar-v1';
+let S;
+try{ S = JSON.parse(localStorage.getItem(KEY)) || null; }catch(e){ S = null; }
+let isExample = !S;
+if(!S) S = JSON.parse(JSON.stringify(EXEMPLO));
+
+const $ = id => document.getElementById(id);
+const NUM_IDS = ['idade1','idade2','renda1','renda2','gastos','parcela','parcelaAnos','patrimonio','liquidez','dividas','aporte','anos','retorno','swr','crescRenda','vol','inss','inssIdade','c_moradia','c_mercado','c_saude','c_transp','c_lazer','c_outros','c_aluguel','c_filho','e_inf','e_fund','e_med'];
+const SEL_IDS = ['cidade','moradia'];
+const CHK_IDS = ['seguro','plano','irCompleta'];
+
+const brl = v => 'R$ ' + Math.round(v).toLocaleString('pt-BR');
+function short(v){
+  const a = Math.abs(v), s = v<0?'−':'';
+  if(a>=1e6) return s+'R$ '+(a/1e6).toLocaleString('pt-BR',{maximumFractionDigits:2,minimumFractionDigits:1})+' mi';
+  if(a>=1e3) return s+'R$ '+Math.round(a/1e3).toLocaleString('pt-BR')+' mil';
+  return s+'R$ '+Math.round(a);
+}
+const pct = v => (v*100).toLocaleString('pt-BR',{maximumFractionDigits:0})+'%';
+
+function fillForm(){
+  NUM_IDS.forEach(id=>{ $(id).value = S[id]; });
+  SEL_IDS.forEach(id=>{ $(id).value = S[id]; });
+  CHK_IDS.forEach(id=>{ $(id).checked = !!S[id]; });
+  renderKids();
+}
+function renderKids(){
+  const box = $('kids'); box.innerHTML='';
+  S.kids.forEach((k,i)=>{
+    const d = document.createElement('div'); d.className='kid';
+    d.innerHTML = `<div class="kid-h"><span>Filho(a) ${i+1}</span><button type="button" class="link" data-rm="${i}">Remover</button></div>
+      <div class="row" style="grid-template-columns:1fr 1fr 1fr">
+        <label>Nasce/nasceu em<input id="k_ano_${i}" type="number" min="1995" max="2060" value="${k.ano}"></label>
+        <label>Escola<select id="k_esc_${i}"><option value="publica">Pública</option><option value="particular">Particular</option><option value="bilingue">Bilíngue</option></select></label>
+        <label>Faculdade<select id="k_fac_${i}"><option value="publica">Pública</option><option value="particular">Particular</option><option value="top">Particular top</option></select></label>
+      </div>`;
+    box.appendChild(d);
+    $('k_esc_'+i).value = k.escola; $('k_fac_'+i).value = k.facul;
+  });
+  $('addKid').hidden = S.kids.length>=4;
+}
+function readForm(){
+  NUM_IDS.forEach(id=>{ const v = parseFloat($(id).value); S[id] = isFinite(v)?v:0; });
+  SEL_IDS.forEach(id=>{ S[id] = $(id).value; });
+  CHK_IDS.forEach(id=>{ S[id] = $(id).checked; });
+  S.kids = S.kids.map((k,i)=>({ano:parseInt($('k_ano_'+i).value)||Y0, escola:$('k_esc_'+i).value, facul:$('k_fac_'+i).value}));
+}
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
+
+/* ---------- modelo ---------- */
+function coreCost(s){ return s.c_moradia+s.c_mercado+s.c_saude+s.c_transp+s.c_lazer+s.c_outros+(s.moradia==='aluguel'?s.c_aluguel:0); }
+function kidYearCost(s,k,year){
+  const a = year - k.ano; if(a<0||a>22) return 0;
+  let c = 0;
+  if(a===0) c += 15000; // enxoval, parto, adaptação
+  if(a<=17) c += s.c_filho*12;
+  const mult = k.escola==='publica'?0:(k.escola==='bilingue'?1.5:1);
+  let fee = 0;
+  if(a>=2&&a<=5) fee = s.e_inf; else if(a>=6&&a<=14) fee = s.e_fund; else if(a>=15&&a<=17) fee = s.e_med;
+  c += fee*mult*13; // 12 mensalidades + matrícula/material
+  if(a>=18) c += FACUL[k.facul]*12;
+  return c;
+}
+const kidsCost = (s,year) => s.kids.reduce((t,k)=>t+kidYearCost(s,k,year),0);
+
+function target(s,N,r){
+  const core = coreCost(s);
+  const Yn = Y0+N;
+  let edu=0, fin=0;
+  for(let y=Yn; y<Yn+30; y++){ edu += kidsCost(s,y)/Math.pow(1+r,y-Yn); }
+  for(let i=N;i<s.parcelaAnos;i++){ fin += s.parcela*12/Math.pow(1+r,i-N); }
+  const swr = Math.max(s.swr,0.5)/100;
+  let inssPV = 0;
+  if(s.inss>0){ const wait = Math.max(0, s.inssIdade-(s.idade1+N)); inssPV = (s.inss*12/swr)/Math.pow(1+r,wait); }
+  const coreTarget = core*12/swr;
+  return {total: Math.max(0, coreTarget + edu + fin - inssPV), coreTarget, edu, fin, inssPV, core};
+}
+function cashflows(s,years){
+  const out=[]; const g=s.crescRenda/100;
+  for(let i=0;i<years;i++){
+    const y=Y0+i;
+    const income=(s.renda1+s.renda2)*12*Math.pow(1+g,i);
+    const exp=s.gastos*12+(i<s.parcelaAnos?s.parcela*12:0)+kidsCost(s,y);
+    out.push({i,y,income,exp,surplus:income-exp});
+  }
+  return out;
+}
+function investShare(s){
+  const sur0=(s.renda1+s.renda2)-s.gastos-(s.parcelaAnos>0?s.parcela:0)-kidsCost(s,Y0)/12;
+  if(sur0<=0) return {share:0,sur0};
+  return {share:Math.min(1, s.aporte/sur0), sur0};
+}
+function project(s,N,share,r,returns){
+  const cf=cashflows(s,N); let P=s.patrimonio-s.dividas; const path=[{i:0,P}];
+  const rows=[];
+  for(let i=0;i<N;i++){
+    const contrib=Math.max(0,cf[i].surplus*share);
+    const ri = returns?returns[i]:r;
+    P = P*(1+ri)+contrib;
+    rows.push(Object.assign({contrib,P},cf[i]));
+    path.push({i:i+1,P});
+  }
+  return {P,path,rows};
+}
+function calc(s){
+  const r=s.retorno/100, N=Math.max(1,Math.round(s.anos));
+  const T=target(s,N,r);
+  const {share,sur0}=investShare(s);
+  const cur=project(s,N,share,r);
+  const A=project(s,N,0,r).P, B=project(s,N,1,r).P-A;
+  const need = B>0?(T.total-A)/B:Infinity; // fração da sobra a investir
+  const needShare = Math.max(0,need);
+  const req=project(s,N,Math.min(needShare,1e6),r);
+  // aporte constante equivalente
+  const fac = r>0?(Math.pow(1+r,N)-1)/r:N;
+  const constMonthly = Math.max(0,(T.total-(s.patrimonio-s.dividas)*Math.pow(1+r,N))/fac/12);
+  // alavancas
+  let delay=null;
+  for(let n=N;n<=N+30;n++){ if(project(s,n,share,r).P>=target(s,n,r).total){delay=n-N;break;} }
+  let firstYear=null;
+  for(let n=1;n<=45;n++){ if(project(s,n,share,r).P>=target(s,n,r).total){firstYear=n;break;} }
+  const swr=Math.max(s.swr,0.5)/100;
+  const sustainCore = Math.max(0,(cur.P-(T.total-T.coreTarget))*swr/12);
+  let lo=-0.05,hi=0.25,reqR=null;
+  if(project(s,N,share,hi).P>=target(s,N,hi).total){
+    for(let k=0;k<50;k++){ const m=(lo+hi)/2; if(project(s,N,share,m).P>=target(s,N,m).total) hi=m; else lo=m; }
+    reqR=hi;
+  }
+  // Monte Carlo
+  const sims=800, vol=s.vol/100; let ok=0;
+  let seed=12345; const rnd=()=>{seed=(seed*1103515245+12345)%2147483648;return seed/2147483648;};
+  const gauss=()=>{let u=0,v=0;while(u===0)u=rnd();v=rnd();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);};
+  for(let k=0;k<sims;k++){ const rets=[]; for(let i=0;i<N;i++) rets.push(r+vol*gauss()); if(project(s,N,share,r,rets).P>=T.total) ok++; }
+  return {r,N,T,share,sur0,cur,req,needShare,constMonthly,delay,firstYear,sustainCore,reqR,prob:ok/sims};
+}
+
+/* ---------- render ---------- */
+function render(){
+  const s=S, R=calc(s);
+  const progress = R.T.total>0?R.cur.P/R.T.total:1;
+  const p=Math.max(0,Math.min(progress,1));
+  $('ringFg').setAttribute('stroke-dashoffset', (351.86*(1-p)).toFixed(1));
+  $('ringFg').setAttribute('stroke', progress>=1?'var(--good)':progress>=0.75?'var(--accent)':progress>=0.5?'var(--warn)':'var(--bad)');
+  $('ringTxt').textContent = pct(Math.min(progress,9.99));
+  const Yr=Y0+R.N;
+  let pill, title, text;
+  const kidsTxt = s.kids.length? (s.kids.length===1?' com um filho':' com '+s.kids.length+' filhos') : '';
+  if(progress>=1){
+    pill='<span class="pill good">✓ No caminho</span>';
+    title=`No ritmo atual, vocês vivem de renda em ${Yr}${kidsTxt}.`;
+    text=`O patrimônio projetado (${short(R.cur.P)}) passa da meta de ${short(R.T.total)}. ${R.firstYear&&R.firstYear<R.N?`A meta já seria atingida em ${Y0+R.firstYear}. `:''}Mantenham o aporte e revisem uma vez por ano.`;
+  } else if(R.needShare<=1){
+    pill='<span class="pill warn">! Ajuste necessário</span>';
+    title=`Dá para chegar em ${Yr}, mas é preciso investir mais.`;
+    text=`Hoje vocês investem ${pct(R.share)} do que sobra no mês. Para a meta de ${short(R.T.total)}, precisam investir ${pct(R.needShare)} da sobra, ou seja, ${brl(R.needShare*R.sur0)} por mês a partir de agora.`;
+  } else {
+    pill='<span class="pill bad">✕ Fora de alcance com a renda atual</span>';
+    title=`Mesmo investindo toda a sobra, faltam ${short(R.T.total-project(s,R.N,1,R.r).P)} em ${Yr}.`;
+    text=`O sonho pede ${short(R.T.total)}. Use as alavancas abaixo: mais prazo, custo de vida menor, mais renda ou escola diferente.`;
+  }
+  $('vPill').innerHTML=pill; $('vTitle').textContent=title; $('vText').textContent=text;
+
+  const reserveMonths = s.gastos>0? s.liquidez/(s.gastos+s.parcela):0;
+  const savingRate = (s.renda1+s.renda2)>0? s.aporte/(s.renda1+s.renda2):0;
+  $('kpis').innerHTML = [
+    ['Meta de patrimônio', short(R.T.total), `para ${brl(R.T.core)}/mês do casal`],
+    ['Projeção no ritmo atual', short(R.cur.P), `em ${Yr}`],
+    ['Aporte necessário hoje', brl(Math.max(R.needShare*R.sur0,0)), R.needShare>1?'maior que a sobra do mês':`investem ${brl(s.aporte)} hoje`],
+    ['Chance de chegar lá', pct(R.prob), `simulando anos bons e ruins`],
+    ['Sobra mensal hoje', brl(R.sur0), `taxa de poupança ${pct(savingRate)}`],
+    ['Reserva de emergência', reserveMonths.toLocaleString('pt-BR',{maximumFractionDigits:1})+' meses', reserveMonths>=6?'ok, meta de 6 a 12':'meta: 6 a 12 meses'],
+    ['Parte da educação', short(R.T.edu), 'custo dos filhos após '+Yr],
+    ['Idade ao viver de renda', (s.idade1+R.N)+' e '+(s.idade2+R.N), 'anos']
+  ].map(k=>`<div class="kpi"><span class="k">${k[0]}</span><span class="v">${k[1]}</span><span class="d">${k[2]}</span></div>`).join('');
+
+  drawChart(R);
+  renderPlan(R,reserveMonths);
+  renderAlloc(R);
+  renderLevers(R);
+  renderTable(R);
+  $('coreSum').textContent = brl(coreCost(s));
+  $('exTag').hidden = !isExample;
+}
+
+function drawChart(R){
+  const svg=$('chart'), W=svg.clientWidth||700, H=320, m={l:64,r:16,t:16,b:52};
+  const cur=R.cur.path, req=R.req.path, N=R.N;
+  const maxV=Math.max(R.T.total*1.1, ...cur.map(d=>d.P), ...req.map(d=>d.P), 1);
+  const step=niceStep(maxV/4); const top=Math.ceil(maxV/step)*step;
+  const x=i=>m.l+(W-m.l-m.r)*i/N, y=v=>m.t+(H-m.t-m.b)*(1-Math.max(v,0)/top);
+  let g='';
+  for(let v=0; v<=top+1; v+=step){ g+=`<line x1="${m.l}" x2="${W-m.r}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)" stroke-width="1"/><text x="${m.l-8}" y="${y(v)+4}" text-anchor="end" font-size="11" fill="var(--ink-3)">${short(v).replace('R$ ','')}</text>`; }
+  const xt = N<=12?1:N<=25?5:10;
+  for(let i=0;i<=N;i+=xt){ g+=`<text x="${x(i)}" y="${H-m.b+16}" text-anchor="middle" font-size="11" fill="var(--ink-3)">${Y0+i}</text>`; }
+  // eventos
+  const evs=[];
+  S.kids.forEach((k,i)=>{ const a=k.ano-Y0; if(a>=0&&a<=N) evs.push([a,'Nasce '+(S.kids.length>1?'filho '+(i+1):'filho(a)')]); const f=k.ano+18-Y0; if(f>=0&&f<=N) evs.push([f,'Faculdade']); });
+  if(S.parcelaAnos>0&&S.parcelaAnos<=N) evs.push([S.parcelaAnos,'Fim do financiamento']);
+  evs.forEach((e,j)=>{ g+=`<line x1="${x(e[0])}" x2="${x(e[0])}" y1="${m.t}" y2="${H-m.b}" stroke="var(--ink-3)" stroke-width="1" stroke-dasharray="2 3" opacity=".6"/><text x="${Math.min(Math.max(x(e[0]),m.l+30),W-m.r-30)}" y="${H-m.b+32+(j%2)*12}" text-anchor="middle" font-size="10.5" fill="var(--ink-2)">${e[1]}</text>`; });
+  // meta
+  g+=`<line x1="${m.l}" x2="${W-m.r}" y1="${y(R.T.total)}" y2="${y(R.T.total)}" stroke="var(--ink-3)" stroke-width="1.5" stroke-dasharray="1 4" stroke-linecap="round"/>`;
+  g+=`<text x="${m.l+6}" y="${y(R.T.total)-6}" font-size="11" fill="var(--ink-2)">Meta ${short(R.T.total)}</text>`;
+  const line=(pts)=>pts.map((d,i)=>(i?'L':'M')+x(d.i).toFixed(1)+' '+y(d.P).toFixed(1)).join(' ');
+  const area=line(cur)+` L${x(N)} ${y(0)} L${x(0)} ${y(0)} Z`;
+  g+=`<path d="${area}" fill="var(--accent)" opacity=".08"/>`;
+  if(R.needShare>0) g+=`<path d="${line(req)}" fill="none" stroke="var(--amber)" stroke-width="2" stroke-dasharray="6 4"/>`;
+  g+=`<path d="${line(cur)}" fill="none" stroke="var(--accent)" stroke-width="2"/>`;
+  const end=cur[cur.length-1];
+  g+=`<circle cx="${x(N)}" cy="${y(end.P)}" r="5" fill="var(--accent)" stroke="var(--surface)" stroke-width="2"/>`;
+  g+=`<line id="cross" x1="0" x2="0" y1="${m.t}" y2="${H-m.b}" stroke="var(--ink-2)" stroke-width="1" visibility="hidden"/>`;
+  g+=`<circle id="dotA" r="5" fill="var(--accent)" stroke="var(--surface)" stroke-width="2" visibility="hidden"/><circle id="dotB" r="5" fill="var(--amber)" stroke="var(--surface)" stroke-width="2" visibility="hidden"/>`;
+  g+=`<rect x="${m.l}" y="${m.t}" width="${W-m.l-m.r}" height="${H-m.t-m.b}" fill="transparent" id="hit"/>`;
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`); svg.innerHTML=g;
+  const tip=$('tip'), hit=$('hit');
+  const move=ev=>{
+    const rect=svg.getBoundingClientRect(); const px=(ev.clientX-rect.left)*(W/rect.width);
+    const i=Math.max(0,Math.min(N,Math.round((px-m.l)/(W-m.l-m.r)*N)));
+    const X=x(i);
+    $('cross').setAttribute('x1',X); $('cross').setAttribute('x2',X); $('cross').setAttribute('visibility','visible');
+    $('dotA').setAttribute('cx',X); $('dotA').setAttribute('cy',y(cur[i].P)); $('dotA').setAttribute('visibility','visible');
+    if(R.needShare>0){ $('dotB').setAttribute('cx',X); $('dotB').setAttribute('cy',y(req[i].P)); $('dotB').setAttribute('visibility','visible'); }
+    tip.innerHTML=`<div style="font-weight:600;margin-bottom:4px">${Y0+i} · vocês com ${S.idade1+i} e ${S.idade2+i}</div>
+      <div class="r"><span>Ritmo atual</span><b>${short(cur[i].P)}</b></div>
+      ${R.needShare>0?`<div class="r"><span>Ritmo necessário</span><b>${short(req[i].P)}</b></div>`:''}
+      <div class="r"><span>Meta final</span><b>${short(R.T.total)}</b></div>`;
+    tip.hidden=false;
+    const tw=tip.offsetWidth, cx=X*(rect.width/W);
+    tip.style.left=(cx+tw+16>rect.width? cx-tw-12 : cx+12)+'px'; tip.style.top='8px';
+  };
+  hit.addEventListener('pointermove',move); hit.addEventListener('pointerdown',move);
+  hit.addEventListener('pointerleave',()=>{ tip.hidden=true; ['cross','dotA','dotB'].forEach(id=>$(id).setAttribute('visibility','hidden')); });
+}
+function niceStep(raw){ const p=Math.pow(10,Math.floor(Math.log10(raw||1))); const n=raw/p; return (n<=1?1:n<=2?2:n<=2.5?2.5:n<=5?5:10)*p; }
+
+function renderPlan(R,reserveMonths){
+  const s=S, items=[];
+  const firstBirth = s.kids.map(k=>k.ano).filter(a=>a>Y0).sort((a,b)=>a-b)[0];
+  if(s.dividas>0) items.push(['bad','Urgente','Quitar as dívidas caras',`São ${brl(s.dividas)} a juros que nenhum investimento cobre. Use parte da reserva ou renegocie antes de investir.`]);
+  const resTarget=(s.gastos+s.parcela)*6;
+  if(reserveMonths<6) items.push(['bad','Agora','Completar a reserva de emergência',`Faltam ${brl(resTarget-s.liquidez)} para 6 meses de gastos. Deixem em Tesouro Selic ou CDB com liquidez diária a 100% do CDI.`]);
+  if(R.needShare>0){
+    const cf=cashflows(s,R.N);
+    const ns=Math.min(R.needShare,1);
+    let txt=`Programem a transferência para o dia do salário e corrijam pelo IPCA todo ano. `;
+    if(firstBirth && firstBirth-Y0<R.N){
+      const before=cf[0].surplus*ns, after=cf[Math.min(firstBirth-Y0+3,R.N-1)].surplus*ns;
+      txt+=`Até ${firstBirth}, invistam cerca de <span class="num">${brl(before/12)}</span>/mês. Com o bebê e a escola, o aporte cai para uns <span class="num">${brl(Math.max(after,0)/12)}</span>/mês. É por isso que os anos antes do nascimento valem mais: cada real investido agora rende por ${R.N} anos.`;
+    } else {
+      txt+=`O equivalente a um aporte fixo seria <span class="num">${brl(R.constMonthly)}</span>/mês.`;
+    }
+    items.push([R.needShare>Math.max(R.share,0.001)?'warn':'good','Este mês',`Investir ${pct(ns)} do que sobra, ${brl(ns*R.sur0)}/mês hoje`,txt]);
+  }
+  if(firstBirth && (!s.seguro||!s.plano)) items.push(['warn','Antes de '+firstBirth,'Proteger a família',`${!s.seguro?'Contratem seguro de vida para os dois, cobrindo pelo menos o custo dos filhos até 22 anos. ':''}${!s.plano?'Entrem num plano de saúde com obstetrícia já, porque a carência para parto é de 300 dias.':''}`]);
+  else if(!s.seguro && s.kids.length) items.push(['warn','Agora','Contratar seguro de vida','Com filhos dependentes, a renda de cada um precisa estar protegida. O custo é baixo enquanto vocês são jovens.']);
+  if(s.irCompleta) items.push(['info','Este ano','Usar PGBL para reduzir o IR','Na declaração completa, aportes em PGBL de até 12% da renda bruta tributável abatem o imposto. Escolham tabela regressiva (10% após 10 anos) e fundos com taxa de administração abaixo de 1%.']);
+  else items.push(['info','Este ano','Comparar declaração simples e completa','Com plano de saúde, escola e dependentes, a completa pode valer a pena. Ela também libera o benefício do PGBL.']);
+  s.kids.forEach((k,i)=>{ if(k.ano+18>Y0) items.push(['info','Contínuo',`Caixa da educação${s.kids.length>1?' do filho '+(i+1):''}`,`Separem o dinheiro da faculdade em Tesouro Educa+ ou IPCA+ com vencimento perto de ${k.ano+18}, para não misturar com a aposentadoria.`]); });
+  if(s.moradia==='aluguel') items.push(['warn','Decidir em 2 anos','Avaliar casa própria',`Pagar aluguel no futuro soma ${short(s.c_aluguel*12/(s.swr/100))} à meta. Comparem com comprar à vista ou quitar um imóvel antes de ${Y0+R.N}.`]);
+  if(s.parcelaAnos>R.N) items.push(['warn','Contínuo','Amortizar o financiamento','O financiamento termina depois da data de viver de renda e encarece a meta. Amortizem e reduzam o prazo, não a parcela.']);
+  items.push(['info','Próximos anos','Testar o destino','Passem temporadas na cidade fora da alta estação. Visitem escolas e confiram hospitais e o tempo de deslocamento.']);
+  items.push(['info','Todo ano','Revisar o plano','Atualizem patrimônio, renda e custos aqui. Se a meta ficar à frente, dá para antecipar a data. Se ficar atrás, ajustem cedo.']);
+  $('plan').innerHTML=items.map(it=>`<li><div><span class="pill ${it[0]}">${it[1]}</span></div><div><h3>${it[2]}</h3><p>${it[3]}</p></div></li>`).join('');
+}
+
+function renderAlloc(R){
+  const n=R.N; let mix, phase;
+  if(n>=15){ phase='crescimento'; mix=[40,10,25,25]; }
+  else if(n>=8){ phase='equilíbrio'; mix=[50,10,20,20]; }
+  else { phase='travar a renda'; mix=[65,15,10,10]; }
+  const cats=[
+    ['var(--accent)','Tesouro IPCA+ e RendA+','Núcleo da aposentadoria. RendA+ paga renda mensal por 20 anos a partir do vencimento escolhido.'],
+    ['var(--ink-3)','Pós-fixado','Tesouro Selic e CDBs. Flexibilidade além da reserva.'],
+    ['var(--amber)','Ações e FIIs no Brasil','ETFs como BOVA11 e fundos imobiliários para renda mensal.'],
+    ['var(--accent-ink)','Exterior','ETFs globais (IVVB11 ou corretora no exterior). Protege contra o real fraco.']
+  ];
+  $('allocLede').textContent=`Faltam ${n} anos, então a fase é de ${phase}. Nos últimos 5 anos, migrem aos poucos para IPCA+ e travem uma taxa real que pague a renda.`;
+  $('allocBar').innerHTML=mix.map((p,i)=>`<span style="width:${p}%;background:${cats[i][0]}" title="${cats[i][1]} ${p}%"></span>`).join('');
+  $('alloc').innerHTML=mix.map((p,i)=>`<div><span class="sw" style="background:${cats[i][0]}"></span><span class="p">${p}%</span><span>${cats[i][1]}<small>${cats[i][2]}</small></span></div>`).join('');
+  const share = R.T.total>0? R.T.edu/R.T.total : 0;
+  $('eduBox').innerHTML = S.kids.length? `<p class="hint" style="font-size:13px;color:var(--ink-2)">Fora dessa divisão: a reserva de emergência e o caixa da educação (${short(R.T.edu)}, cerca de ${pct(share)} da meta), em títulos com vencimento casado com a faculdade.${S.irCompleta?' Uma parte do núcleo pode ficar em PGBL pelo benefício fiscal.':''}</p>`:'';
+}
+
+function renderLevers(R){
+  const s=S, L=[];
+  const extra = Math.max(0,R.needShare*R.sur0 - s.aporte);
+  L.push(['Investir mais por mês', extra>0? '+'+brl(extra) : 'já basta', extra>0? `Total de ${brl(R.needShare*R.sur0)}/mês hoje, ajustado à sobra de cada ano.` : 'O aporte atual já fecha a meta.']);
+  L.push(['Adiar a data', R.delay===null?'mais de 30 anos':R.delay===0?'nenhum ano':'+'+R.delay+(R.delay===1?' ano':' anos'), R.delay?`Viver de renda em ${Y0+R.N+R.delay}, com ${s.idade1+R.N+R.delay} anos.`:'No ritmo atual vocês chegam no prazo.']);
+  L.push(['Custo de vida possível', brl(R.sustainCore)+'/mês', `É o que o patrimônio projetado sustenta para o casal. O plano atual pede ${brl(R.T.core)}.`]);
+  L.push(['Rendimento necessário', R.reqR===null?'acima de 25%':(R.reqR*100).toLocaleString('pt-BR',{maximumFractionDigits:1})+'% real', R.reqR!==null&&R.reqR>0.07?'Acima do que títulos públicos pagam. Prefira as outras alavancas.':'Rendimento acima da inflação que fecha a meta no ritmo atual.']);
+  $('levers').innerHTML=L.map(l=>`<div class="lever"><div class="k">${l[0]}</div><div class="v">${l[1]}</div><p>${l[2]}</p></div>`).join('');
+}
+
+function renderTable(R){
+  const s=S;
+  let h='<thead><tr><th>Ano</th><th>Eventos</th><th>Idades</th><th>Renda/mês</th><th>Gastos/mês</th><th>Aporte/mês</th><th>Patrimônio</th></tr></thead><tbody>';
+  R.cur.rows.forEach(r=>{
+    const ev=[];
+    s.kids.forEach((k,i)=>{ const a=r.y-k.ano; const nm=s.kids.length>1?'F'+(i+1):'Filho(a)'; if(a===0)ev.push(nm+' nasce'); if(a===2)ev.push(nm+' na escola'); if(a===15)ev.push(nm+' no ensino médio'); if(a===18)ev.push(nm+' na faculdade'); });
+    if(s.parcelaAnos>0&&r.i===s.parcelaAnos) ev.push('Financiamento quitado');
+    h+=`<tr><td>${r.y}</td><td class="ev">${ev.join(', ')}</td><td>${s.idade1+r.i}/${s.idade2+r.i}</td><td>${brl(r.income/12)}</td><td>${brl(r.exp/12)}</td><td>${brl(r.contrib/12)}</td><td>${short(r.P)}</td></tr>`;
+  });
+  h+=`<tr class="ret"><td>${Y0+R.N}</td><td class="ev">Viver de renda</td><td>${s.idade1+R.N}/${s.idade2+R.N}</td><td colspan="3">Meta: ${brl(R.T.total)}</td><td>${short(R.cur.P)}</td></tr></tbody>`;
+  $('tbl').innerHTML=h;
+}
+
+/* ---------- eventos ---------- */
+let raf;
+function onChange(e){
+  if(e && e.target.id==='cidade'){ Object.assign(S, CIDADES[e.target.value]); readFormExcept(Object.keys(CIDADES.litnorte)); fillForm(); }
+  else readForm();
+  isExample=false; save();
+  cancelAnimationFrame(raf); raf=requestAnimationFrame(render);
+}
+function readFormExcept(skip){ const keep={}; skip.forEach(k=>keep[k]=S[k]); readForm(); Object.assign(S,keep); }
+$('f').addEventListener('input', e=>{ if(e.target.id!=='cidade') onChange(e); });
+$('f').addEventListener('change', e=>{ if(e.target.tagName==='SELECT') onChange(e); });
+$('f').addEventListener('submit', e=>e.preventDefault());
+$('kids').addEventListener('click', e=>{ const i=e.target.dataset.rm; if(i!==undefined){ readForm(); S.kids.splice(+i,1); renderKids(); onChange(); }});
+$('addKid').addEventListener('click', ()=>{ readForm(); S.kids.push({ano:Y0+3, escola:'particular', facul:'particular'}); renderKids(); onChange(); });
+$('reset').addEventListener('click', ()=>{ S=JSON.parse(JSON.stringify(EXEMPLO)); isExample=true; try{localStorage.removeItem(KEY);}catch(e){} fillForm(); render(); });
+let rt; window.addEventListener('resize', ()=>{ clearTimeout(rt); rt=setTimeout(render,120); });
+
+fillForm(); render();
+})();
+</script>
+</body>
+</html>
