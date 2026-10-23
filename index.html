@@ -84,6 +84,10 @@ td.gap-bad{color:var(--bad)} td.gap-ok{color:var(--good)}
 .person .big{font-family:var(--f-mono);font-size:24px;color:var(--accent-ink)}
 .person dl{margin:0;display:grid;grid-template-columns:1fr auto;gap:4px 12px;font-size:13px}
 .person dt{color:var(--ink-2)} .person dd{margin:0;font-family:var(--f-mono);text-align:right;font-variant-numeric:tabular-nums}
+.lbl-row{display:flex;align-items:center;gap:6px}
+.info{width:18px;height:18px;border-radius:50%;padding:0;font:600 11px/16px var(--f-body);text-align:center;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);flex:none;cursor:help}
+.info:hover,.info[aria-expanded="true"]{background:var(--accent);color:#fff;border-color:var(--accent)}
+.info-pop{position:fixed;z-index:50;max-width:min(300px,calc(100vw - 32px));background:var(--ink);color:var(--bg);font-size:13px;line-height:1.45;padding:10px 12px;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.2)}
 details.costs summary{cursor:pointer;font-size:13px;color:var(--accent-ink);font-weight:500}
 details.costs .row{margin-top:8px}
 
@@ -217,7 +221,20 @@ tr.ret td{background:var(--accent-soft)}
             <label>Do(a) parceiro(a) (% acima da inflação/ano)<input id="cresc2" type="number" step="0.5" min="-10" max="30"></label>
           </div>
           <p class="hint" id="rendaHint">Inclua 13º, férias e PLR divididos por 12.</p>
-          <label>Gastos mensais atuais (sem financiamento)<input id="gastos" type="number" step="100" min="0"></label>
+          <label>Vocês já moram juntos(as)?
+            <select id="juntas"><option value="nao">Ainda não, cada um tem sua casa</option><option value="sim">Sim, já moramos juntos(as)</option></select>
+          </label>
+          <div id="sepBox" style="display:grid;gap:10px">
+            <div class="row">
+              <label>Seus gastos mensais hoje<input id="gastos1" type="number" step="100" min="0"></label>
+              <label>Gastos do(a) parceiro(a) hoje<input id="gastos2" type="number" step="100" min="0"></label>
+            </div>
+            <div class="row">
+              <label>Vão morar juntos(as) em (ano)<input id="anoJuntas" type="number" min="2026" max="2060"></label>
+              <label>Custo para montar a casa (uma vez)<input id="custoMudanca" type="number" step="1000" min="0"></label>
+            </div>
+          </div>
+          <label><span id="gastosLbl">Gastos mensais atuais (sem financiamento)</span><input id="gastos" type="number" step="100" min="0"></label>
           <div class="row">
             <label>Parcela de financiamento/mês<input id="parcela" type="number" step="100" min="0"></label>
             <label>Anos restantes<input id="parcelaAnos" type="number" min="0" max="35"></label>
@@ -338,12 +355,12 @@ tr.ret td{background:var(--accent-soft)}
         <div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;align-items:end">
           <div style="min-width:0;flex:1 1 320px"><h2>Quanto cada um investe</h2><p class="lede" id="splitLede" style="margin:0"></p></div>
           <label style="flex:0 1 240px">Como dividir o esforço
-            <select id="divisao"><option value="proporcional">Proporcional ao salário</option><option value="igual">Meio a meio</option></select>
+            <select id="divisao"><option value="proporcional">Proporcional ao salário</option><option value="sobra">Proporcional à sobra de cada um</option><option value="igual">Meio a meio</option></select>
           </label>
         </div>
         <div class="split" id="splitCols"></div>
         <div class="tbl"><table id="splitTbl"></table></div>
-        <p class="hint" style="margin-top:10px">Os gastos da casa e dos filhos são do casal. Na divisão proporcional, cada um investe o mesmo percentual do próprio salário, o jeito mais comum de dividir de forma justa quando as rendas são diferentes. Os valores seguem o ritmo necessário para a meta, ano a ano.</p>
+        <p class="hint" style="margin-top:10px" id="splitHint">Os gastos da casa e dos filhos são do casal. Na divisão proporcional, cada um investe o mesmo percentual do próprio salário, o jeito mais comum de dividir de forma justa quando as rendas são diferentes. Os valores seguem o ritmo necessário para a meta, ano a ano.</p>
       </section>
 
       <section class="kpis" id="kpis"></section>
@@ -433,7 +450,7 @@ function applyStyle(s){
   s.c_aluguel=r100(b.c_aluguel*st.alug); s.e_inf=b.e_inf; s.e_fund=b.e_fund; s.e_med=b.e_med; s.viagens=st.viagens;
 }
 const EXEMPLO = Object.assign({
-  idade1:32, idade2:31, renda1:12000, renda2:10000, gastos:10000, parcela:0, parcelaAnos:0,
+  idade1:32, idade2:31, renda1:12000, renda2:10000, gastos:10000, juntas:'nao', gastos1:6000, gastos2:5000, anoJuntas:2028, custoMudanca:30000, parcela:0, parcelaAnos:0,
   patrimonio1:180000, patrimonio2:120000, patrimonio:300000, liquidez:60000, dividas:0, aporte1:4000, aporte2:3000, aporte:7000, divisao:'proporcional', seguro:false, plano:true, irCompleta:false,
   cidade:'litnorte', anos:20, moradia:'propria', c_filho:1500,
   vinc1:'clt', vinc2:'clt', estilo:'confortavel', viagens:20000, viagensHoje:12000, retorno:5, swr:4.5, cresc1:2, cresc2:2, creep:30, vol:9, inss:0, inssIdade:65,
@@ -445,13 +462,14 @@ try{ S = JSON.parse(localStorage.getItem(KEY)) || null; }catch(e){ S = null; }
 let isExample = !S;
 if(S){ if(S.patrimonio1===undefined){ S.patrimonio1=Math.round((S.patrimonio||0)/2); S.patrimonio2=(S.patrimonio||0)-S.patrimonio1; S.aporte1=Math.round((S.aporte||0)/2); S.aporte2=(S.aporte||0)-S.aporte1; }
   S.divisao=S.divisao||'proporcional';
+  if(!S.juntas){ S.juntas='sim'; S.gastos1=Math.round(S.gastos/2); S.gastos2=S.gastos-S.gastos1; S.anoJuntas=Y0+1; S.custoMudanca=0; }
   if(S.cresc1===undefined){ S.cresc1=S.cresc2=(S.crescRenda!==undefined?S.crescRenda:1); S.creep=0; }
   S.vinc1 = S.vinc1||'clt'; S.vinc2 = S.vinc2||'clt'; if(!S.estilo){ S.estilo='custom'; S.viagens=S.viagens||0; S.viagensHoje=S.viagensHoje||0; } }
 if(!S) S = JSON.parse(JSON.stringify(EXEMPLO));
 
 const $ = id => document.getElementById(id);
-const NUM_IDS = ['idade1','idade2','renda1','renda2','gastos','parcela','parcelaAnos','patrimonio1','patrimonio2','liquidez','dividas','aporte1','aporte2','anos','retorno','swr','cresc1','cresc2','creep','vol','inss','inssIdade','c_moradia','c_mercado','c_saude','c_transp','c_lazer','c_outros','c_aluguel','c_filho','e_inf','e_fund','e_med','viagens','viagensHoje'];
-const SEL_IDS = ['cidade','moradia','vinc1','vinc2','divisao'];
+const NUM_IDS = ['idade1','idade2','renda1','renda2','gastos','gastos1','gastos2','anoJuntas','custoMudanca','parcela','parcelaAnos','patrimonio1','patrimonio2','liquidez','dividas','aporte1','aporte2','anos','retorno','swr','cresc1','cresc2','creep','vol','inss','inssIdade','c_moradia','c_mercado','c_saude','c_transp','c_lazer','c_outros','c_aluguel','c_filho','e_inf','e_fund','e_med','viagens','viagensHoje'];
+const SEL_IDS = ['cidade','moradia','vinc1','vinc2','divisao','juntas'];
 const CHK_IDS = ['seguro','plano','irCompleta'];
 
 const brl = v => 'R$ ' + Math.round(v).toLocaleString('pt-BR');
@@ -493,6 +511,7 @@ function renderKids(){
     $('k_esc_'+i).value = k.escola; $('k_fac_'+i).value = k.facul;
   });
   $('addKid').hidden = S.kids.length>=4;
+  if(typeof addInfo==='function') addInfo(box);
 }
 function updateHint(){ const h=$('rendaHint'); if(h) h.textContent = anyPJ(S)?'Para PJ, use o que entra no bolso por mês: pró-labore + lucros distribuídos, já sem impostos e taxas da empresa, dividido por 12. Para CLT, inclua 13º, férias e PLR.':'Inclua 13º, férias e PLR divididos por 12.'; }
 function readForm(){
@@ -521,6 +540,8 @@ function kidYearCost(s,k,year){
 const isPJ = v => v==='pj'||v==='autonomo';
 const anyPJ = s => isPJ(s.vinc1)||isPJ(s.vinc2);
 const reserveGoal = s => anyPJ(s)?12:6;
+const separadas = (s,y) => s.juntas==='nao' && y < s.anoJuntas;
+const baseGastos = (s,y) => separadas(s,y) ? s.gastos1+s.gastos2 : s.gastos;
 const kidsCost = (s,year) => s.kids.reduce((t,k)=>t+kidYearCost(s,k,year),0);
 
 function target(s,N,r){
@@ -540,13 +561,13 @@ function cashflows(s,years){
   for(let i=0;i<years;i++){
     const y=Y0+i;
     const income=(s.renda1*Math.pow(1+g1,i)+s.renda2*Math.pow(1+g2,i))*12;
-    const exp=Math.max(0,income-inc0)*creep+s.gastos*12+(s.viagensHoje||0)+(i<s.parcelaAnos?s.parcela*12:0)+kidsCost(s,y);
+    const exp=Math.max(0,income-inc0)*creep+baseGastos(s,y)*12+(s.juntas==='nao'&&y===s.anoJuntas?(s.custoMudanca||0):0)+(s.viagensHoje||0)+(i<s.parcelaAnos?s.parcela*12:0)+kidsCost(s,y);
     out.push({i,y,income,exp,surplus:income-exp});
   }
   return out;
 }
 function investShare(s){
-  const sur0=(s.renda1+s.renda2)-s.gastos-(s.viagensHoje||0)/12-(s.parcelaAnos>0?s.parcela:0)-kidsCost(s,Y0)/12;
+  const sur0=(s.renda1+s.renda2)-baseGastos(s,Y0)-(s.viagensHoje||0)/12-(s.parcelaAnos>0?s.parcela:0)-kidsCost(s,Y0)/12;
   if(sur0<=0) return {share:0,sur0};
   return {share:Math.min(1, s.aporte/sur0), sur0};
 }
@@ -630,7 +651,7 @@ function render(){
   }
   $('vPill').innerHTML=pill; $('vTitle').textContent=title; $('vText').textContent=text;
 
-  const reserveMonths = s.gastos>0? s.liquidez/(s.gastos+s.parcela):0;
+  const g0=baseGastos(s,Y0); const reserveMonths = g0>0? s.liquidez/(g0+s.parcela):0;
   const savingRate = (s.renda1+s.renda2)>0? s.aporte/(s.renda1+s.renda2):0;
   $('kpis').innerHTML = [
     ['Meta de patrimônio', short(R.T.total), `para ${brl(R.T.core)}/mês do casal`],
@@ -653,6 +674,9 @@ function render(){
   $('coreSum').textContent = brl(coreCost(s));
   $('exTag').hidden = !isExample;
   updateHint();
+  const sep=S.juntas==='nao'; $('sepBox').hidden=!sep; $('gastosLbl').textContent= sep?'Gastos da casa quando morarem juntos(as)/mês':'Gastos mensais atuais da casa (sem financiamento)';
+  if(!window.__splitHint) window.__splitHint=$('splitHint').textContent;
+  $('splitHint').textContent = sep ? 'Enquanto cada um mora na sua casa, a sobra de cada um vem da própria renda menos os próprios gastos, e a opção "Proporcional à sobra" divide o aporte por ela. Depois da mudança, os gastos da casa e dos filhos passam a ser do casal, e a divisão segue o salário.' : window.__splitHint;
 }
 
 function drawChart(R){
@@ -669,6 +693,7 @@ function drawChart(R){
   const evs=[];
   S.kids.forEach((k,i)=>{ const a=k.ano-Y0; if(a>=0&&a<=N) evs.push([a,'Nasce '+(S.kids.length>1?'filho '+(i+1):'filho(a)')]); const f=k.ano+18-Y0; if(f>=0&&f<=N) evs.push([f,'Faculdade']); });
   if(S.parcelaAnos>0&&S.parcelaAnos<=N) evs.push([S.parcelaAnos,'Fim do financiamento']);
+  if(S.juntas==='nao'&&S.anoJuntas>Y0&&S.anoJuntas-Y0<=N) evs.push([S.anoJuntas-Y0,'Moram juntos(as)']);
   evs.forEach((e,j)=>{ g+=`<line x1="${x(e[0])}" x2="${x(e[0])}" y1="${m.t}" y2="${H-m.b}" stroke="var(--ink-3)" stroke-width="1" stroke-dasharray="2 3" opacity=".6"/><text x="${Math.min(Math.max(x(e[0]),m.l+30),W-m.r-30)}" y="${H-m.b+32+(j%2)*12}" text-anchor="middle" font-size="10.5" fill="var(--ink-2)">${e[1]}</text>`; });
   // meta
   g+=`<line x1="${m.l}" x2="${W-m.r}" y1="${y(R.T.total)}" y2="${y(R.T.total)}" stroke="var(--ink-3)" stroke-width="1.5" stroke-dasharray="1 4" stroke-linecap="round"/>`;
@@ -709,7 +734,7 @@ function renderPlan(R,reserveMonths){
   const s=S, items=[];
   const firstBirth = s.kids.map(k=>k.ano).filter(a=>a>Y0).sort((a,b)=>a-b)[0];
   if(s.dividas>0) items.push(['bad','Urgente','Quitar as dívidas caras',`São ${brl(s.dividas)} a juros que nenhum investimento cobre. Use parte da reserva ou renegocie antes de investir.`]);
-  const rg=reserveGoal(s), resTarget=(s.gastos+s.parcela)*rg;
+  const rg=reserveGoal(s), resTarget=(baseGastos(s,Y0)+s.parcela)*rg;
   if(reserveMonths<rg) items.push(['bad','Agora','Completar a reserva de emergência',`Faltam ${brl(resTarget-s.liquidez)} para ${rg} meses de gastos${anyPJ(s)?'. Como PJ não tem FGTS nem seguro-desemprego, a reserva é a sua rede de proteção':''}. Deixem em Tesouro Selic ou CDB com liquidez diária a 100% do CDI.`]);
   if(R.needShare>0){
     const cf=cashflows(s,R.N);
@@ -798,6 +823,10 @@ function renderIncome(R){
 }
 function personWeights(s,i){
   if(s.divisao==='igual') return [0.5,0.5];
+  if(s.divisao==='sobra' && separadas(s,Y0+i)){
+    const a=Math.max(0,s.renda1*Math.pow(1+s.cresc1/100,i)-s.gastos1), b=Math.max(0,s.renda2*Math.pow(1+s.cresc2/100,i)-s.gastos2);
+    if(a+b>0) return [a/(a+b),b/(a+b)];
+  }
   const a=s.renda1*Math.pow(1+s.cresc1/100,i), b=s.renda2*Math.pow(1+s.cresc2/100,i);
   return a+b>0?[a/(a+b),b/(a+b)]:[0.5,0.5];
 }
@@ -826,6 +855,7 @@ function renderSplit(R){
     return `<div class="person"><h3>${names[k]}<span class="pill ${st[0]}">${st[1]}</span></h3>
       <div><span class="big">${brl(need[k])}</span><span class="hint" style="display:inline"> /mês, ${pctSal(need[k],sal[k])} do salário</span></div>
       <dl><dt>Investe hoje</dt><dd>${brl(cur[k])} (${pctSal(cur[k],sal[k])})</dd>
+      ${separadas(s,Y0)?`<dt>Sobra hoje (renda − seus gastos)</dt><dd>${brl(sal[k]-(k?s.gastos2:s.gastos1))}</dd><dt>Precisa investir da sobra</dt><dd>${sal[k]-(k?s.gastos2:s.gastos1)>0?pct(need[k]/(sal[k]-(k?s.gastos2:s.gastos1))):'—'}</dd>`:''}
       <dt>Patrimônio hoje</dt><dd>${short(k?s.patrimonio2:s.patrimonio1)}</dd>
       <dt>Patrimônio em ${Y0+N}</dt><dd>${short(fin[k])}</dd></dl></div>`;
   }).join('');
@@ -833,6 +863,7 @@ function renderSplit(R){
   let h='<thead><tr><th>Ano</th><th>Fase</th><th>Você investe</th><th>% do salário</th><th>Parceiro(a) investe</th><th>% do salário</th></tr></thead><tbody>';
   marks.forEach(i=>{
     const r=path[i]; const ev=[];
+    if(separadas(s,r.y)) ev.push('cada um na sua casa'); else if(s.juntas==='nao'&&r.y===s.anoJuntas) ev.push('mudança');
     s.kids.forEach(k=>{ const a=r.y-k.ano; if(a<0) ev.push('antes do bebê'); else if(a<=1) ev.push('bebê'); else if(a<=5) ev.push('educação infantil'); else if(a<=14) ev.push('fundamental'); else if(a<=17) ev.push('ensino médio'); else if(a<=22) ev.push('faculdade'); });
     h+=`<tr><td>${r.y}</td><td class="ev">${[...new Set(ev)].join(', ')||'—'}</td><td>${brl(r.c1)}</td><td>${pctSal(r.c1,r.sal1)}</td><td>${brl(r.c2)}</td><td>${pctSal(r.c2,r.sal2)}</td></tr>`;
   });
@@ -856,11 +887,97 @@ function renderTable(R){
     const ev=[];
     s.kids.forEach((k,i)=>{ const a=r.y-k.ano; const nm=s.kids.length>1?'F'+(i+1):'Filho(a)'; if(a===0)ev.push(nm+' nasce'); if(a===2)ev.push(nm+' na escola'); if(a===15)ev.push(nm+' no ensino médio'); if(a===18)ev.push(nm+' na faculdade'); });
     if(s.parcelaAnos>0&&r.i===s.parcelaAnos) ev.push('Financiamento quitado');
+    if(s.juntas==='nao'&&r.y===s.anoJuntas) ev.push('Vão morar juntos(as)');
     h+=`<tr><td>${r.y}</td><td class="ev">${ev.join(', ')}</td><td>${s.idade1+r.i}/${s.idade2+r.i}</td><td>${brl(r.income/12)}</td><td>${brl(r.exp/12)}</td><td>${brl(r.contrib/12)}</td><td>${short(r.P)}</td></tr>`;
   });
   h+=`<tr class="ret"><td>${Y0+R.N}</td><td class="ev">Viver de renda</td><td>${s.idade1+R.N}/${s.idade2+R.N}</td><td colspan="3">Meta: ${brl(R.T.total)}</td><td>${short(R.cur.P)}</td></tr></tbody>`;
   $('tbl').innerHTML=h;
 }
+
+const INFO = {
+  idade1:'Sua idade hoje. Serve para mostrar com que idade você vai viver de renda e quando o INSS começa.',
+  idade2:'Idade do(a) parceiro(a) hoje.',
+  renda1:'Quanto cai na sua conta por mês, já sem impostos. Se recebe 13º, férias ou PLR, some tudo no ano e divida por 12. Se é PJ, use pró-labore mais os lucros que você retira.',
+  renda2:'Quanto cai na conta do(a) parceiro(a) por mês, já sem impostos, do mesmo jeito que a sua renda.',
+  vinc1:'Como você trabalha. CLT tem FGTS e 13º. PJ e autônomo não têm, então o app pede uma reserva maior e mostra cuidados com o INSS.',
+  vinc2:'Como o(a) parceiro(a) trabalha: CLT, PJ, autônomo ou servidor.',
+  cresc1:'Quanto você espera que sua renda suba por ano além da inflação. 0 só repõe a inflação. 2 a 3 é uma carreira crescendo bem. Com 3%, R$ 10 mil hoje viram cerca de R$ 13,4 mil em 10 anos, em dinheiro de hoje.',
+  cresc2:'Quanto a renda do(a) parceiro(a) deve subir por ano além da inflação.',
+  juntas:'Se ainda não moram juntos(as), o app usa os gastos de cada um até a data da mudança e, depois dela, os gastos da casa.',
+  gastos1:'Tudo o que você gasta por mês hoje: aluguel, contas, mercado, transporte e lazer. Não inclua viagens nem financiamento, que têm campos próprios.',
+  gastos2:'Tudo o que o(a) parceiro(a) gasta por mês hoje, sem viagens e sem financiamento.',
+  anoJuntas:'Ano em que pretendem morar na mesma casa. A partir dele, valem os gastos da casa.',
+  custoMudanca:'Gasto único para começar a vida juntos(as): móveis, eletrodomésticos, mudança e pequenas reformas. Entra no ano da mudança.',
+  gastos:'Gastos mensais da casa toda: moradia, contas, mercado, transporte e lazer. Filhos, viagens e financiamento ficam de fora, porque o app calcula à parte.',
+  viagensHoje:'Quanto gastam com viagens num ano normal hoje. O app tira esse valor da sobra e sugere uma caixa só para viagens.',
+  parcela:'Valor mensal de um financiamento de imóvel ou carro, se tiverem.',
+  parcelaAnos:'Quantos anos faltam para quitar o financiamento. Depois disso, a parcela vira sobra.',
+  patrimonio1:'Tudo o que você já tem investido: Tesouro, CDB, ações, fundos e previdência. Não conte o imóvel onde mora nem o carro.',
+  patrimonio2:'Tudo o que o(a) parceiro(a) já tem investido.',
+  aporte1:'Quanto você investe por mês hoje, em média.',
+  aporte2:'Quanto o(a) parceiro(a) investe por mês hoje, em média.',
+  liquidez:'Dinheiro que dá para sacar no mesmo dia, como Tesouro Selic ou CDB de liquidez diária. É a reserva de emergência.',
+  dividas:'Dívidas com juros altos, como rotativo do cartão, cheque especial e empréstimo pessoal. Vale quitar antes de investir.',
+  seguro:'Seguro que paga um valor à família se um de vocês morrer ou ficar inválido. Importante quando há filhos.',
+  plano:'Plano de saúde. Para parto, a carência é de 300 dias, então vale contratar antes da gravidez.',
+  irCompleta:'Na declaração completa do Imposto de Renda, gastos com saúde, educação e previdência PGBL reduzem o imposto.',
+  cidade:'Região onde querem morar no futuro. Ela preenche custos de referência de moradia, escola e saúde, que vocês podem ajustar.',
+  viagens:'Quanto querem gastar com viagens por ano quando viverem de renda.',
+  anos:'Daqui a quantos anos querem parar de depender do salário.',
+  moradia:'Com casa própria quitada, a meta fica bem menor. Com aluguel, o valor do aluguel entra no custo de vida.',
+  c_moradia:'Condomínio, IPTU, luz, água, gás, internet e manutenção da casa.',
+  c_mercado:'Supermercado, feira, farmácia e produtos de casa.',
+  c_saude:'Plano de saúde do casal. O dos filhos entra no custo extra por filho.',
+  c_transp:'Combustível, seguro, IPVA, manutenção e a troca do carro de tempos em tempos, ou aplicativo e transporte público.',
+  c_lazer:'Restaurantes, delivery, passeios, assinaturas e academia.',
+  c_outros:'Roupas, presentes, cuidados pessoais e imprevistos.',
+  c_aluguel:'Só é usado se escolherem aluguel em "Moradia no futuro".',
+  c_filho:'Gasto mensal de cada filho fora a escola: roupas, alimentação, atividades e saúde. Vale até os 17 anos.',
+  e_inf:'Mensalidade da escola particular dos 2 aos 5 anos. O app conta 13 parcelas por ano por causa da matrícula e do material.',
+  e_fund:'Mensalidade do 1º ao 9º ano, dos 6 aos 14 anos.',
+  e_med:'Mensalidade do ensino médio, dos 15 aos 17 anos.',
+  retorno:'Quanto os investimentos rendem por ano acima da inflação, já sem imposto. De 4 a 5% é um valor prudente.',
+  swr:'Quanto do patrimônio dá para tirar por ano sem que ele acabe. Quanto menor, mais seguro, e maior fica a meta. De 4 a 4,5% é o usual.',
+  creep:'Quando a renda sobe, parte costuma virar gasto: carro melhor, mais lazer. Com 30%, de cada R$ 1.000 de aumento, R$ 300 viram gasto.',
+  vol:'Quanto a carteira sobe e desce de um ano para o outro. Serve para calcular a chance de chegar lá. Mais ações deixam esse número maior.',
+  inss:'Aposentadoria do INSS que o casal espera receber por mês, em dinheiro de hoje. Na dúvida, deixe 0.',
+  inssIdade:'Sua idade quando o INSS começa a pagar.',
+  divisao:'Como repartir o aporte entre vocês. Proporcional ao salário: cada um investe o mesmo % do que ganha. Proporcional à sobra: quem sobra mais investe mais. Meio a meio: o mesmo valor em reais.',
+  k_ano:'Ano em que o bebê nasce, ou nasceu.',
+  k_esc:'Tipo de escola. A bilíngue custa cerca de 50% a mais que a particular.',
+  k_fac:'Pública: só custos de moradia e material. Particular: mensalidade média. Particular top: as universidades mais caras.'
+};
+function addInfo(root){
+  root.querySelectorAll('label').forEach(l=>{
+    if(l.querySelector('.info')) return;
+    const c=l.querySelector('input,select'); if(!c||!c.id) return;
+    const text=INFO[c.id]||INFO[c.id.replace(/_\d+$/,'')]; if(!text) return;
+    const b=document.createElement('button'); b.type='button'; b.className='info'; b.textContent='i';
+    b.setAttribute('aria-label','O que é este campo?'); b.setAttribute('aria-expanded','false'); b.dataset.tip=text;
+    if(l.classList.contains('check')){ l.appendChild(b); return; }
+    const row=document.createElement('span'); row.className='lbl-row';
+    while(l.firstChild && l.firstChild!==c) row.appendChild(l.firstChild);
+    row.appendChild(b); l.insertBefore(row,c);
+  });
+}
+let infoPop=null, infoBtn=null;
+function closeInfo(){ if(infoPop){ infoPop.remove(); infoPop=null; } if(infoBtn){ infoBtn.setAttribute('aria-expanded','false'); infoBtn=null; } }
+document.addEventListener('click',e=>{
+  const b=e.target.closest('.info');
+  if(!b){ if(!e.target.closest('.info-pop')) closeInfo(); return; }
+  e.preventDefault();
+  if(infoBtn===b){ closeInfo(); return; }
+  closeInfo();
+  infoPop=document.createElement('div'); infoPop.className='info-pop'; infoPop.setAttribute('role','tooltip'); infoPop.textContent=b.dataset.tip;
+  document.body.appendChild(infoPop); infoBtn=b; b.setAttribute('aria-expanded','true');
+  const r=b.getBoundingClientRect(), w=infoPop.offsetWidth, h=infoPop.offsetHeight;
+  let left=Math.min(Math.max(16,r.left+r.width/2-w/2), innerWidth-w-16);
+  let top=r.bottom+8; if(top+h>innerHeight-8) top=Math.max(8,r.top-h-8);
+  infoPop.style.left=left+'px'; infoPop.style.top=top+'px';
+});
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeInfo(); });
+window.addEventListener('scroll',closeInfo,true);
+window.addEventListener('resize',closeInfo);
 
 /* ---------- eventos ---------- */
 let raf;
@@ -961,7 +1078,7 @@ $('restoreBtn').addEventListener('click',()=>{
   fillForm(); render(); $('restoreBar').hidden=true;
 });
 
-fillForm(); render();
+fillForm(); addInfo(document); render();
 })();
 </script>
 </body>

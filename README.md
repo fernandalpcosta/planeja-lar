@@ -8,15 +8,17 @@ Simulador para planejar a independência financeira de uma família no Brasil: p
 
 ## O que você informa
 
-1. **Situação hoje:** idades, vínculo de cada um (CLT, PJ, autônomo ou servidor), renda líquida e aumento esperado de cada um, gastos, gasto anual com viagens, financiamento, patrimônio e aporte mensal de cada um (investimentos separados), reserva do casal e dívidas.
+1. **Situação hoje:** idades, vínculo de cada um (CLT, PJ, autônomo ou servidor), renda líquida e aumento esperado de cada um, gastos (separados por pessoa enquanto cada um mora na sua casa, com o ano da mudança e o custo de montar a casa), gasto anual com viagens, financiamento, patrimônio e aporte mensal de cada um (investimentos separados), reserva do casal e dívidas.
 2. **Filhos:** ano de nascimento, escola (pública, particular ou bilíngue) e faculdade.
 3. **O sonho:** cidade de destino, estilo de vida pré-definido (Essencial, Confortável, Viajante ou Alto padrão, com custos editáveis), orçamento anual de viagens, em quantos anos quer viver de renda e se terá casa própria ou aluguel.
 4. **Premissas:** quanto de cada aumento vira gasto, rendimento real, taxa de retirada segura, aumento real da renda e INSS.
 
+Cada campo tem um botão **i** com uma explicação simples do que preencher.
+
 ## O que o app devolve
 
 - **Quanto a renda precisa crescer:** o aumento anual acima da inflação que o casal precisa ter, com marcos a cada 5 anos para cada pessoa, comparado com a carreira planejada
-- **Quanto cada um investe:** o aporte necessário de cada pessoa, em reais e em % do salário, dividido proporcionalmente à renda ou meio a meio, com o patrimônio de cada um no ano da meta
+- **Quanto cada um investe:** o aporte necessário de cada pessoa, em reais e em % do salário, dividido proporcionalmente ao salário, à sobra de cada um ou meio a meio, com o patrimônio de cada um no ano da meta
 - Meta de patrimônio e quanto dela o ritmo atual alcança
 - Aporte mensal necessário, antes e depois da chegada dos filhos
 - Chance de sucesso (simulação Monte Carlo)
