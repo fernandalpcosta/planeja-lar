@@ -26,6 +26,18 @@ Simulador para planejar a independência financeira de uma família no Brasil: p
 
 Para quem é PJ ou autônomo, o plano pede reserva de 12 meses, alerta que o INSS e a licença-maternidade seguem o pró-labore e indica seguros para proteger a renda.
 
+## Compartilhar um plano
+
+O botão **Compartilhar plano** gera um link protegido por senha:
+
+1. Crie uma senha de pelo menos 8 caracteres e clique em **Gerar link**.
+2. Envie o link para a outra pessoa e passe a senha por outro caminho (pessoalmente ou numa ligação).
+3. Quem abrir o link digita a senha e vê o plano. Ela recebe uma cópia: o que mudar fica só no navegador dela.
+
+O link guarda o plano como estava na hora. Se algo mudar, gere um link novo.
+
+**Como funciona a proteção:** o plano é criptografado no navegador com AES-256-GCM, usando uma chave derivada da senha (PBKDF2, 250 mil iterações). Os dados vão depois do `#` no link, parte que o navegador nunca envia ao servidor. Nem o GitHub nem ninguém sem a senha consegue ler o plano. Quem tiver o link e a senha consegue, então guarde os dois com cuidado.
+
 ## Como a conta funciona
 
 Tudo é calculado em reais de hoje, já descontada a inflação.
@@ -44,4 +56,4 @@ Os dados ficam salvos apenas no navegador de quem usa (localStorage).
 - **Regras mudam.** Leis de impostos, regras do INSS e produtos financeiros podem mudar. Confira as informações nas fontes oficiais.
 - **Antes de decidir**, procure profissionais habilitados: um planejador financeiro certificado (CFP), um consultor de valores mobiliários registrado na CVM e um contador.
 - **Responsabilidade.** As decisões tomadas com base neste app são de responsabilidade de quem o usa. Os autores não se responsabilizam por perdas ou danos decorrentes do uso dessas informações.
-- **Privacidade.** Os dados digitados ficam só no navegador de quem usa e não são enviados a nenhum servidor.
+- **Privacidade.** Os dados digitados ficam só no navegador de quem usa e não são enviados a nenhum servidor. Links de compartilhamento levam os dados criptografados com a senha escolhida.

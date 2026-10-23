@@ -26,6 +26,7 @@
   --accent:#2aa598; --accent-ink:#5cc4b8; --accent-soft:#123a37; --amber:#cf7f35; --amber-soft:#3a2716;
   --good:#5cc27f; --good-soft:#163222; --warn:#e3a34a; --warn-soft:#3a2a12; --bad:#ef7b72; --bad-soft:#3d1a18; color-scheme:dark}
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
 .wrap{max-width:1280px;margin:0 auto;padding-block:24px 64px;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
 header.top{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:12px;margin-bottom:20px}
@@ -60,6 +61,13 @@ button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
 .style-card .c{font-family:var(--f-mono);font-size:13px;color:var(--accent-ink)}
 .style-card .d{font-size:12px;color:var(--ink-3);line-height:1.35}
 .style-card.wide{grid-column:1/-1}
+.share{margin-bottom:20px;display:grid;gap:10px}
+.share h2{margin:0}
+.share .lede{margin:0}
+.share-row{display:flex;gap:10px;align-items:end;flex-wrap:wrap}
+.share-row label{flex:1 1 220px}
+.share .err{color:var(--bad)}
+.share .ok{color:var(--good)}
 details.costs summary{cursor:pointer;font-size:13px;color:var(--accent-ink);font-weight:500}
 details.costs .row{margin-top:8px}
 
@@ -136,10 +144,40 @@ tr.ret td{background:var(--accent-soft)}
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
       <span class="ex" id="exTag">Dados de exemplo</span>
       <button id="reset" type="button">Voltar ao exemplo</button>
+      <button id="shareBtn" type="button" class="primary">Compartilhar plano</button>
     </div>
   </header>
 
   <p class="notice" role="note"><b>Aviso:</b><span>As projeções e o plano são simulações hipotéticas e não garantem nenhum resultado. Não são recomendação de investimento. <a href="#aviso-legal">Leia o aviso completo</a>.</span></p>
+
+  <p class="notice" id="restoreBar" hidden><b>Plano compartilhado:</b><span>Você está vendo o plano que recebeu. As mudanças ficam salvas só neste navegador. <button type="button" class="link" id="restoreBtn">Voltar aos meus dados</button></span></p>
+
+  <section class="card share" id="openPanel" hidden>
+    <h2>Abrir plano compartilhado</h2>
+    <p class="lede">Alguém compartilhou um plano do Planeja Lar com você. Digite a senha que essa pessoa passou.</p>
+    <div class="share-row">
+      <label>Senha<input id="openPw" type="password" autocomplete="current-password"></label>
+      <button type="button" class="primary" id="openGo">Abrir plano</button>
+    </div>
+    <p class="hint" id="openMsg" aria-live="polite"></p>
+    <p class="hint">O plano recebido substitui os dados mostrados aqui. Os seus dados anteriores ficam guardados e podem ser restaurados.</p>
+  </section>
+
+  <section class="card share" id="sharePanel" hidden>
+    <h2>Compartilhar este plano</h2>
+    <p class="lede">Crie um link protegido por senha. Só quem tiver o link e a senha consegue ver o plano. Os dados vão criptografados dentro do próprio link e não são enviados a nenhum servidor, nem ao GitHub.</p>
+    <div class="share-row">
+      <label>Crie uma senha (mínimo 8 caracteres)<input id="sharePw" type="password" autocomplete="new-password" minlength="8"></label>
+      <button type="button" class="primary" id="shareGo">Gerar link</button>
+    </div>
+    <p class="hint" id="shareMsg" aria-live="polite"></p>
+    <div id="shareOut" hidden style="display:grid;gap:8px">
+      <label>Link do plano<input id="shareLink" readonly></label>
+      <div class="share-row"><button type="button" id="shareCopy">Copiar link</button><span class="hint" id="copyMsg" aria-live="polite"></span></div>
+      <p class="hint">Mandem a senha por outro caminho, pessoalmente ou numa ligação, e não junto com o link. O link guarda o plano como está agora: se mudarem algo, gerem um link novo. Quem abrir recebe uma cópia e pode editar sem mudar o plano de vocês.</p>
+    </div>
+    <div><button type="button" class="link" id="shareClose">Fechar</button></div>
+  </section>
 
   <div class="grid">
     <aside class="inputs" aria-label="Seus dados">
@@ -316,7 +354,7 @@ tr.ret td{background:var(--accent-soft)}
           <li><b>Regras mudam.</b> Leis de impostos, regras do INSS e produtos financeiros podem mudar. Confira as informações nas fontes oficiais.</li>
           <li><b>Antes de decidir</b>, procure profissionais habilitados: um planejador financeiro certificado (CFP), um consultor de valores mobiliários registrado na CVM e um contador.</li>
           <li><b>Responsabilidade.</b> As decisões tomadas com base neste app são de responsabilidade de quem o usa. Os autores não se responsabilizam por perdas ou danos decorrentes do uso dessas informações.</li>
-          <li><b>Privacidade.</b> Os dados digitados ficam só no seu navegador e não são enviados a nenhum servidor.</li>
+          <li><b>Privacidade.</b> Os dados digitados ficam só no seu navegador e não são enviados a nenhum servidor. Links de compartilhamento levam os dados criptografados com a senha que você escolher. Quem tiver o link e a senha consegue ver o plano, então guarde os dois com cuidado.</li>
         </ul>
       </section>
       <p class="foot">Valores em reais de 2026, corrigidos pela inflação. A meta usa a regra de retirada segura sobre o custo do casal e soma, à parte, o custo restante dos filhos e do financiamento após a data de viver de renda.</p>
@@ -704,6 +742,86 @@ $('kids').addEventListener('click', e=>{ const i=e.target.dataset.rm; if(i!==und
 $('addKid').addEventListener('click', ()=>{ readForm(); S.kids.push({ano:Y0+3, escola:'particular', facul:'particular'}); renderKids(); onChange(); });
 $('reset').addEventListener('click', ()=>{ S=JSON.parse(JSON.stringify(EXEMPLO)); isExample=true; try{localStorage.removeItem(KEY);}catch(e){} fillForm(); render(); });
 let rt; window.addEventListener('resize', ()=>{ clearTimeout(rt); rt=setTimeout(render,120); });
+
+/* ---------- compartilhar ---------- */
+const enc=new TextEncoder(), dec=new TextDecoder();
+const b64u=u8=>{ let b=''; u8.forEach(c=>b+=String.fromCharCode(c)); return btoa(b).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''); };
+const unb64u=t=>Uint8Array.from(atob(t.replace(/-/g,'+').replace(/_/g,'/')+'==='.slice((t.length+3)%4)),c=>c.charCodeAt(0));
+async function pipe(u8,Stream){ const st=new Blob([u8]).stream().pipeThrough(new Stream('deflate-raw')); return new Uint8Array(await new Response(st).arrayBuffer()); }
+async function deriveKey(pw,salt){
+  const base=await crypto.subtle.importKey('raw',enc.encode(pw),'PBKDF2',false,['deriveKey']);
+  return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:250000,hash:'SHA-256'},base,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
+}
+async function seal(obj,pw){
+  let data=enc.encode(JSON.stringify(obj)), ver=2;
+  if(window.CompressionStream){ try{ data=await pipe(data,CompressionStream); ver=1; }catch(e){} }
+  const salt=crypto.getRandomValues(new Uint8Array(16)), iv=crypto.getRandomValues(new Uint8Array(12));
+  const ct=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},await deriveKey(pw,salt),data));
+  const out=new Uint8Array(29+ct.length); out[0]=ver; out.set(salt,1); out.set(iv,17); out.set(ct,29);
+  return b64u(out);
+}
+async function unseal(t,pw){
+  const u=unb64u(t);
+  let data=new Uint8Array(await crypto.subtle.decrypt({name:'AES-GCM',iv:u.slice(17,29)},await deriveKey(pw,u.slice(1,17)),u.slice(29)));
+  if(u[0]===1) data=await pipe(data,DecompressionStream);
+  return JSON.parse(dec.decode(data));
+}
+const canCrypto = !!(window.crypto && crypto.subtle);
+$('shareBtn').addEventListener('click',()=>{
+  $('sharePanel').hidden=false; $('shareOut').hidden=true; $('shareMsg').textContent='';
+  if(!canCrypto){ $('shareMsg').textContent='Este navegador não permite criptografia. Abra o app pelo endereço https para compartilhar.'; $('shareMsg').className='hint err'; }
+  $('sharePanel').scrollIntoView({behavior:'smooth',block:'start'}); $('sharePw').focus({preventScroll:true});
+});
+$('shareClose').addEventListener('click',()=>{ $('sharePanel').hidden=true; $('sharePw').value=''; });
+async function makeLink(){
+  const pw=$('sharePw').value, msg=$('shareMsg');
+  if(pw.length<8){ msg.textContent='A senha precisa ter pelo menos 8 caracteres.'; msg.className='hint err'; return; }
+  msg.textContent='Gerando link…'; msg.className='hint';
+  try{
+    readForm();
+    const t=await seal(S,pw);
+    $('shareLink').value=location.origin+location.pathname+'#p='+t;
+    $('shareOut').hidden=false; msg.textContent='Link pronto.'; msg.className='hint ok'; $('copyMsg').textContent='';
+  }catch(e){ msg.textContent='Não foi possível gerar o link neste navegador. Tente pelo Chrome, Safari ou Firefox atualizados.'; msg.className='hint err'; }
+}
+$('shareGo').addEventListener('click',makeLink);
+$('sharePw').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); makeLink(); } });
+$('shareCopy').addEventListener('click',()=>{
+  const inp=$('shareLink');
+  const done=()=>{ $('copyMsg').textContent='Link copiado.'; };
+  const fallback=()=>{ inp.focus(); inp.select(); $('copyMsg').textContent='Link selecionado. Copie com Ctrl+C ou Cmd+C.'; };
+  if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(inp.value).then(done,fallback); else fallback();
+});
+const BACKUP=KEY+'-backup';
+let sharedToken=null;
+function checkHash(){
+  sharedToken=(location.hash.match(/^#p=([A-Za-z0-9_-]+)$/)||[])[1]||null;
+  if(sharedToken){ $('openPanel').hidden=false; $('openMsg').textContent=''; window.scrollTo(0,0); setTimeout(()=>$('openPw').focus(),0); }
+}
+checkHash();
+window.addEventListener('hashchange',checkHash);
+async function openShared(){
+  const msg=$('openMsg');
+  if(!canCrypto){ msg.textContent='Este navegador não permite abrir planos protegidos. Abra o link pelo endereço https.'; msg.className='hint err'; return; }
+  msg.textContent='Abrindo…'; msg.className='hint';
+  let data;
+  try{ data=await unseal(sharedToken,$('openPw').value); }
+  catch(e){ msg.textContent='Senha incorreta ou link incompleto. Confira com quem enviou e tente de novo.'; msg.className='hint err'; return; }
+  if(!data||typeof data!=='object'||!Array.isArray(data.kids)){ msg.textContent='Este link não contém um plano válido.'; msg.className='hint err'; return; }
+  if(!isExample){ try{ localStorage.setItem(BACKUP, JSON.stringify(S)); }catch(e){} }
+  S=Object.assign(JSON.parse(JSON.stringify(EXEMPLO)), data);
+  isExample=false; save(); fillForm(); render();
+  $('openPanel').hidden=true; $('openPw').value=''; $('restoreBar').hidden=false;
+  try{ history.replaceState(null,'',location.pathname+location.search); }catch(e){}
+}
+$('openGo').addEventListener('click',openShared);
+$('openPw').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); openShared(); } });
+$('restoreBtn').addEventListener('click',()=>{
+  let prev=null; try{ prev=JSON.parse(localStorage.getItem(BACKUP)); localStorage.removeItem(BACKUP); }catch(e){}
+  if(prev){ S=Object.assign(JSON.parse(JSON.stringify(EXEMPLO)), prev); isExample=false; save(); }
+  else { S=JSON.parse(JSON.stringify(EXEMPLO)); isExample=true; try{ localStorage.removeItem(KEY); }catch(e){} }
+  fillForm(); render(); $('restoreBar').hidden=true;
+});
 
 fillForm(); render();
 })();
