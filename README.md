@@ -8,7 +8,7 @@ Simulador para planejar a independência financeira de uma família no Brasil: p
 
 ## O que você informa
 
-1. **Situação hoje:** idades, vínculo de cada um (CLT, PJ, autônomo ou servidor), renda líquida e aumento esperado de cada um, gastos, gasto anual com viagens, financiamento, patrimônio, reserva, dívidas e quanto investe por mês.
+1. **Situação hoje:** idades, vínculo de cada um (CLT, PJ, autônomo ou servidor), renda líquida e aumento esperado de cada um, gastos, gasto anual com viagens, financiamento, patrimônio e aporte mensal de cada um (investimentos separados), reserva do casal e dívidas.
 2. **Filhos:** ano de nascimento, escola (pública, particular ou bilíngue) e faculdade.
 3. **O sonho:** cidade de destino, estilo de vida pré-definido (Essencial, Confortável, Viajante ou Alto padrão, com custos editáveis), orçamento anual de viagens, em quantos anos quer viver de renda e se terá casa própria ou aluguel.
 4. **Premissas:** quanto de cada aumento vira gasto, rendimento real, taxa de retirada segura, aumento real da renda e INSS.
@@ -16,6 +16,7 @@ Simulador para planejar a independência financeira de uma família no Brasil: p
 ## O que o app devolve
 
 - **Quanto a renda precisa crescer:** o aumento anual acima da inflação que o casal precisa ter, com marcos a cada 5 anos para cada pessoa, comparado com a carreira planejada
+- **Quanto cada um investe:** o aporte necessário de cada pessoa, em reais e em % do salário, dividido proporcionalmente à renda ou meio a meio, com o patrimônio de cada um no ano da meta
 - Meta de patrimônio e quanto dela o ritmo atual alcança
 - Aporte mensal necessário, antes e depois da chegada dos filhos
 - Chance de sucesso (simulação Monte Carlo)

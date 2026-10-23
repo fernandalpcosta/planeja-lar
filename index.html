@@ -77,6 +77,13 @@ button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
 .inc-hero .main{background:var(--accent-soft)}
 .inc-hero .main .v{color:var(--accent-ink)}
 td.gap-bad{color:var(--bad)} td.gap-ok{color:var(--good)}
+.split{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:16px 0 4px}
+@media (max-width:640px){.split{grid-template-columns:minmax(0,1fr)}}
+.person{border:1px solid var(--line);border-radius:8px;padding:14px;display:grid;gap:8px}
+.person h3{margin:0;font-size:15px;font-weight:600;display:flex;justify-content:space-between;gap:8px;align-items:center}
+.person .big{font-family:var(--f-mono);font-size:24px;color:var(--accent-ink)}
+.person dl{margin:0;display:grid;grid-template-columns:1fr auto;gap:4px 12px;font-size:13px}
+.person dt{color:var(--ink-2)} .person dd{margin:0;font-family:var(--f-mono);text-align:right;font-variant-numeric:tabular-nums}
 details.costs summary{cursor:pointer;font-size:13px;color:var(--accent-ink);font-weight:500}
 details.costs .row{margin-top:8px}
 
@@ -216,12 +223,16 @@ tr.ret td{background:var(--accent-soft)}
             <label>Anos restantes<input id="parcelaAnos" type="number" min="0" max="35"></label>
           </div>
           <div class="row">
-            <label>Patrimônio investido<input id="patrimonio" type="number" step="1000" min="0"></label>
-            <label>…em liquidez diária<input id="liquidez" type="number" step="1000" min="0"></label>
+            <label>Seu patrimônio investido<input id="patrimonio1" type="number" step="1000" min="0"></label>
+            <label>Patrimônio do(a) parceiro(a)<input id="patrimonio2" type="number" step="1000" min="0"></label>
           </div>
           <div class="row">
+            <label>Você investe por mês hoje<input id="aporte1" type="number" step="100" min="0"></label>
+            <label>Parceiro(a) investe por mês hoje<input id="aporte2" type="number" step="100" min="0"></label>
+          </div>
+          <div class="row">
+            <label>Reserva em liquidez diária (do casal)<input id="liquidez" type="number" step="1000" min="0"></label>
             <label>Dívidas caras (cartão, cheque especial)<input id="dividas" type="number" step="500" min="0"></label>
-            <label>Quanto investem por mês hoje<input id="aporte" type="number" step="100" min="0"></label>
           </div>
           <label>Gasto com viagens por ano hoje<input id="viagensHoje" type="number" step="1000" min="0"></label>
           <p class="hint">Fora dos gastos mensais. O app separa esse valor numa caixa de viagens.</p>
@@ -323,6 +334,18 @@ tr.ret td{background:var(--accent-soft)}
         <p class="hint" style="margin-top:10px">Valores em reais de hoje: um aumento de 3% acima da inflação significa ganhar 3% a mais de poder de compra por ano. O cálculo mantém o hábito atual de vocês: investir a mesma parte da sobra e transformar em gasto a parte do aumento definida nas premissas.</p>
       </section>
 
+      <section class="card" id="splitCard">
+        <div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;align-items:end">
+          <div style="min-width:0;flex:1 1 320px"><h2>Quanto cada um investe</h2><p class="lede" id="splitLede" style="margin:0"></p></div>
+          <label style="flex:0 1 240px">Como dividir o esforço
+            <select id="divisao"><option value="proporcional">Proporcional ao salário</option><option value="igual">Meio a meio</option></select>
+          </label>
+        </div>
+        <div class="split" id="splitCols"></div>
+        <div class="tbl"><table id="splitTbl"></table></div>
+        <p class="hint" style="margin-top:10px">Os gastos da casa e dos filhos são do casal. Na divisão proporcional, cada um investe o mesmo percentual do próprio salário, o jeito mais comum de dividir de forma justa quando as rendas são diferentes. Os valores seguem o ritmo necessário para a meta, ano a ano.</p>
+      </section>
+
       <section class="kpis" id="kpis"></section>
 
       <section class="card">
@@ -411,7 +434,7 @@ function applyStyle(s){
 }
 const EXEMPLO = Object.assign({
   idade1:32, idade2:31, renda1:12000, renda2:10000, gastos:10000, parcela:0, parcelaAnos:0,
-  patrimonio:300000, liquidez:60000, dividas:0, aporte:7000, seguro:false, plano:true, irCompleta:false,
+  patrimonio1:180000, patrimonio2:120000, patrimonio:300000, liquidez:60000, dividas:0, aporte1:4000, aporte2:3000, aporte:7000, divisao:'proporcional', seguro:false, plano:true, irCompleta:false,
   cidade:'litnorte', anos:20, moradia:'propria', c_filho:1500,
   vinc1:'clt', vinc2:'clt', estilo:'confortavel', viagens:20000, viagensHoje:12000, retorno:5, swr:4.5, cresc1:2, cresc2:2, creep:30, vol:9, inss:0, inssIdade:65,
   kids:[{ano:2031, escola:'particular', facul:'particular'}]
@@ -420,13 +443,15 @@ const KEY = 'planeja-lar-v1';
 let S;
 try{ S = JSON.parse(localStorage.getItem(KEY)) || null; }catch(e){ S = null; }
 let isExample = !S;
-if(S){ if(S.cresc1===undefined){ S.cresc1=S.cresc2=(S.crescRenda!==undefined?S.crescRenda:1); S.creep=0; }
+if(S){ if(S.patrimonio1===undefined){ S.patrimonio1=Math.round((S.patrimonio||0)/2); S.patrimonio2=(S.patrimonio||0)-S.patrimonio1; S.aporte1=Math.round((S.aporte||0)/2); S.aporte2=(S.aporte||0)-S.aporte1; }
+  S.divisao=S.divisao||'proporcional';
+  if(S.cresc1===undefined){ S.cresc1=S.cresc2=(S.crescRenda!==undefined?S.crescRenda:1); S.creep=0; }
   S.vinc1 = S.vinc1||'clt'; S.vinc2 = S.vinc2||'clt'; if(!S.estilo){ S.estilo='custom'; S.viagens=S.viagens||0; S.viagensHoje=S.viagensHoje||0; } }
 if(!S) S = JSON.parse(JSON.stringify(EXEMPLO));
 
 const $ = id => document.getElementById(id);
-const NUM_IDS = ['idade1','idade2','renda1','renda2','gastos','parcela','parcelaAnos','patrimonio','liquidez','dividas','aporte','anos','retorno','swr','cresc1','cresc2','creep','vol','inss','inssIdade','c_moradia','c_mercado','c_saude','c_transp','c_lazer','c_outros','c_aluguel','c_filho','e_inf','e_fund','e_med','viagens','viagensHoje'];
-const SEL_IDS = ['cidade','moradia','vinc1','vinc2'];
+const NUM_IDS = ['idade1','idade2','renda1','renda2','gastos','parcela','parcelaAnos','patrimonio1','patrimonio2','liquidez','dividas','aporte1','aporte2','anos','retorno','swr','cresc1','cresc2','creep','vol','inss','inssIdade','c_moradia','c_mercado','c_saude','c_transp','c_lazer','c_outros','c_aluguel','c_filho','e_inf','e_fund','e_med','viagens','viagensHoje'];
+const SEL_IDS = ['cidade','moradia','vinc1','vinc2','divisao'];
 const CHK_IDS = ['seguro','plano','irCompleta'];
 
 const brl = v => 'R$ ' + Math.round(v).toLocaleString('pt-BR');
@@ -474,6 +499,7 @@ function readForm(){
   NUM_IDS.forEach(id=>{ const v = parseFloat($(id).value); S[id] = isFinite(v)?v:0; });
   SEL_IDS.forEach(id=>{ S[id] = $(id).value; });
   CHK_IDS.forEach(id=>{ S[id] = $(id).checked; });
+  S.patrimonio = S.patrimonio1+S.patrimonio2; S.aporte = S.aporte1+S.aporte2;
   S.kids = S.kids.map((k,i)=>({ano:parseInt($('k_ano_'+i).value)||Y0, escola:$('k_esc_'+i).value, facul:$('k_fac_'+i).value}));
 }
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
@@ -622,6 +648,7 @@ function render(){
   renderAlloc(R);
   renderLevers(R);
   renderIncome(R);
+  renderSplit(R);
   renderTable(R);
   $('coreSum').textContent = brl(coreCost(s));
   $('exTag').hidden = !isExample;
@@ -694,6 +721,7 @@ function renderPlan(R,reserveMonths){
     } else {
       txt+=`O equivalente a um aporte fixo seria <span class="num">${brl(R.constMonthly)}</span>/mês.`;
     }
+    { const sp=splitPath(R)[0]; if(sp) txt+=` Divisão: você <span class="num">${brl(sp.c1)}</span> (${pctSal(sp.c1,sp.sal1)} do salário) e parceiro(a) <span class="num">${brl(sp.c2)}</span> (${pctSal(sp.c2,sp.sal2)}).`; }
     items.push([R.needShare>Math.max(R.share,0.001)?'warn':'good','Este mês',`Investir ${pct(ns)} do que sobra, ${brl(ns*R.sur0)}/mês hoje`,txt]);
   }
   if(R.gReq!==null && R.gReq>R.gPlan+0.0005){
@@ -744,7 +772,7 @@ function renderIncome(R){
   const s=S, N=R.N, Yr=Y0+N;
   let lede, pillCls;
   if(R.share<=0){
-    lede='Hoje vocês não investem nada da sobra, então aumento de renda sozinho não muda o resultado. Comecem definindo um aporte mensal em "Quanto investem por mês hoje".'; pillCls='bad';
+    lede='Hoje vocês não investem nada da sobra, então aumento de renda sozinho não muda o resultado. Comecem definindo um aporte mensal em "Você investe por mês hoje" e "Parceiro(a) investe por mês hoje".'; pillCls='bad';
   } else if(R.gReq===null){
     lede=`Mesmo com a renda crescendo 30% acima da inflação por ano, o hábito atual não chega à meta de ${short(R.T.total)}. Combinem aumento de renda com investir uma parte maior da sobra ou com um sonho mais enxuto.`; pillCls='bad';
   } else if(R.gReq<=R.gPlan+0.0005){
@@ -767,6 +795,48 @@ function renderIncome(R){
     h+=`<tr${i===N?' class="ret"':''}><td>${Y0+i}</td><td>${s.idade1+i}/${s.idade2+i}</td><td>${req1===null?'—':brl(req1)}</td><td>${req2===null?'—':brl(req2)}</td><td>${need===null?'—':brl(need)}</td><td>${brl(plan)}</td><td class="${diff===null?'':diff>=-1?'gap-ok':'gap-bad'}">${diff===null?'—':Math.abs(diff)<1?'em dia':(diff>0?'folga ':'faltam ')+brl(Math.abs(diff))}</td></tr>`;
   });
   $('incTbl').innerHTML=h+'</tbody>';
+}
+function personWeights(s,i){
+  if(s.divisao==='igual') return [0.5,0.5];
+  const a=s.renda1*Math.pow(1+s.cresc1/100,i), b=s.renda2*Math.pow(1+s.cresc2/100,i);
+  return a+b>0?[a/(a+b),b/(a+b)]:[0.5,0.5];
+}
+function splitPath(R){
+  const s=S; let P1=s.patrimonio1-s.dividas*(s.patrimonio>0?s.patrimonio1/s.patrimonio:0.5), P2=s.patrimonio-s.dividas-P1;
+  return R.req.rows.map(row=>{
+    const w=personWeights(s,row.i), c1=row.contrib*w[0], c2=row.contrib*w[1];
+    P1=P1*(1+R.r)+c1; P2=P2*(1+R.r)+c2;
+    const sal1=s.renda1*Math.pow(1+s.cresc1/100,row.i), sal2=s.renda2*Math.pow(1+s.cresc2/100,row.i);
+    return {i:row.i,y:row.y,c1:c1/12,c2:c2/12,sal1,sal2,P1,P2};
+  });
+}
+const pctSal=(v,sal)=>sal>0?pct(v/sal):'—';
+function renderSplit(R){
+  const s=S, path=splitPath(R), N=R.N, first=path[0], last=path[path.length-1];
+  const names=['Você','Parceiro(a)'], cur=[s.aporte1,s.aporte2], sal=[s.renda1,s.renda2], need=[first.c1,first.c2], fin=[last.P1,last.P2];
+  const totalNeed=first.c1+first.c2;
+  $('splitLede').textContent = R.needShare>1
+    ? `Mesmo investindo toda a sobra do casal a meta não fecha. Os valores abaixo mostram o esforço que ela pediria.`
+    : (s.divisao==='igual'
+      ? `Para a meta, o casal precisa investir ${brl(totalNeed)} por mês hoje, metade para cada um.`
+      : `Para a meta, o casal precisa investir ${brl(totalNeed)} por mês hoje, o equivalente a ${pctSal(totalNeed,s.renda1+s.renda2)} da renda de cada um.`);
+  $('splitCols').innerHTML=[0,1].map(k=>{
+    const diff=need[k]-cur[k];
+    const st=Math.abs(diff)<50?['good','✓ em dia']:diff>0?['warn','+'+brl(diff)+'/mês']:['good','folga de '+brl(-diff)];
+    return `<div class="person"><h3>${names[k]}<span class="pill ${st[0]}">${st[1]}</span></h3>
+      <div><span class="big">${brl(need[k])}</span><span class="hint" style="display:inline"> /mês, ${pctSal(need[k],sal[k])} do salário</span></div>
+      <dl><dt>Investe hoje</dt><dd>${brl(cur[k])} (${pctSal(cur[k],sal[k])})</dd>
+      <dt>Patrimônio hoje</dt><dd>${short(k?s.patrimonio2:s.patrimonio1)}</dd>
+      <dt>Patrimônio em ${Y0+N}</dt><dd>${short(fin[k])}</dd></dl></div>`;
+  }).join('');
+  const marks=[...new Set([0,5,10,15,N-1].filter(i=>i>=0&&i<N))];
+  let h='<thead><tr><th>Ano</th><th>Fase</th><th>Você investe</th><th>% do salário</th><th>Parceiro(a) investe</th><th>% do salário</th></tr></thead><tbody>';
+  marks.forEach(i=>{
+    const r=path[i]; const ev=[];
+    s.kids.forEach(k=>{ const a=r.y-k.ano; if(a<0) ev.push('antes do bebê'); else if(a<=1) ev.push('bebê'); else if(a<=5) ev.push('educação infantil'); else if(a<=14) ev.push('fundamental'); else if(a<=17) ev.push('ensino médio'); else if(a<=22) ev.push('faculdade'); });
+    h+=`<tr><td>${r.y}</td><td class="ev">${[...new Set(ev)].join(', ')||'—'}</td><td>${brl(r.c1)}</td><td>${pctSal(r.c1,r.sal1)}</td><td>${brl(r.c2)}</td><td>${pctSal(r.c2,r.sal2)}</td></tr>`;
+  });
+  $('splitTbl').innerHTML=h+'</tbody>';
 }
 function renderLevers(R){
   const s=S, L=[];
@@ -805,6 +875,7 @@ $('f').addEventListener('input', e=>{ if(e.target.tagName!=='SELECT' && e.target
 $('f').addEventListener('change', e=>{ if(e.target.name==='estilo') onChange(e); });
 $('f').addEventListener('change', e=>{ if(e.target.tagName==='SELECT') onChange(e); });
 $('f').addEventListener('submit', e=>e.preventDefault());
+$('divisao').addEventListener('change', onChange);
 $('kids').addEventListener('click', e=>{ const i=e.target.dataset.rm; if(i!==undefined){ readForm(); S.kids.splice(+i,1); renderKids(); onChange(); }});
 $('addKid').addEventListener('click', ()=>{ readForm(); S.kids.push({ano:Y0+3, escola:'particular', facul:'particular'}); renderKids(); onChange(); });
 $('reset').addEventListener('click', ()=>{ S=JSON.parse(JSON.stringify(EXEMPLO)); isExample=true; try{localStorage.removeItem(KEY);}catch(e){} fillForm(); render(); });
