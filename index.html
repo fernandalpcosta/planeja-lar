@@ -106,6 +106,12 @@ th{font-weight:600;color:var(--ink-2);font-size:12px}
 td.ev{color:var(--ink-2);white-space:normal;min-width:140px}
 tr.ret td{background:var(--accent-soft)}
 .foot{font-size:12px;color:var(--ink-3);max-width:80ch}
+.notice{display:flex;gap:10px;align-items:flex-start;background:var(--warn-soft);color:var(--ink);border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:20px}
+.notice b{color:var(--warn)}
+.notice a{color:var(--accent-ink)}
+.legal{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px 20px;font-size:13px;color:var(--ink-2)}
+.legal h2{font-family:var(--f-display);font-weight:400;font-size:18px;color:var(--ink);margin:0 0 8px}
+.legal ul{margin:0;padding-left:18px;display:grid;gap:6px;max-width:85ch}
 .ex{font-size:12px;background:var(--warn-soft);color:var(--warn);padding:2px 8px;border-radius:4px;font-weight:600}
 @media (prefers-reduced-motion:no-preference){.ring circle.fg{transition:stroke-dashoffset .5s ease}}
 </style>
@@ -123,6 +129,8 @@ tr.ret td{background:var(--accent-soft)}
       <button id="reset" type="button">Voltar ao exemplo</button>
     </div>
   </header>
+
+  <p class="notice" role="note"><b>Aviso:</b><span>As projeções e o plano são simulações hipotéticas e não garantem nenhum resultado. Não são recomendação de investimento. <a href="#aviso-legal">Leia o aviso completo</a>.</span></p>
 
   <div class="grid">
     <aside class="inputs" aria-label="Seus dados">
@@ -283,7 +291,19 @@ tr.ret td{background:var(--accent-soft)}
         </details>
       </section>
 
-      <p class="foot">Estudo educativo com premissas simplificadas, não é recomendação de investimento. Valores em reais de 2026, corrigidos pela inflação. A meta usa a regra de retirada segura sobre o custo do casal e soma, à parte, o custo restante dos filhos e do financiamento após a data de viver de renda. Para executar, procure um planejador CFP sem conflito de interesse.</p>
+      <section class="legal" id="aviso-legal">
+        <h2>Aviso legal</h2>
+        <ul>
+          <li><b>Simulação hipotética.</b> Os números são estimativas feitas a partir dos dados que você digita e de premissas simplificadas: rendimento, inflação, custos de cidades e escolas, regras de impostos e do INSS. A realidade vai ser diferente.</li>
+          <li><b>Sem garantia.</b> Rentabilidade passada não garante rentabilidade futura. Todo investimento tem risco, inclusive de perda. Nada aqui garante que a meta será atingida.</li>
+          <li><b>Não é recomendação.</b> O plano de ação e a sugestão de carteira têm caráter educativo e genérico. Não são recomendação, oferta ou consultoria de investimento, contábil, tributária, jurídica ou previdenciária, e não consideram seu perfil de investidor (suitability).</li>
+          <li><b>Regras mudam.</b> Leis de impostos, regras do INSS e produtos financeiros podem mudar. Confira as informações nas fontes oficiais.</li>
+          <li><b>Antes de decidir</b>, procure profissionais habilitados: um planejador financeiro certificado (CFP), um consultor de valores mobiliários registrado na CVM e um contador.</li>
+          <li><b>Responsabilidade.</b> As decisões tomadas com base neste app são de responsabilidade de quem o usa. Os autores não se responsabilizam por perdas ou danos decorrentes do uso dessas informações.</li>
+          <li><b>Privacidade.</b> Os dados digitados ficam só no seu navegador e não são enviados a nenhum servidor.</li>
+        </ul>
+      </section>
+      <p class="foot">Valores em reais de 2026, corrigidos pela inflação. A meta usa a regra de retirada segura sobre o custo do casal e soma, à parte, o custo restante dos filhos e do financiamento após a data de viver de renda.</p>
     </main>
   </div>
 </div>

@@ -2,6 +2,8 @@
 
 Simulador para planejar a independência financeira de uma família no Brasil: parte da situação de hoje e desenha um plano para viver de renda, com filhos em escola particular, no litoral ou interior de São Paulo.
 
+> ⚠️ **Aviso:** as projeções e recomendações deste app são simulações hipotéticas e não garantem nenhum resultado. Não são recomendação de investimento. Veja o [aviso legal](#aviso-legal).
+
 É uma única página HTML, sem build e sem servidor. Basta abrir o `index.html` no navegador ou publicar com GitHub Pages.
 
 ## O que você informa
@@ -34,4 +36,12 @@ Tudo é calculado em reais de hoje, já descontada a inflação.
 
 Os dados ficam salvos apenas no navegador de quem usa (localStorage).
 
-> Estudo educativo com premissas simplificadas. Não é recomendação de investimento.
+## Aviso legal
+
+- **Simulação hipotética.** Os números são estimativas feitas a partir dos dados informados e de premissas simplificadas: rendimento, inflação, custos de cidades e escolas, regras de impostos e do INSS. A realidade vai ser diferente.
+- **Sem garantia.** Rentabilidade passada não garante rentabilidade futura. Todo investimento tem risco, inclusive de perda. Nada aqui garante que a meta será atingida.
+- **Não é recomendação.** O plano de ação e a sugestão de carteira têm caráter educativo e genérico. Não são recomendação, oferta ou consultoria de investimento, contábil, tributária, jurídica ou previdenciária, e não consideram o perfil de investidor (suitability) de quem usa.
+- **Regras mudam.** Leis de impostos, regras do INSS e produtos financeiros podem mudar. Confira as informações nas fontes oficiais.
+- **Antes de decidir**, procure profissionais habilitados: um planejador financeiro certificado (CFP), um consultor de valores mobiliários registrado na CVM e um contador.
+- **Responsabilidade.** As decisões tomadas com base neste app são de responsabilidade de quem o usa. Os autores não se responsabilizam por perdas ou danos decorrentes do uso dessas informações.
+- **Privacidade.** Os dados digitados ficam só no navegador de quem usa e não são enviados a nenhum servidor.
