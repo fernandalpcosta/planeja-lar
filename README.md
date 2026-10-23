@@ -6,7 +6,7 @@ Simulador para planejar a independência financeira de uma família no Brasil: p
 
 ## O que você informa
 
-1. **Situação hoje:** idades, renda líquida do casal, gastos, financiamento, patrimônio, reserva, dívidas e quanto investe por mês.
+1. **Situação hoje:** idades, vínculo de cada um (CLT, PJ, autônomo ou servidor), renda líquida do casal, gastos, financiamento, patrimônio, reserva, dívidas e quanto investe por mês.
 2. **Filhos:** ano de nascimento, escola (pública, particular ou bilíngue) e faculdade.
 3. **O sonho:** cidade de destino (com custos de referência editáveis), em quantos anos quer viver de renda e se terá casa própria ou aluguel.
 4. **Premissas:** rendimento real, taxa de retirada segura, aumento real da renda e INSS.
@@ -21,6 +21,8 @@ Simulador para planejar a independência financeira de uma família no Brasil: p
 - Sugestão de carteira conforme o prazo
 - Alavancas: aportar mais, adiar, reduzir o custo de vida ou buscar mais rendimento
 - Tabela ano a ano
+
+Para quem é PJ ou autônomo, o plano pede reserva de 12 meses, alerta que o INSS e a licença-maternidade seguem o pró-labore e indica seguros para proteger a renda.
 
 ## Como a conta funciona
 

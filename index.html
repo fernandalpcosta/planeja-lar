@@ -137,7 +137,11 @@ tr.ret td{background:var(--accent-soft)}
             <label>Sua renda líquida/mês<input id="renda1" type="number" step="100" min="0"></label>
             <label>Renda líquida do(a) parceiro(a)<input id="renda2" type="number" step="100" min="0"></label>
           </div>
-          <p class="hint">Inclua 13º, férias e PLR divididos por 12.</p>
+          <div class="row">
+            <label>Seu vínculo<select id="vinc1"><option value="clt">CLT</option><option value="pj">PJ / empresa própria</option><option value="autonomo">Autônomo</option><option value="servidor">Servidor público</option></select></label>
+            <label>Vínculo do(a) parceiro(a)<select id="vinc2"><option value="clt">CLT</option><option value="pj">PJ / empresa própria</option><option value="autonomo">Autônomo</option><option value="servidor">Servidor público</option></select></label>
+          </div>
+          <p class="hint" id="rendaHint">Inclua 13º, férias e PLR divididos por 12.</p>
           <label>Gastos mensais atuais (sem financiamento)<input id="gastos" type="number" step="100" min="0"></label>
           <div class="row">
             <label>Parcela de financiamento/mês<input id="parcela" type="number" step="100" min="0"></label>
@@ -299,18 +303,19 @@ const EXEMPLO = Object.assign({
   idade1:32, idade2:31, renda1:12000, renda2:10000, gastos:11000, parcela:0, parcelaAnos:0,
   patrimonio:300000, liquidez:60000, dividas:0, aporte:7000, seguro:false, plano:true, irCompleta:false,
   cidade:'litnorte', anos:20, moradia:'propria', c_filho:1500,
-  retorno:5, swr:4.5, crescRenda:1, vol:9, inss:0, inssIdade:65,
+  vinc1:'clt', vinc2:'clt', retorno:5, swr:4.5, crescRenda:1, vol:9, inss:0, inssIdade:65,
   kids:[{ano:2031, escola:'particular', facul:'particular'}]
 }, CIDADES.litnorte);
 const KEY = 'planeja-lar-v1';
 let S;
 try{ S = JSON.parse(localStorage.getItem(KEY)) || null; }catch(e){ S = null; }
 let isExample = !S;
+if(S){ S.vinc1 = S.vinc1||'clt'; S.vinc2 = S.vinc2||'clt'; }
 if(!S) S = JSON.parse(JSON.stringify(EXEMPLO));
 
 const $ = id => document.getElementById(id);
 const NUM_IDS = ['idade1','idade2','renda1','renda2','gastos','parcela','parcelaAnos','patrimonio','liquidez','dividas','aporte','anos','retorno','swr','crescRenda','vol','inss','inssIdade','c_moradia','c_mercado','c_saude','c_transp','c_lazer','c_outros','c_aluguel','c_filho','e_inf','e_fund','e_med'];
-const SEL_IDS = ['cidade','moradia'];
+const SEL_IDS = ['cidade','moradia','vinc1','vinc2'];
 const CHK_IDS = ['seguro','plano','irCompleta'];
 
 const brl = v => 'R$ ' + Math.round(v).toLocaleString('pt-BR');
@@ -343,6 +348,7 @@ function renderKids(){
   });
   $('addKid').hidden = S.kids.length>=4;
 }
+function updateHint(){ const h=$('rendaHint'); if(h) h.textContent = anyPJ(S)?'Para PJ, use o que entra no bolso por mês: pró-labore + lucros distribuídos, já sem impostos e taxas da empresa, dividido por 12. Para CLT, inclua 13º, férias e PLR.':'Inclua 13º, férias e PLR divididos por 12.'; }
 function readForm(){
   NUM_IDS.forEach(id=>{ const v = parseFloat($(id).value); S[id] = isFinite(v)?v:0; });
   SEL_IDS.forEach(id=>{ S[id] = $(id).value; });
@@ -365,6 +371,9 @@ function kidYearCost(s,k,year){
   if(a>=18) c += FACUL[k.facul]*12;
   return c;
 }
+const isPJ = v => v==='pj'||v==='autonomo';
+const anyPJ = s => isPJ(s.vinc1)||isPJ(s.vinc2);
+const reserveGoal = s => anyPJ(s)?12:6;
 const kidsCost = (s,year) => s.kids.reduce((t,k)=>t+kidYearCost(s,k,year),0);
 
 function target(s,N,r){
@@ -472,7 +481,7 @@ function render(){
     ['Aporte necessário hoje', brl(Math.max(R.needShare*R.sur0,0)), R.needShare>1?'maior que a sobra do mês':`investem ${brl(s.aporte)} hoje`],
     ['Chance de chegar lá', pct(R.prob), `simulando anos bons e ruins`],
     ['Sobra mensal hoje', brl(R.sur0), `taxa de poupança ${pct(savingRate)}`],
-    ['Reserva de emergência', reserveMonths.toLocaleString('pt-BR',{maximumFractionDigits:1})+' meses', reserveMonths>=6?'ok, meta de 6 a 12':'meta: 6 a 12 meses'],
+    ['Reserva de emergência', reserveMonths.toLocaleString('pt-BR',{maximumFractionDigits:1})+' meses', reserveMonths>=reserveGoal(s)?'ok, meta de '+reserveGoal(s)+' meses':'meta: '+reserveGoal(s)+' meses'+(anyPJ(s)?' (renda PJ varia)':'')],
     ['Parte da educação', short(R.T.edu), 'custo dos filhos após '+Yr],
     ['Idade ao viver de renda', (s.idade1+R.N)+' e '+(s.idade2+R.N), 'anos']
   ].map(k=>`<div class="kpi"><span class="k">${k[0]}</span><span class="v">${k[1]}</span><span class="d">${k[2]}</span></div>`).join('');
@@ -484,6 +493,7 @@ function render(){
   renderTable(R);
   $('coreSum').textContent = brl(coreCost(s));
   $('exTag').hidden = !isExample;
+  updateHint();
 }
 
 function drawChart(R){
@@ -540,8 +550,8 @@ function renderPlan(R,reserveMonths){
   const s=S, items=[];
   const firstBirth = s.kids.map(k=>k.ano).filter(a=>a>Y0).sort((a,b)=>a-b)[0];
   if(s.dividas>0) items.push(['bad','Urgente','Quitar as dívidas caras',`São ${brl(s.dividas)} a juros que nenhum investimento cobre. Use parte da reserva ou renegocie antes de investir.`]);
-  const resTarget=(s.gastos+s.parcela)*6;
-  if(reserveMonths<6) items.push(['bad','Agora','Completar a reserva de emergência',`Faltam ${brl(resTarget-s.liquidez)} para 6 meses de gastos. Deixem em Tesouro Selic ou CDB com liquidez diária a 100% do CDI.`]);
+  const rg=reserveGoal(s), resTarget=(s.gastos+s.parcela)*rg;
+  if(reserveMonths<rg) items.push(['bad','Agora','Completar a reserva de emergência',`Faltam ${brl(resTarget-s.liquidez)} para ${rg} meses de gastos${anyPJ(s)?'. Como PJ não tem FGTS nem seguro-desemprego, a reserva é a sua rede de proteção':''}. Deixem em Tesouro Selic ou CDB com liquidez diária a 100% do CDI.`]);
   if(R.needShare>0){
     const cf=cashflows(s,R.N);
     const ns=Math.min(R.needShare,1);
@@ -556,8 +566,16 @@ function renderPlan(R,reserveMonths){
   }
   if(firstBirth && (!s.seguro||!s.plano)) items.push(['warn','Antes de '+firstBirth,'Proteger a família',`${!s.seguro?'Contratem seguro de vida para os dois, cobrindo pelo menos o custo dos filhos até 22 anos. ':''}${!s.plano?'Entrem num plano de saúde com obstetrícia já, porque a carência para parto é de 300 dias.':''}`]);
   else if(!s.seguro && s.kids.length) items.push(['warn','Agora','Contratar seguro de vida','Com filhos dependentes, a renda de cada um precisa estar protegida. O custo é baixo enquanto vocês são jovens.']);
-  if(s.irCompleta) items.push(['info','Este ano','Usar PGBL para reduzir o IR','Na declaração completa, aportes em PGBL de até 12% da renda bruta tributável abatem o imposto. Escolham tabela regressiva (10% após 10 anos) e fundos com taxa de administração abaixo de 1%.']);
-  else items.push(['info','Este ano','Comparar declaração simples e completa','Com plano de saúde, escola e dependentes, a completa pode valer a pena. Ela também libera o benefício do PGBL.']);
+  if(anyPJ(s)){
+    const quem = [isPJ(s.vinc1)?{n:'você',r:s.renda1}:null, isPJ(s.vinc2)?{n:'seu parceiro(a)',r:s.renda2}:null].filter(Boolean);
+    items.push(['warn','Este ano','Proteger a renda PJ',`PJ não tem FGTS, 13º, férias pagas nem seguro-desemprego, e o auxílio do INSS é calculado sobre o pró-labore. Com pró-labore de 1 salário mínimo, um afastamento por doença paga só isso. Contratem seguro de vida e seguro de invalidez ou de diária por incapacidade (DIT) que cubra a renda real${quem.length?', de '+quem.map(q=>brl(q.r)).join(' e ')+'/mês':''}.`]);
+    items.push(['warn','Agora','Não contar com INSS acima do mínimo',`Contribuindo sobre 1 salário mínimo, a aposentadoria tende a ser de 1 salário mínimo. ${s.inss>0?'Confiram se o INSS informado nas premissas segue essa lógica.':'O plano já não conta com INSS; se quiserem incluir, informem cerca de 1 salário mínimo por pessoa PJ.'} Vale simular com o contador se aumentar o pró-labore compensa: ele custa INSS e IR hoje, mas melhora aposentadoria, auxílio-doença e licença-maternidade.`]);
+    const fb = s.kids.map(k=>k.ano).filter(a=>a>Y0).sort((a,b)=>a-b)[0];
+    if(fb) items.push(['warn','Antes de '+fb,'Guardar para a licença-maternidade',`O salário-maternidade do INSS é calculado sobre a contribuição. Se quem vai se afastar for PJ com pró-labore de 1 salário mínimo, recebe cerca de 1 salário mínimo por 4 meses. Guardem à parte uns ${quem.map(q=>brl(q.r*4)).join(' ou ')} para cobrir esses meses, além da reserva.`]);
+  }
+  if(anyPJ(s) && !(s.vinc1==='clt'||s.vinc1==='servidor'||s.vinc2==='clt'||s.vinc2==='servidor')) items.push(['info','Este ano','PGBL quase não ajuda com pró-labore baixo','O desconto do PGBL é de até 12% da renda tributável, que para PJ é só o pró-labore. Com 1 salário mínimo, o benefício é mínimo. Prefiram VGBL (bom para sucessão) ou investir direto no Tesouro e em ETFs. Atenção às regras novas de dividendos: desde 2026 há retenção de 10% sobre lucros acima de R$ 50 mil por mês da mesma empresa e IR mínimo para quem ganha acima de R$ 600 mil por ano. Revisem com o contador.']);
+  else if(s.irCompleta) items.push(['info','Este ano','Usar PGBL para reduzir o IR','Na declaração completa, aportes em PGBL de até 12% da renda bruta tributável abatem o imposto. Escolham tabela regressiva (10% após 10 anos) e fundos com taxa de administração abaixo de 1%.']);
+  else if(!anyPJ(s)) items.push(['info','Este ano','Comparar declaração simples e completa','Com plano de saúde, escola e dependentes, a completa pode valer a pena. Ela também libera o benefício do PGBL.']);
   s.kids.forEach((k,i)=>{ if(k.ano+18>Y0) items.push(['info','Contínuo',`Caixa da educação${s.kids.length>1?' do filho '+(i+1):''}`,`Separem o dinheiro da faculdade em Tesouro Educa+ ou IPCA+ com vencimento perto de ${k.ano+18}, para não misturar com a aposentadoria.`]); });
   if(s.moradia==='aluguel') items.push(['warn','Decidir em 2 anos','Avaliar casa própria',`Pagar aluguel no futuro soma ${short(s.c_aluguel*12/(s.swr/100))} à meta. Comparem com comprar à vista ou quitar um imóvel antes de ${Y0+R.N}.`]);
   if(s.parcelaAnos>R.N) items.push(['warn','Contínuo','Amortizar o financiamento','O financiamento termina depois da data de viver de renda e encarece a meta. Amortizem e reduzam o prazo, não a parcela.']);
