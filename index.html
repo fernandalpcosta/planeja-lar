@@ -68,6 +68,15 @@ button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
 .share-row label{flex:1 1 220px}
 .share .err{color:var(--bad)}
 .share .ok{color:var(--good)}
+.inc-hero{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:4px}
+@media (max-width:700px){.inc-hero{grid-template-columns:minmax(0,1fr)}}
+.inc-hero>div{background:var(--sunk);border-radius:8px;padding:14px;display:grid;gap:2px;align-content:start}
+.inc-hero .k{font-size:12px;color:var(--ink-2)}
+.inc-hero .v{font-family:var(--f-mono);font-size:24px;font-variant-numeric:tabular-nums}
+.inc-hero .d{font-size:12px;color:var(--ink-3)}
+.inc-hero .main{background:var(--accent-soft)}
+.inc-hero .main .v{color:var(--accent-ink)}
+td.gap-bad{color:var(--bad)} td.gap-ok{color:var(--good)}
 details.costs summary{cursor:pointer;font-size:13px;color:var(--accent-ink);font-weight:500}
 details.costs .row{margin-top:8px}
 
@@ -196,6 +205,10 @@ tr.ret td{background:var(--accent-soft)}
             <label>Seu vínculo<select id="vinc1"><option value="clt">CLT</option><option value="pj">PJ / empresa própria</option><option value="autonomo">Autônomo</option><option value="servidor">Servidor público</option></select></label>
             <label>Vínculo do(a) parceiro(a)<select id="vinc2"><option value="clt">CLT</option><option value="pj">PJ / empresa própria</option><option value="autonomo">Autônomo</option><option value="servidor">Servidor público</option></select></label>
           </div>
+          <div class="row">
+            <label>Seu aumento esperado (% acima da inflação/ano)<input id="cresc1" type="number" step="0.5" min="-10" max="30"></label>
+            <label>Do(a) parceiro(a) (% acima da inflação/ano)<input id="cresc2" type="number" step="0.5" min="-10" max="30"></label>
+          </div>
           <p class="hint" id="rendaHint">Inclua 13º, férias e PLR divididos por 12.</p>
           <label>Gastos mensais atuais (sem financiamento)<input id="gastos" type="number" step="100" min="0"></label>
           <div class="row">
@@ -275,7 +288,7 @@ tr.ret td{background:var(--accent-soft)}
             <label>Retirada segura (% a.a.)<input id="swr" type="number" step="0.25" min="2" max="8"></label>
           </div>
           <div class="row">
-            <label>Aumento real da renda (% a.a.)<input id="crescRenda" type="number" step="0.5" min="-5" max="10"></label>
+            <label>Do aumento, quanto vira gasto (%)<input id="creep" type="number" step="5" min="0" max="100"></label>
             <label>Volatilidade da carteira (%)<input id="vol" type="number" step="1" min="0" max="30"></label>
           </div>
           <div class="row">
@@ -300,6 +313,14 @@ tr.ret td{background:var(--accent-soft)}
           <h2 id="vTitle" style="margin-top:8px"></h2>
           <p id="vText"></p>
         </div>
+      </section>
+
+      <section class="card" id="incomeCard">
+        <h2>Quanto a renda precisa crescer</h2>
+        <p class="lede" id="incLede"></p>
+        <div class="inc-hero" id="incHero"></div>
+        <div class="tbl"><table id="incTbl"></table></div>
+        <p class="hint" style="margin-top:10px">Valores em reais de hoje: um aumento de 3% acima da inflação significa ganhar 3% a mais de poder de compra por ano. O cálculo mantém o hábito atual de vocês: investir a mesma parte da sobra e transformar em gasto a parte do aumento definida nas premissas.</p>
       </section>
 
       <section class="kpis" id="kpis"></section>
@@ -392,18 +413,19 @@ const EXEMPLO = Object.assign({
   idade1:32, idade2:31, renda1:12000, renda2:10000, gastos:10000, parcela:0, parcelaAnos:0,
   patrimonio:300000, liquidez:60000, dividas:0, aporte:7000, seguro:false, plano:true, irCompleta:false,
   cidade:'litnorte', anos:20, moradia:'propria', c_filho:1500,
-  vinc1:'clt', vinc2:'clt', estilo:'confortavel', viagens:20000, viagensHoje:12000, retorno:5, swr:4.5, crescRenda:1, vol:9, inss:0, inssIdade:65,
+  vinc1:'clt', vinc2:'clt', estilo:'confortavel', viagens:20000, viagensHoje:12000, retorno:5, swr:4.5, cresc1:2, cresc2:2, creep:30, vol:9, inss:0, inssIdade:65,
   kids:[{ano:2031, escola:'particular', facul:'particular'}]
 }, CIDADES.litnorte);
 const KEY = 'planeja-lar-v1';
 let S;
 try{ S = JSON.parse(localStorage.getItem(KEY)) || null; }catch(e){ S = null; }
 let isExample = !S;
-if(S){ S.vinc1 = S.vinc1||'clt'; S.vinc2 = S.vinc2||'clt'; if(!S.estilo){ S.estilo='custom'; S.viagens=S.viagens||0; S.viagensHoje=S.viagensHoje||0; } }
+if(S){ if(S.cresc1===undefined){ S.cresc1=S.cresc2=(S.crescRenda!==undefined?S.crescRenda:1); S.creep=0; }
+  S.vinc1 = S.vinc1||'clt'; S.vinc2 = S.vinc2||'clt'; if(!S.estilo){ S.estilo='custom'; S.viagens=S.viagens||0; S.viagensHoje=S.viagensHoje||0; } }
 if(!S) S = JSON.parse(JSON.stringify(EXEMPLO));
 
 const $ = id => document.getElementById(id);
-const NUM_IDS = ['idade1','idade2','renda1','renda2','gastos','parcela','parcelaAnos','patrimonio','liquidez','dividas','aporte','anos','retorno','swr','crescRenda','vol','inss','inssIdade','c_moradia','c_mercado','c_saude','c_transp','c_lazer','c_outros','c_aluguel','c_filho','e_inf','e_fund','e_med','viagens','viagensHoje'];
+const NUM_IDS = ['idade1','idade2','renda1','renda2','gastos','parcela','parcelaAnos','patrimonio','liquidez','dividas','aporte','anos','retorno','swr','cresc1','cresc2','creep','vol','inss','inssIdade','c_moradia','c_mercado','c_saude','c_transp','c_lazer','c_outros','c_aluguel','c_filho','e_inf','e_fund','e_med','viagens','viagensHoje'];
 const SEL_IDS = ['cidade','moradia','vinc1','vinc2'];
 const CHK_IDS = ['seguro','plano','irCompleta'];
 
@@ -488,11 +510,11 @@ function target(s,N,r){
   return {total: Math.max(0, coreTarget + edu + fin - inssPV), coreTarget, edu, fin, inssPV, core};
 }
 function cashflows(s,years){
-  const out=[]; const g=s.crescRenda/100;
+  const out=[]; const g1=s.cresc1/100, g2=s.cresc2/100, inc0=(s.renda1+s.renda2)*12, creep=Math.min(Math.max(s.creep||0,0),100)/100;
   for(let i=0;i<years;i++){
     const y=Y0+i;
-    const income=(s.renda1+s.renda2)*12*Math.pow(1+g,i);
-    const exp=s.gastos*12+(s.viagensHoje||0)+(i<s.parcelaAnos?s.parcela*12:0)+kidsCost(s,y);
+    const income=(s.renda1*Math.pow(1+g1,i)+s.renda2*Math.pow(1+g2,i))*12;
+    const exp=Math.max(0,income-inc0)*creep+s.gastos*12+(s.viagensHoje||0)+(i<s.parcelaAnos?s.parcela*12:0)+kidsCost(s,y);
     out.push({i,y,income,exp,surplus:income-exp});
   }
   return out;
@@ -543,7 +565,17 @@ function calc(s){
   let seed=12345; const rnd=()=>{seed=(seed*1103515245+12345)%2147483648;return seed/2147483648;};
   const gauss=()=>{let u=0,v=0;while(u===0)u=rnd();v=rnd();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);};
   for(let k=0;k<sims;k++){ const rets=[]; for(let i=0;i<N;i++) rets.push(r+vol*gauss()); if(project(s,N,share,r,rets).P>=T.total) ok++; }
-  return {r,N,T,share,sur0,cur,req,needShare,constMonthly,delay,firstYear,sustainCore,reqR,prob:ok/sims};
+  // crescimento de renda necessário (mesmo % para os dois, mantendo o hábito de investir de hoje)
+  const reachG=g=>project(Object.assign({},s,{cresc1:g*100,cresc2:g*100}),N,share,r).P>=T.total;
+  let gReq=null;
+  if(share>0 && reachG(0.30)){
+    let a=-0.10,b=0.30;
+    if(reachG(a)) gReq=a; else { for(let k=0;k<50;k++){ const m=(a+b)/2; if(reachG(m)) b=m; else a=m; } gReq=b; }
+  }
+  const incAt=(g1,g2,i)=>s.renda1*Math.pow(1+g1,i)+s.renda2*Math.pow(1+g2,i);
+  const inc0=s.renda1+s.renda2;
+  const gPlan = inc0>0? Math.pow(incAt(s.cresc1/100,s.cresc2/100,N)/inc0,1/N)-1 : 0;
+  return {r,N,T,share,sur0,cur,req,needShare,constMonthly,delay,firstYear,sustainCore,reqR,prob:ok/sims,gReq,gPlan,incAt,inc0};
 }
 
 /* ---------- render ---------- */
@@ -589,6 +621,7 @@ function render(){
   renderPlan(R,reserveMonths);
   renderAlloc(R);
   renderLevers(R);
+  renderIncome(R);
   renderTable(R);
   $('coreSum').textContent = brl(coreCost(s));
   $('exTag').hidden = !isExample;
@@ -663,6 +696,10 @@ function renderPlan(R,reserveMonths){
     }
     items.push([R.needShare>Math.max(R.share,0.001)?'warn':'good','Este mês',`Investir ${pct(ns)} do que sobra, ${brl(ns*R.sur0)}/mês hoje`,txt]);
   }
+  if(R.gReq!==null && R.gReq>R.gPlan+0.0005){
+    const i5=Math.min(5,R.N), need5=R.incAt(R.gReq,R.gReq,i5);
+    items.push(['warn','Próximos '+i5+' anos','Fazer a renda crescer',`A meta pede a renda do casal em <span class="num">${brl(need5)}</span>/mês até ${Y0+i5}, contra ${brl(R.inc0)} hoje. ${anyPJ(s)?'Para PJ: revisem preços e contratos todo ano acima do IPCA, busquem clientes maiores e reduzam a dependência de um só cliente. ':''}${(s.vinc1==='clt'||s.vinc2==='clt')?'Para CLT: negociem reajustes acima da inflação, mapeiem a próxima promoção e o que ela exige. ':''}Separem o aumento antes de ele virar gasto: direcionem pelo menos ${100-Math.round(s.creep||0)}% de cada aumento para o aporte.`]);
+  }
   if(firstBirth && (!s.seguro||!s.plano)) items.push(['warn','Antes de '+firstBirth,'Proteger a família',`${!s.seguro?'Contratem seguro de vida para os dois, cobrindo pelo menos o custo dos filhos até 22 anos. ':''}${!s.plano?'Entrem num plano de saúde com obstetrícia já, porque a carência para parto é de 300 dias.':''}`]);
   else if(!s.seguro && s.kids.length) items.push(['warn','Agora','Contratar seguro de vida','Com filhos dependentes, a renda de cada um precisa estar protegida. O custo é baixo enquanto vocês são jovens.']);
   if(anyPJ(s)){
@@ -702,12 +739,42 @@ function renderAlloc(R){
   $('eduBox').innerHTML = S.kids.length? `<p class="hint" style="font-size:13px;color:var(--ink-2)">Fora dessa divisão: a reserva de emergência${S.viagensHoje>0?', a caixa de viagens':''} e o caixa da educação (${short(R.T.edu)}, cerca de ${pct(share)} da meta), em títulos com vencimento casado com a faculdade.${S.irCompleta?' Uma parte do núcleo pode ficar em PGBL pelo benefício fiscal.':''}</p>`:'';
 }
 
+const pctReal = g => (g>=0?'+':'−')+Math.abs(g*100).toLocaleString('pt-BR',{maximumFractionDigits:1,minimumFractionDigits:1})+'%';
+function renderIncome(R){
+  const s=S, N=R.N, Yr=Y0+N;
+  let lede, pillCls;
+  if(R.share<=0){
+    lede='Hoje vocês não investem nada da sobra, então aumento de renda sozinho não muda o resultado. Comecem definindo um aporte mensal em "Quanto investem por mês hoje".'; pillCls='bad';
+  } else if(R.gReq===null){
+    lede=`Mesmo com a renda crescendo 30% acima da inflação por ano, o hábito atual não chega à meta de ${short(R.T.total)}. Combinem aumento de renda com investir uma parte maior da sobra ou com um sonho mais enxuto.`; pillCls='bad';
+  } else if(R.gReq<=R.gPlan+0.0005){
+    lede=`A carreira que vocês planejaram já basta. Com a renda crescendo ${pctReal(R.gReq)} ao ano acima da inflação, vocês chegam à meta em ${Yr}. O que passar disso é folga ou antecipa a data.`; pillCls='good';
+  } else {
+    const mult=Math.pow(1+R.gReq,N);
+    lede=`Para viver de renda em ${Yr} sem mudar o hábito de investir, a renda do casal precisa crescer ${pctReal(R.gReq)} ao ano acima da inflação. Em ${N} anos, isso é ganhar ${mult.toLocaleString('pt-BR',{maximumFractionDigits:1})} vezes o poder de compra de hoje.`; pillCls=R.gReq-R.gPlan>0.03?'bad':'warn';
+  }
+  $('incLede').textContent=lede;
+  const g=R.gReq, finalReq = g===null?null:R.incAt(g,g,N), finalPlan=R.incAt(s.cresc1/100,s.cresc2/100,N);
+  $('incHero').innerHTML=`
+    <div class="main"><span class="k">Aumento necessário por ano</span><span class="v">${g===null?'—':pctReal(g)}</span><span class="d">acima da inflação, para os dois</span></div>
+    <div><span class="k">Renda do casal em ${Yr}</span><span class="v">${finalReq===null?'—':brl(finalReq)}</span><span class="d">hoje: ${brl(R.inc0)}/mês</span></div>
+    <div><span class="k">Carreira planejada</span><span class="v">${pctReal(R.gPlan)}</span><span class="d"><span class="pill ${pillCls}">${pillCls==='good'?'✓ basta':pillCls==='warn'?'! um pouco abaixo':'✕ bem abaixo'}</span> chega a ${brl(finalPlan)}/mês</span></div>`;
+  const marks=[...new Set([0,5,10,15,N].filter(i=>i<=N))];
+  let h=`<thead><tr><th>Ano</th><th>Idades</th><th>Você precisa</th><th>Parceiro(a) precisa</th><th>Casal precisa</th><th>Casal planejado</th><th>Diferença</th></tr></thead><tbody>`;
+  marks.forEach(i=>{
+    const req1=g===null?null:s.renda1*Math.pow(1+g,i), req2=g===null?null:s.renda2*Math.pow(1+g,i);
+    const plan=R.incAt(s.cresc1/100,s.cresc2/100,i), need=g===null?null:req1+req2, diff=need===null?null:plan-need;
+    h+=`<tr${i===N?' class="ret"':''}><td>${Y0+i}</td><td>${s.idade1+i}/${s.idade2+i}</td><td>${req1===null?'—':brl(req1)}</td><td>${req2===null?'—':brl(req2)}</td><td>${need===null?'—':brl(need)}</td><td>${brl(plan)}</td><td class="${diff===null?'':diff>=-1?'gap-ok':'gap-bad'}">${diff===null?'—':Math.abs(diff)<1?'em dia':(diff>0?'folga ':'faltam ')+brl(Math.abs(diff))}</td></tr>`;
+  });
+  $('incTbl').innerHTML=h+'</tbody>';
+}
 function renderLevers(R){
   const s=S, L=[];
   const extra = Math.max(0,R.needShare*R.sur0 - s.aporte);
   L.push(['Investir mais por mês', extra>0? '+'+brl(extra) : 'já basta', extra>0? `Total de ${brl(R.needShare*R.sur0)}/mês hoje, ajustado à sobra de cada ano.` : 'O aporte atual já fecha a meta.']);
   L.push(['Adiar a data', R.delay===null?'mais de 30 anos':R.delay===0?'nenhum ano':'+'+R.delay+(R.delay===1?' ano':' anos'), R.delay?`Viver de renda em ${Y0+R.N+R.delay}, com ${s.idade1+R.N+R.delay} anos.`:'No ritmo atual vocês chegam no prazo.']);
   L.push(['Custo de vida possível', brl(R.sustainCore)+'/mês', `É o que o patrimônio projetado sustenta para o casal. O plano atual pede ${brl(R.T.core)}.`]);
+  L.push(['Aumentar a renda', R.gReq===null?'não basta sozinho':pctReal(R.gReq)+' ao ano', R.gReq===null?'Combine com outra alavanca.':`Acima da inflação, chegando a ${brl(R.incAt(R.gReq,R.gReq,R.N))}/mês de renda do casal em ${Y0+R.N}.`]);
   L.push(['Rendimento necessário', R.reqR===null?'acima de 25%':(R.reqR*100).toLocaleString('pt-BR',{maximumFractionDigits:1})+'% real', R.reqR!==null&&R.reqR>0.07?'Acima do que títulos públicos pagam. Prefira as outras alavancas.':'Rendimento acima da inflação que fecha a meta no ritmo atual.']);
   $('levers').innerHTML=L.map(l=>`<div class="lever"><div class="k">${l[0]}</div><div class="v">${l[1]}</div><p>${l[2]}</p></div>`).join('');
 }

@@ -8,13 +8,14 @@ Simulador para planejar a independência financeira de uma família no Brasil: p
 
 ## O que você informa
 
-1. **Situação hoje:** idades, vínculo de cada um (CLT, PJ, autônomo ou servidor), renda líquida do casal, gastos, gasto anual com viagens, financiamento, patrimônio, reserva, dívidas e quanto investe por mês.
+1. **Situação hoje:** idades, vínculo de cada um (CLT, PJ, autônomo ou servidor), renda líquida e aumento esperado de cada um, gastos, gasto anual com viagens, financiamento, patrimônio, reserva, dívidas e quanto investe por mês.
 2. **Filhos:** ano de nascimento, escola (pública, particular ou bilíngue) e faculdade.
 3. **O sonho:** cidade de destino, estilo de vida pré-definido (Essencial, Confortável, Viajante ou Alto padrão, com custos editáveis), orçamento anual de viagens, em quantos anos quer viver de renda e se terá casa própria ou aluguel.
-4. **Premissas:** rendimento real, taxa de retirada segura, aumento real da renda e INSS.
+4. **Premissas:** quanto de cada aumento vira gasto, rendimento real, taxa de retirada segura, aumento real da renda e INSS.
 
 ## O que o app devolve
 
+- **Quanto a renda precisa crescer:** o aumento anual acima da inflação que o casal precisa ter, com marcos a cada 5 anos para cada pessoa, comparado com a carreira planejada
 - Meta de patrimônio e quanto dela o ritmo atual alcança
 - Aporte mensal necessário, antes e depois da chegada dos filhos
 - Chance de sucesso (simulação Monte Carlo)
@@ -43,7 +44,8 @@ O link guarda o plano como estava na hora. Se algo mudar, gere um link novo.
 Tudo é calculado em reais de hoje, já descontada a inflação.
 
 - **Meta** = custo mensal do casal × 12 ÷ taxa de retirada segura + valor presente do custo dos filhos depois da data de viver de renda + parcelas restantes do financiamento − valor presente do INSS.
-- **Projeção:** a cada ano, o patrimônio rende a taxa real e recebe a parte da sobra (renda − gastos − filhos − financiamento) que vocês investem hoje.
+- **Projeção:** a cada ano, a renda de cada pessoa cresce no ritmo informado, uma parte do aumento vira gasto, e o patrimônio rende a taxa real e recebe a mesma parte da sobra (renda − gastos − viagens − filhos − financiamento) que vocês investem hoje.
+- **Aumento necessário:** o app busca o crescimento anual de renda, igual para os dois, que faz a projeção alcançar a meta mantendo esse hábito.
 - **Custo dos filhos:** custo extra mensal até os 17 anos, mensalidade escolar × 13 por fase (infantil, fundamental, médio) e 5 anos de faculdade.
 
 Os dados ficam salvos apenas no navegador de quem usa (localStorage).
