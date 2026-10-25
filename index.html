@@ -88,7 +88,10 @@ details.costs .grid4{display:grid;grid-template-columns:repeat(auto-fit,minmax(1
 
 /* carreira */
 .steps{display:grid;gap:8px}
-.step{display:grid;grid-template-columns:70px minmax(0,1fr) 76px auto;gap:6px;align-items:end;border:1px dashed var(--line);border-radius:8px;padding:8px}
+.first-job{border:1px solid var(--accent);background:var(--accent-soft);border-radius:8px;padding:10px;display:grid;gap:8px}
+.fj-h{margin:0;font-size:13px;font-weight:600;color:var(--accent-ink)}
+.st-hint{grid-column:1/-1;font-size:12px;color:var(--ink-3)}
+.step{display:grid;grid-template-columns:62px minmax(0,1fr) 92px auto;gap:6px;align-items:end;border:1px dashed var(--line);border-radius:8px;padding:8px}
 .step label{font-size:12px}
 .step button{padding:6px 8px}
 
@@ -106,8 +109,8 @@ details.costs .grid4{display:grid;grid-template-columns:repeat(auto-fit,minmax(1
 .kpi .k{font-size:12px;color:var(--ink-2)}
 .kpi .v{font-family:var(--f-mono);font-size:21px;font-weight:500;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
 .kpi .d{font-size:12px;color:var(--ink-3)}
-.tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
-@media (max-width:760px){.tiles{grid-template-columns:minmax(0,1fr)}}
+.tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:640px){.tiles{grid-template-columns:minmax(0,1fr)}}
 .tile{background:var(--sunk);border-radius:8px;padding:14px;display:grid;gap:4px;align-content:start;min-width:0}
 .tile .k{font-size:12px;color:var(--ink-2);font-weight:600;letter-spacing:.04em;text-transform:uppercase}
 .tile .v{font-family:var(--f-mono);font-size:24px;font-variant-numeric:tabular-nums}
@@ -261,10 +264,6 @@ td.ok{color:var(--good)} td.no{color:var(--bad)}
           </label>
         </div>
         <label><span id="rendaLbl">Renda líquida por mês</span><input id="renda" type="number" step="100" min="0"></label>
-        <div id="desBox" class="row">
-          <label>Meses até voltar a ter renda<input id="mesesSemRenda" type="number" min="0" max="36"></label>
-          <label>Renda esperada ao voltar<input id="rendaVolta" type="number" step="100" min="0"></label>
-        </div>
         <div class="row">
           <label>Gastos por mês hoje<input id="gastos" type="number" step="100" min="0"></label>
           <label>Viagens por ano hoje<input id="viagensHoje" type="number" step="1000" min="0"></label>
@@ -282,12 +281,20 @@ td.ok{color:var(--good)} td.no{color:var(--bad)}
 
       <fieldset>
         <legend>Carreira</legend>
+        <div id="desBox" class="first-job">
+          <p class="fj-h">1º degrau: o primeiro emprego</p>
+          <div class="row">
+            <label>Consigo em (meses)<input id="mesesSemRenda" type="number" min="0" max="60"></label>
+            <label>Salário líquido esperado<input id="rendaVolta" type="number" step="100" min="0"></label>
+          </div>
+          <p class="hint" id="fjHint"></p>
+        </div>
         <div class="row">
           <label>Reajuste por ano (% acima da inflação)<input id="reajuste" type="number" step="0.5" min="-10" max="30"></label>
           <label>Do aumento, vira gasto (%)<input id="creep" type="number" step="5" min="0" max="100"></label>
         </div>
         <p class="subh" style="margin:6px 0 0">Saltos que você planeja</p>
-        <p class="hint">Promoções, troca de empresa, gestão, mudança de área. Diga daqui a quantos anos e quanto a renda sobe. O aumento pode ser negativo, como numa mudança de área que começa ganhando menos.</p>
+        <p class="hint">Promoções, troca de empresa, gestão, mudança de área. Diga daqui a quantos anos e qual será a sua nova renda líquida por mês, em reais de hoje. O app mostra quanto isso representa de aumento.</p>
         <div class="steps" id="steps"></div>
         <button type="button" id="addStep">+ Adicionar salto de carreira</button>
         <label>Simular um grande salto daqui a (anos)<input id="saltoAno" type="number" min="1" max="30"></label>
@@ -432,6 +439,7 @@ const EXTRAS = {
   doacao: {nome:'Doações', mes:500, info:'Apoio mensal a causas e pessoas.'}
 };
 const DEGRAUS = {
+  emprego:{nome:'Novo emprego', pct:0},
   promocao:{nome:'Promoção', pct:20}, troca:{nome:'Trocar de empresa', pct:25}, gestao:{nome:'Virar gestor(a)', pct:40},
   especialista:{nome:'Especialização ou certificação', pct:15}, area:{nome:'Mudar de área', pct:-10}, empresa:{nome:'Abrir empresa ou virar PJ', pct:30},
   exterior:{nome:'Trabalhar para fora', pct:80}, outro:{nome:'Outro', pct:10}
@@ -442,7 +450,7 @@ const EXEMPLO = {
   idade:30, situacao:'clt', renda:10000, mesesSemRenda:4, rendaVolta:9000, gastos:5500, viagensHoje:6000,
   patrimonio:60000, liquidez:20000, dividas:0, share:80,
   reajuste:0.5, creep:30, saltoAno:3,
-  steps:[{anos:2,tipo:'promocao',pct:20},{anos:5,tipo:'troca',pct:25},{anos:9,tipo:'gestao',pct:40}],
+  steps:[{anos:2,tipo:'promocao',valor:12000},{anos:5,tipo:'troca',valor:15000},{anos:9,tipo:'gestao',valor:21000}],
   perfil:'moderado', retorno:5, swr:4.5, vol:10, inss:0, inssIdade:65,
   estilo:'litoral', extras:['pet'], anos:20, moradia:'comprar', anoFilho:2031
 };
@@ -459,6 +467,8 @@ let S; try{ S=JSON.parse(localStorage.getItem(KEY))||null; }catch(e){ S=null; }
 let isExample=!S;
 const fresh=()=>JSON.parse(JSON.stringify(EXEMPLO));
 S = S ? Object.assign(fresh(), S) : fresh();
+// versões antigas guardavam o salto em %: converte para a nova renda em reais
+if(S.steps.some(st=>st.valor===undefined)){ let v=S.situacao==='desempregado'?S.rendaVolta:S.renda; S.steps=S.steps.slice().sort((a,b)=>a.anos-b.anos).map(st=>{ v=Math.round(v*(1+(st.pct||0)/100)/100)*100; return {anos:st.anos,tipo:st.tipo,valor:v}; }); }
 
 const $=id=>document.getElementById(id);
 const NUM_IDS=['idade','renda','mesesSemRenda','rendaVolta','gastos','viagensHoje','patrimonio','liquidez','dividas','share','reajuste','creep','saltoAno','retorno','swr','vol','inss','inssIdade','anos','anoFilho'].concat(COST_KEYS);
@@ -485,8 +495,8 @@ function renderSteps(){
   $('steps').innerHTML=S.steps.map((st,i)=>`<div class="step">
     <label>Em (anos)<input id="st_anos_${i}" type="number" min="0" max="40" step="1" value="${st.anos}"></label>
     <label>Tipo<select id="st_tipo_${i}">${Object.entries(DEGRAUS).map(([k,d])=>`<option value="${k}"${st.tipo===k?' selected':''}>${d.nome}</option>`).join('')}</select></label>
-    <label>Aumento (%)<input id="st_pct_${i}" type="number" step="5" min="-80" max="500" value="${st.pct}"></label>
-    <button type="button" class="link" data-rmstep="${i}" aria-label="Remover salto">✕</button></div>`).join('') || '<p class="hint">Nenhum salto planejado. O app usa só o reajuste anual.</p>';
+    <label>Nova renda<input id="st_val_${i}" type="number" step="100" min="0" value="${st.valor}"></label>
+    <button type="button" class="link" data-rmstep="${i}" aria-label="Remover salto">✕</button><span class="st-hint" id="st_hint_${i}"></span></div>`).join('') || '<p class="hint">Nenhum salto planejado. O app usa só o reajuste anual.</p>';
   $('addStep').hidden=S.steps.length>=6;
   addInfo($('steps'));
 }
@@ -500,7 +510,7 @@ function readForm(){
   SEL_IDS.forEach(id=>{ S[id]=$(id).value; });
   const est=document.querySelector('input[name=estilo]:checked'); if(est) S.estilo=est.value;
   S.extras=[...document.querySelectorAll('input[name=extra]:checked')].map(i=>i.value);
-  S.steps=S.steps.map((st,i)=>({anos:parseFloat($('st_anos_'+i).value)||0, tipo:$('st_tipo_'+i).value, pct:parseFloat($('st_pct_'+i).value)||0}));
+  S.steps=S.steps.map((st,i)=>({anos:parseFloat($('st_anos_'+i).value)||0, tipo:$('st_tipo_'+i).value, valor:parseFloat($('st_val_'+i).value)||0}));
 }
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
 
@@ -521,12 +531,12 @@ function target(s,N){
   return {total:Math.max(0,coreT+casa+edu-inssPV), core, coreT, casa, edu, inssPV};
 }
 const unemployed=s=>s.situacao==='desempregado';
-function incomeAt(s,m,g,steps){
+// renda do mês m: parte da renda atual (ou do primeiro emprego), troca de valor a cada salto e cresce pelo reajuste desde o último salto
+function incomeAt(s,m,g,steps,base){
   if(unemployed(s) && m<s.mesesSemRenda) return s.renda;
-  const base=unemployed(s)?s.rendaVolta:s.renda;
-  let inc=base*Math.pow(1+g,m/12);
-  for(const st of steps) if(m>=st.anos*12) inc*=1+st.pct/100;
-  return Math.max(0,inc);
+  let start=unemployed(s)?s.mesesSemRenda:0, val=base!==undefined?base:(unemployed(s)?s.rendaVolta:s.renda);
+  for(const st of steps.slice().sort((a,b)=>a.anos-b.anos)){ const sm=Math.round(st.anos*12); if(m>=sm && sm>=start){ start=sm; val=st.valor; } }
+  return Math.max(0,val*Math.pow(1+g,(m-start)/12));
 }
 function sim(s,N,opt={}){
   const rA=opt.r!==undefined?opt.r:s.retorno/100, share=Math.min(Math.max(opt.share!==undefined?opt.share:s.share/100,0),1);
@@ -535,7 +545,7 @@ function sim(s,N,opt={}){
   let P=s.patrimonio-s.dividas, minP=P; const years=[]; let a={inc:0,exp:0,c:0};
   for(let m=0;m<N*12;m++){
     const yi=Math.floor(m/12), ra=opt.returns?opt.returns[yi]:rA, rm=Math.pow(1+ra,1/12)-1;
-    const inc=incomeAt(s,m,g,steps);
+    const inc=incomeAt(s,m,g,steps,opt.base);
     const exp=s.gastos+Math.max(0,inc-creepBase)*creep+s.viagensHoje/12+kidMonthly(s,Y0+yi);
     const sobra=inc-exp, c=sobra>0?sobra*share:sobra;
     P=P*(1+rm)+c; if(P<minP) minP=P;
@@ -552,7 +562,11 @@ function calc(s){
   let gReq=null; if(s.share>0 && reach({g:0.6,steps:[]})) gReq = reach({g:-0.1,steps:[]}) ? -0.1 : bisect(g=>reach({g,steps:[]}),-0.1,0.6);
   // 2. um grande salto no ano escolhido, com o reajuste informado
   const J=Math.min(Math.max(1,Math.round(s.saltoAno)),N-1||1);
-  let jumpReq=null; if(s.share>0 && reach({steps:[{anos:J,pct:1000}]})) jumpReq = reach({steps:[{anos:J,pct:0}]}) ? 0 : bisect(p=>reach({steps:[{anos:J,pct:p}]}),0,1000);
+  // novo salário necessário no salto (em reais)
+  const HI=600000;
+  let jumpReq=null; if(s.share>0 && reach({steps:[{anos:J,valor:HI}]})) jumpReq = reach({steps:[{anos:J,valor:0}]}) ? 0 : bisect(v=>reach({steps:[{anos:J,valor:v}]}),0,HI,40);
+  // 3. salário-alvo: quanto o primeiro emprego (ou um emprego hoje) precisa pagar, só com reajustes depois
+  let baseReq=null; if(s.share>0 && reach({base:HI,steps:[]})) baseReq = reach({base:0,steps:[]}) ? 0 : bisect(v=>reach({base:v,steps:[]}),0,HI,40);
   // alavancas
   const shareReq = reach({share:1}) ? bisect(x=>reach({share:x}),0,1) : null;
   let delay=null; for(let n=N;n<=N+30;n++){ if(sim(s,n).P>=target(s,n).total){ delay=n-N; break; } }
@@ -563,7 +577,7 @@ function calc(s){
   const gauss=()=>{ let u=0; while(u===0) u=rnd(); return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*rnd()); };
   for(let k=0;k<sims;k++){ const rets=[]; for(let i=0;i<N;i++) rets.push(r+vol*gauss()); if(sim(s,N,{returns:rets}).P>=T.total) ok++; }
   const need = gReq===null?null:sim(s,N,{g:gReq,steps:[]});
-  return {N,T,plan,gReq,J,jumpReq,shareReq,delay,sustainCore,prob:ok/sims,need,progress:T.total>0?plan.P/T.total:1};
+  return {N,T,plan,gReq,J,jumpReq,baseReq,shareReq,delay,sustainCore,prob:ok/sims,need,progress:T.total>0?plan.P/T.total:1};
 }
 
 /* ---------- desenho ---------- */
@@ -612,7 +626,7 @@ function render(){
   let pill,title,text;
   if(R.progress>=1){ pill='<span class="pill good">✓ No caminho</span>'; title=`Com o seu plano de carreira, você vive ${dname} em ${Yr}.`; text=`O patrimônio projetado (${short(R.plan.P)}) passa da meta de ${short(R.T.total)}, aos ${s.idade+N} anos. Mantenha o hábito de investir ${s.share}% do que sobra e revise uma vez por ano.`; }
   else { pill=`<span class="pill ${R.progress>=0.6?'warn':'bad'}">${R.progress>=0.6?'! Ajuste necessário':'✕ Longe do sonho'}</span>`; title=`Seu plano chega a ${pct(R.progress)} ${dnameDe} em ${Yr}.`;
-    const opts=[]; if(R.gReq!==null) opts.push(`uma renda crescendo ${pct1(R.gReq)} ao ano acima da inflação`); if(R.jumpReq!==null) opts.push(`um salto de ${Math.round(R.jumpReq).toLocaleString('pt-BR')}% na renda em ${Y0+R.J}`);
+    const opts=[]; if(R.baseReq!==null&&unemployed(s)) opts.push(`um primeiro emprego pagando ${brl(R.baseReq)} por mês`); if(R.gReq!==null) opts.push(`uma renda crescendo ${pct1(R.gReq)} ao ano acima da inflação`); if(R.jumpReq!==null&&R.jumpReq>0) opts.push(`um salto para ${brl(R.jumpReq)} por mês em ${Y0+R.J}`);
     text=`A meta é ${short(R.T.total)}. ${opts.length?'Para fechar, você precisa de '+opts.join(' ou ')+'. ':''}Os detalhes estão em "Quanto sua carreira precisa evoluir".`; }
   if(R.plan.minP<0){ text+=` Atenção: no caminho o patrimônio fica negativo (${short(R.plan.minP)}), ou seja, faltaria dinheiro para as contas.`; }
   $('vPill').innerHTML=pill; $('vTitle').textContent=title; $('vText').textContent=text;
@@ -636,10 +650,20 @@ function render(){
   $('coreSum').textContent=brl(coreCost(s));
   $('exTag').hidden=!isExample;
   $('desBox').hidden=!unemployed(s);
-  $('rendaLbl').textContent=unemployed(s)?'Renda hoje (bicos, seguro-desemprego)':(s.situacao==='pj'||s.situacao==='empreendedor')?'Renda líquida por mês (pró-labore + lucros)':'Renda líquida por mês';
+  $('rendaLbl').textContent=unemployed(s)?'Renda hoje (bicos, seguro-desemprego, ajuda; pode ser 0)':(s.situacao==='pj'||s.situacao==='empreendedor')?'Renda líquida por mês (pró-labore + lucros)':'Renda líquida por mês';
   $('filhoBox').hidden=!hasKid(s);
   $('shareHint').textContent= sobra0>0?`Hoje isso dá ${brl(aporte0)} por mês investidos.`:'Hoje não sobra dinheiro no mês. Os gastos maiores que a renda saem do patrimônio.';
   renderDreams();
+  updateStepHints();
+}
+function updateStepHints(){
+  const s=S, g0=s.reajuste/100, sorted=s.steps.map((st,i)=>({st,i})).sort((a,b)=>a.st.anos-b.st.anos);
+  sorted.forEach(({st,i},k)=>{
+    const el=$('st_hint_'+i); if(!el) return;
+    const prev=sorted.slice(0,k).map(o=>o.st), before=incomeAt(s,Math.max(0,Math.round(st.anos*12)-1),g0,prev);
+    el.textContent=`Em ${Y0+Math.floor(st.anos)}: de ${brl(before)} para ${brl(st.valor)} (${before>0?pct1(st.valor/before-1):'primeira renda'})`;
+  });
+  $('fjHint').textContent=unemployed(s)?`O app calcula na caixa "Quanto sua carreira precisa evoluir" quanto esse primeiro salário precisa ser.`:'';
 }
 
 function renderCareer(R){
@@ -650,12 +674,13 @@ function renderCareer(R){
   else if(s.share<=0) lede='Você não investe nada do que sobra, então aumentar a renda não muda o resultado. Defina um percentual em "Do que sobra, investe".';
   else lede=`O seu plano leva a renda a ${brl(planFinal)} por mês em ${Yr} e chega a ${pct(R.progress)} do sonho. Há três caminhos para fechar a conta, mantendo o hábito de investir ${s.share}% do que sobra:`;
   $('carLede').textContent=lede;
-  const jumpTxt=R.jumpReq===null?'mais de 1.000%':R.jumpReq<=0?'nenhum':'+'+Math.round(R.jumpReq).toLocaleString('pt-BR')+'%';
-  const baseJ=incomeAt(s,R.J*12-1,g0,[]);
+  const baseJ=incomeAt(s,R.J*12-1,g0,[]), des=unemployed(s), base0=des?s.rendaVolta:s.renda;
+  const jumpTxt=R.jumpReq===null?'não basta':R.jumpReq<=0?'já basta':brl(R.jumpReq);
   $('carTiles').innerHTML=`
-    <div class="tile main"><span class="k">Só com aumentos anuais</span><span class="v">${R.gReq===null?'não basta':pct1(R.gReq)+'/ano'}</span><p>${R.gReq===null?'Nem 60% ao ano fecha. Combine com outra alavanca.':`acima da inflação, todo ano, sem saltos. Em ${Yr} você estaria ganhando ${brl(incomeAt(s,N*12-1,R.gReq,[]))}.`}</p></div>
-    <div class="tile"><span class="k">Um grande salto em ${Y0+R.J}</span><span class="v">${jumpTxt}</span><p>${R.jumpReq===null?'Um salto só não resolve.':R.jumpReq<=0?'O reajuste anual já basta.':`de ${brl(baseJ)} para ${brl(baseJ*(1+R.jumpReq/100))} por mês, depois só reajuste de ${pct1(g0)}.`}</p></div>
-    <div class="tile"><span class="k">O seu plano</span><span class="v">${pct(R.progress)}</span><p>do sonho, com ${s.steps.length?s.steps.length+(s.steps.length>1?' saltos':' salto')+' e ':''}reajuste de ${pct1(g0)}. Renda final: ${brl(planFinal)}.</p></div>`;
+    <div class="tile main"><span class="k">${des?'O primeiro emprego precisa pagar':'Salário-alvo a partir de hoje'}</span><span class="v">${R.baseReq===null?'não basta':R.baseReq<=0?'qualquer valor':brl(R.baseReq)}</span><p>${R.baseReq===null?'Nenhum salário sozinho fecha a conta. Combine com outra alavanca.':des?`por mês, líquido, ${s.mesesSemRenda?'daqui a '+s.mesesSemRenda+(s.mesesSemRenda>1?' meses':' mês'):'desde já'}, com reajuste de ${pct1(g0)} ao ano depois. Você espera ${brl(s.rendaVolta)}: ${s.rendaVolta>=R.baseReq?'já basta.':'faltam '+brl(R.baseReq-s.rendaVolta)+' por mês, que os saltos de carreira precisam cobrir.'}`:`por mês, líquido, desde já e com reajuste de ${pct1(g0)} ao ano. Hoje você ganha ${brl(s.renda)}${s.renda>=R.baseReq?', então já basta.':'.'}`}</p></div>
+    <div class="tile"><span class="k">Só com aumentos anuais</span><span class="v">${R.gReq===null?'não basta':pct1(R.gReq)+'/ano'}</span><p>${R.gReq===null?'Nem 60% ao ano fecha.':`acima da inflação, todo ano, partindo de ${brl(base0)}. Em ${Yr} você estaria ganhando ${brl(incomeAt(s,N*12-1,R.gReq,[]))}.`}</p></div>
+    <div class="tile"><span class="k">Um grande salto em ${Y0+R.J}</span><span class="v">${jumpTxt}</span><p>${R.jumpReq===null?'Um salto só não resolve.':R.jumpReq<=0?'O reajuste anual já basta.':`de nova renda por mês, saindo de ${brl(baseJ)} (${pct1(R.jumpReq/Math.max(baseJ,1)-1)}). Depois, só reajuste de ${pct1(g0)}.`}</p></div>
+    <div class="tile"><span class="k">O seu plano</span><span class="v">${pct(R.progress)}</span><p>do sonho, com ${des?'o primeiro emprego, ':''}${s.steps.length?s.steps.length+(s.steps.length>1?' saltos':' salto')+' e ':''}reajuste de ${pct1(g0)}. Renda final: ${brl(planFinal)}.</p></div>`;
   // tradução em linguagem de carreira
   let tr='';
   if(R.gReq!==null && R.gReq>g0+0.0005){
@@ -664,13 +689,13 @@ function renderCareer(R){
   } else if(R.gReq!==null){
     tr=`<b>Em linguagem de carreira:</b> só o reajuste anual já sustenta o sonho. Cada promoção vira folga ou antecipa a data.`;
   } else tr=`<b>Em linguagem de carreira:</b> nem uma carreira muito acelerada fecha a conta sozinha. Combine com um sonho mais enxuto, mais prazo ou investir uma parte maior da sobra.`;
-  if(unemployed(s)) tr+=` Como você está sem emprego, o cálculo considera ${s.mesesSemRenda} meses com ${brl(s.renda)} e depois ${brl(s.rendaVolta)} por mês.`;
+  if(unemployed(s)) tr+=` Como você está sem emprego, o ponto de partida é o primeiro emprego: ${s.mesesSemRenda} meses com ${brl(s.renda)} e depois ${brl(s.rendaVolta)} por mês. Os aumentos e saltos contam a partir dele.`;
   $('carTranslate').innerHTML=tr;
   // gráfico de renda (trimestral, para mostrar os saltos)
   const xs=[], vPlan=[], vNeed=[];
   for(let q=0;q<=N*4;q++){ const mth=Math.min(q*3,N*12-1); xs.push(q/4); vPlan.push(incomeAt(s,mth,g0,s.steps)); if(R.gReq!==null) vNeed.push(incomeAt(s,mth,R.gReq,[])); }
   const ev=s.steps.filter(st=>st.anos<N).map(st=>({t:st.anos,label:DEGRAUS[st.tipo]?DEGRAUS[st.tipo].nome:'Salto'}));
-  if(unemployed(s)&&s.mesesSemRenda>0) ev.unshift({t:s.mesesSemRenda/12,label:'Volta a trabalhar'});
+  if(unemployed(s)) ev.unshift({t:s.mesesSemRenda/12,label:'1º emprego'});
   lineChart('incChart','incTip',{xs,series:[{v:vPlan,color:'var(--accent)'},{v:vNeed,color:'var(--amber)',dash:'6 4'}],events:ev.slice(0,6),
     tip:i=>`<div style="font-weight:600;margin-bottom:4px">${Y0+Math.floor(xs[i])} · ${s.idade+Math.floor(xs[i])} anos</div><div class="r"><span>Seu plano</span><b>${brl(vPlan[i])}</b></div>${vNeed.length?`<div class="r"><span>Necessária</span><b>${brl(vNeed[i])}</b></div>`:''}`});
   // marcos
@@ -736,7 +761,7 @@ function renderPlan(R,sobra0,aporte0,fol){
   if(unemployed(s)){
     const burn=s.gastos+s.viagensHoje/12-s.renda;
     items.push([fol<s.mesesSemRenda?'bad':'warn','Agora','Atravessar o período sem renda',`Você gasta ${brl(Math.max(burn,0))} a mais do que ganha por mês. ${fol===Infinity?'Sua renda atual cobre os gastos.':`A reserva dura ${fol.toLocaleString('pt-BR',{maximumFractionDigits:1})} meses ${fol<s.mesesSemRenda?`e acaba antes dos ${s.mesesSemRenda} meses previstos: corte gastos já, adie as viagens e veja seguro-desemprego e saque do FGTS se tiver direito.`:`e cobre os ${s.mesesSemRenda} meses previstos. Mesmo assim, corte o que der para preservá-la.`}`} Suspenda os aportes até voltar a ter renda.`]);
-    items.push(['warn','Este mês','Buscar a próxima vaga mirando a renda necessária',`Para o sonho, a vaga ideal paga a partir de <span class="num">${brl(R.gReq===null?s.rendaVolta:Math.max(s.rendaVolta,incomeAt(s,s.mesesSemRenda,R.gReq,[])))}</span>/mês. Atualize currículo e LinkedIn, avise sua rede e considere trabalhos temporários ou como PJ enquanto busca.`]);
+    items.push(['warn','Este mês','Buscar a próxima vaga mirando a renda necessária',`Para o sonho só com reajustes depois, o primeiro emprego deveria pagar <span class="num">${R.baseReq===null?'mais do que é possível':brl(R.baseReq)}</span>/mês líquidos. ${R.baseReq!==null&&s.rendaVolta<R.baseReq?`Se começar com ${brl(s.rendaVolta)}, planeje saltos para cobrir a diferença. `:''} Atualize currículo e LinkedIn, avise sua rede e considere trabalhos temporários ou como PJ enquanto busca.`]);
   }
   if(s.dividas>0) items.push(['bad','Urgente','Quitar as dívidas caras',`São ${brl(s.dividas)} a juros que nenhum investimento cobre. Renegocie e quite antes de investir.`]);
   const rg=reserveGoal(s), resT=rg*(s.gastos+s.viagensHoje/12);
@@ -769,7 +794,7 @@ function renderTable(R){
   let h='<thead><tr><th>Ano</th><th class="ev">Eventos</th><th>Idade</th><th>Renda/mês</th><th>Gastos/mês</th><th>Investe/mês</th><th>Patrimônio</th></tr></thead><tbody>';
   R.plan.years.forEach(r=>{
     const ev=[]; s.steps.forEach(st=>{ if(Math.floor(st.anos)===r.i) ev.push(DEGRAUS[st.tipo]?DEGRAUS[st.tipo].nome:'Salto'); });
-    if(unemployed(s)&&r.i===Math.floor(s.mesesSemRenda/12)) ev.push('volta a trabalhar');
+    if(unemployed(s)&&r.i===Math.floor(s.mesesSemRenda/12)) ev.push('primeiro emprego');
     if(hasKid(s)&&r.y===s.anoFilho) ev.push('filho(a) nasce');
     h+=`<tr><td>${r.y}</td><td class="ev">${ev.join(', ')}</td><td>${s.idade+r.i}</td><td>${brl(r.inc)}</td><td>${brl(r.exp)}</td><td>${brl(r.c)}</td><td>${short(r.P)}</td></tr>`;
   });
@@ -780,10 +805,10 @@ function renderTable(R){
 /* ---------- explicações dos campos ---------- */
 const INFO={
   idade:'Sua idade hoje. Serve para mostrar com que idade você chega ao sonho.',
-  situacao:'Como você trabalha hoje. Se estiver sem emprego, o app pergunta quanto tempo deve levar para voltar e quanto espera ganhar.',
+  situacao:'Como você trabalha hoje. Sem emprego, o primeiro degrau da carreira vira o primeiro emprego: em quantos meses e com que salário.',
   renda:'Quanto cai na sua conta por mês, já sem impostos. Some 13º, férias e PLR no ano e divida por 12. Se é PJ, use pró-labore mais os lucros que você retira.',
-  mesesSemRenda:'Quantos meses você acha que leva para voltar a ter renda.',
-  rendaVolta:'Quanto espera ganhar por mês, líquido, quando voltar a trabalhar.',
+  mesesSemRenda:'Em quantos meses você acha que consegue o primeiro emprego.',
+  rendaVolta:'Quanto você espera ganhar por mês, líquido, no primeiro emprego. O app mostra se esse valor basta e quanto o primeiro emprego precisaria pagar.',
   gastos:'Tudo o que você gasta por mês hoje: moradia, contas, mercado, transporte e lazer. Viagens têm campo próprio.',
   viagensHoje:'Quanto você gasta com viagens num ano normal hoje.',
   patrimonio:'Tudo o que você já tem investido, incluindo a reserva: Tesouro, CDB, ações, fundos e previdência. Não conte o imóvel onde mora nem o carro.',
@@ -792,7 +817,7 @@ const INFO={
   share:'Da sobra do mês (renda menos gastos e viagens), quanto vai para investimentos. Esse hábito vale também para os aumentos futuros.',
   reajuste:'Quanto sua renda sobe por ano além da inflação, sem contar promoções. 0 só repõe a inflação. Entre 0,5 e 1 é o comum.',
   creep:'Quando a renda sobe, parte costuma virar gasto: carro melhor, mais lazer. Com 30%, de cada R$ 1.000 de aumento, R$ 300 viram gasto.',
-  saltoAno:'Daqui a quantos anos você imagina dar um grande salto, como uma promoção grande ou uma troca de empresa. O app calcula de quanto ele precisa ser.',
+  saltoAno:'Daqui a quantos anos você imagina dar um grande salto, como uma promoção grande ou uma troca de empresa. O app calcula qual nova renda esse salto precisa trazer.',
   perfil:'O quanto você aceita ver o dinheiro oscilar. Conservador evita sustos, arrojado aceita mais altos e baixos para crescer mais.',
   retorno:'Quanto os investimentos rendem por ano acima da inflação, já sem imposto. De 4 a 5% é um valor prudente.',
   swr:'Quanto do patrimônio dá para tirar por ano sem que ele acabe. Quanto menor, mais seguro, e maior fica a meta. De 4 a 4,5% é o usual.',
@@ -855,13 +880,13 @@ $('f').addEventListener('input',e=>{
 $('f').addEventListener('change',e=>{
   const t=e.target;
   if(t.name==='estilo'){ readForm(); S.estilo=t.value; applyDream(S); fillForm(); update(); return; }
-  if(t.id&&t.id.startsWith('st_tipo_')){ const i=+t.id.split('_')[2]; readForm(); S.steps[i].pct=DEGRAUS[t.value].pct; renderSteps(); update(); return; }
+  if(t.id&&t.id.startsWith('st_tipo_')){ const i=+t.id.split('_')[2]; readForm(); const st=S.steps[i], prev=S.steps.filter((o,j)=>j!==i&&o.anos<=st.anos); const before=incomeAt(S,Math.max(0,Math.round(st.anos*12)-1),S.reajuste/100,prev); if(DEGRAUS[t.value].pct) st.valor=Math.round(before*(1+DEGRAUS[t.value].pct/100)/100)*100; renderSteps(); update(); return; }
   if(t.name==='extra'||t.tagName==='SELECT'){ readForm(); fillFormSoft(); update(); }
 });
 function fillFormSoft(){ COST_KEYS.forEach(id=>{ $(id).value=S[id]; }); $('moradia').value=S.moradia; }
 $('f').addEventListener('submit',e=>e.preventDefault());
 $('f').addEventListener('click',e=>{ const b=e.target.closest('[data-rmstep]'); if(b){ readForm(); S.steps.splice(+b.dataset.rmstep,1); renderSteps(); update(); } });
-$('addStep').addEventListener('click',()=>{ readForm(); const last=S.steps.length?S.steps[S.steps.length-1].anos:0; S.steps.push({anos:last+3,tipo:'promocao',pct:20}); renderSteps(); update(); });
+$('addStep').addEventListener('click',()=>{ readForm(); const last=S.steps.length?Math.max(...S.steps.map(o=>o.anos)):(unemployed(S)?Math.ceil(S.mesesSemRenda/12):0); const anos=last+3, before=incomeAt(S,anos*12-1,S.reajuste/100,S.steps); S.steps.push({anos,tipo:'promocao',valor:Math.round(before*1.2/100)*100}); renderSteps(); update(); });
 $('reset').addEventListener('click',()=>{ S=fresh(); isExample=true; try{ localStorage.removeItem(KEY); }catch(e){} fillForm(); render(); });
 let rt; window.addEventListener('resize',()=>{ clearTimeout(rt); rt=setTimeout(render,150); });
 
