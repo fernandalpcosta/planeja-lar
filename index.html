@@ -221,7 +221,7 @@ td.ok{color:var(--good)} td.no{color:var(--bad)}
   <form id="f" class="layout" autocomplete="off">
     <section class="card full" aria-labelledby="dreamH">
       <h2 id="dreamH">Qual é o seu sonho?</h2>
-      <p class="lede">Escolha o estilo de vida que você quer bancar só com a renda dos investimentos. Os valores são para uma pessoa, em reais de hoje, e dá para ajustar tudo em "Ajustar os custos".</p>
+      <p class="lede">Escolha o estilo de vida que você quer bancar só com a renda dos investimentos. Os valores são para uma pessoa, em dinheiro de hoje, e dá para ajustar tudo em "Ajustar os custos".</p>
       <div class="dreams" id="dreams" role="radiogroup" aria-label="Estilo de vida"></div>
       <p class="subh">Quer somar algo ao sonho?</p>
       <div class="chips" id="extras"></div>
@@ -263,6 +263,14 @@ td.ok{color:var(--good)} td.no{color:var(--bad)}
             </select>
           </label>
         </div>
+        <div class="row">
+          <label>Moeda do plano
+            <select id="moeda"><option value="BRL">Real (R$)</option><option value="EUR">Euro (€)</option><option value="USD">Dólar (US$)</option></select>
+          </label>
+          <label>Recebo em
+            <select id="moedaRenda"><option value="BRL">Real (R$)</option><option value="EUR">Euro (€)</option><option value="USD">Dólar (US$)</option></select>
+          </label>
+        </div>
         <label><span id="rendaLbl">Renda líquida por mês</span><input id="renda" type="number" step="100" min="0"></label>
         <div class="row">
           <label>Gastos por mês hoje<input id="gastos" type="number" step="100" min="0"></label>
@@ -285,7 +293,7 @@ td.ok{color:var(--good)} td.no{color:var(--bad)}
           <p class="fj-h">1º degrau: o primeiro emprego</p>
           <div class="row">
             <label>Consigo em (meses)<input id="mesesSemRenda" type="number" min="0" max="60"></label>
-            <label>Salário líquido esperado<input id="rendaVolta" type="number" step="100" min="0"></label>
+            <label><span id="voltaLbl">Salário líquido esperado</span><input id="rendaVolta" type="number" step="100" min="0"></label>
           </div>
           <p class="hint" id="fjHint"></p>
         </div>
@@ -294,7 +302,7 @@ td.ok{color:var(--good)} td.no{color:var(--bad)}
           <label>Do aumento, vira gasto (%)<input id="creep" type="number" step="5" min="0" max="100"></label>
         </div>
         <p class="subh" style="margin:6px 0 0">Saltos que você planeja</p>
-        <p class="hint">Promoções, troca de empresa, gestão, mudança de área. Diga daqui a quantos anos e qual será a sua nova renda líquida por mês, em reais de hoje. O app mostra quanto isso representa de aumento.</p>
+        <p class="hint">Promoções, troca de empresa, gestão, mudança de área. Diga daqui a quantos anos e qual será a sua nova renda líquida por mês, em dinheiro de hoje. O app mostra quanto isso representa de aumento.</p>
         <div class="steps" id="steps"></div>
         <button type="button" id="addStep">+ Adicionar salto de carreira</button>
         <label>Simular um grande salto daqui a (anos)<input id="saltoAno" type="number" min="1" max="30"></label>
@@ -316,7 +324,11 @@ td.ok{color:var(--good)} td.no{color:var(--bad)}
           <label>INSS esperado por mês<input id="inss" type="number" step="100" min="0"></label>
           <label>A partir da idade<input id="inssIdade" type="number" min="55" max="75"></label>
         </div>
-        <p class="hint">Tudo é calculado em reais de hoje, já descontada a inflação.</p>
+        <div class="row">
+          <label>1 euro em reais<input id="fxEUR" type="number" step="0.05" min="0.1"></label>
+          <label>1 dólar em reais<input id="fxUSD" type="number" step="0.05" min="0.1"></label>
+        </div>
+        <p class="hint">Atualize o câmbio com a cotação do dia. Tudo é calculado em dinheiro de hoje, já descontada a inflação.</p>
       </fieldset>
     </aside>
 
@@ -362,7 +374,7 @@ td.ok{color:var(--good)} td.no{color:var(--bad)}
 
       <section class="card">
         <h2>Caminho do patrimônio</h2>
-        <p class="lede">Em reais de hoje. A linha cheia segue o seu plano de carreira. A tracejada segue a renda necessária.</p>
+        <p class="lede">Em dinheiro de hoje. A linha cheia segue o seu plano de carreira. A tracejada segue a renda necessária.</p>
         <div class="legend" style="margin-top:0">
           <span><i style="border-color:var(--accent)"></i>Seu plano</span>
           <span><i style="border-color:var(--amber);border-top-style:dashed"></i>Com a renda necessária</span>
@@ -402,7 +414,7 @@ td.ok{color:var(--good)} td.no{color:var(--bad)}
           <li><b>Privacidade.</b> Os dados digitados ficam só no seu navegador e não são enviados a nenhum servidor. Links de compartilhamento levam os dados criptografados com a senha que você escolher.</li>
         </ul>
       </section>
-      <p class="foot">Valores em reais de 2026, corrigidos pela inflação. A meta é o custo do sonho por ano dividido pela retirada segura, mais a casa (se for comprar) e o custo restante do filho, menos o valor do INSS.</p>
+      <p class="foot">Valores em dinheiro de 2026, corrigidos pela inflação. Valores em euro ou dólar usam o câmbio informado nas premissas. A meta é o custo do sonho por ano dividido pela retirada segura, mais a casa (se for comprar) e o custo restante do filho, menos o valor do INSS.</p>
     </main>
   </form>
 </div>
@@ -451,7 +463,7 @@ const EXEMPLO = {
   patrimonio:60000, liquidez:20000, dividas:0, share:80,
   reajuste:0.5, creep:30, saltoAno:3,
   steps:[{anos:2,tipo:'promocao',valor:12000},{anos:5,tipo:'troca',valor:15000},{anos:9,tipo:'gestao',valor:21000}],
-  perfil:'moderado', retorno:5, swr:4.5, vol:10, inss:0, inssIdade:65,
+  moeda:'BRL', moedaRenda:'BRL', fxEUR:6.2, fxUSD:5.4, perfil:'moderado', retorno:5, swr:4.5, vol:10, inss:0, inssIdade:65,
   estilo:'litoral', extras:['pet'], anos:20, moradia:'comprar', anoFilho:2031
 };
 function applyDream(s){
@@ -471,10 +483,17 @@ S = S ? Object.assign(fresh(), S) : fresh();
 if(S.steps.some(st=>st.valor===undefined)){ let v=S.situacao==='desempregado'?S.rendaVolta:S.renda; S.steps=S.steps.slice().sort((a,b)=>a.anos-b.anos).map(st=>{ v=Math.round(v*(1+(st.pct||0)/100)/100)*100; return {anos:st.anos,tipo:st.tipo,valor:v}; }); }
 
 const $=id=>document.getElementById(id);
-const NUM_IDS=['idade','renda','mesesSemRenda','rendaVolta','gastos','viagensHoje','patrimonio','liquidez','dividas','share','reajuste','creep','saltoAno','retorno','swr','vol','inss','inssIdade','anos','anoFilho'].concat(COST_KEYS);
-const SEL_IDS=['situacao','perfil','moradia'];
-const brl=v=>'R$ '+Math.round(v).toLocaleString('pt-BR');
-function short(v){ const a=Math.abs(v), s=v<0?'−':''; if(a>=1e6) return s+'R$ '+(a/1e6).toLocaleString('pt-BR',{maximumFractionDigits:2,minimumFractionDigits:1})+' mi'; if(a>=1e3) return s+'R$ '+Math.round(a/1e3).toLocaleString('pt-BR')+' mil'; return s+'R$ '+Math.round(a); }
+const NUM_IDS=['fxEUR','fxUSD','idade','renda','mesesSemRenda','rendaVolta','gastos','viagensHoje','patrimonio','liquidez','dividas','share','reajuste','creep','saltoAno','retorno','swr','vol','inss','inssIdade','anos','anoFilho'].concat(COST_KEYS);
+const SEL_IDS=['situacao','perfil','moradia','moeda','moedaRenda'];
+// os valores ficam guardados em reais; a tela mostra e lê na moeda escolhida
+const INC_IDS=['renda','rendaVolta'], PLAN_IDS=['gastos','viagensHoje','patrimonio','liquidez','dividas','inss'].concat(COST_KEYS);
+const CUR={BRL:'R$',EUR:'€',USD:'US$'};
+const fx=c=>c==='EUR'?(S.fxEUR>0?S.fxEUR:1):c==='USD'?(S.fxUSD>0?S.fxUSD:1):1;
+const sym=()=>CUR[S.moeda]||'R$';
+const toView=(id,v)=>INC_IDS.includes(id)?Math.round(v/fx(S.moedaRenda)):PLAN_IDS.includes(id)?Math.round(v/fx(S.moeda)):v;
+const fromView=(id,v)=>INC_IDS.includes(id)?v*fx(S.moedaRenda):PLAN_IDS.includes(id)?v*fx(S.moeda):v;
+const brl=v=>sym()+' '+Math.round(v/fx(S.moeda)).toLocaleString('pt-BR');
+function short(v){ const a=Math.abs(v)/fx(S.moeda), s=(v<0?'−':'')+sym()+' '; if(a>=1e6) return s+(a/1e6).toLocaleString('pt-BR',{maximumFractionDigits:2,minimumFractionDigits:1})+' mi'; if(a>=1e3) return s+Math.round(a/1e3).toLocaleString('pt-BR')+' mil'; return s+Math.round(a); }
 const pct=v=>(v*100).toLocaleString('pt-BR',{maximumFractionDigits:0})+'%';
 const pct1=v=>(v>=0?'+':'−')+Math.abs(v*100).toLocaleString('pt-BR',{maximumFractionDigits:1,minimumFractionDigits:1})+'%';
 const anosTxt=n=>n===1?'1 ano':n.toLocaleString('pt-BR',{maximumFractionDigits:1})+' anos';
@@ -495,22 +514,22 @@ function renderSteps(){
   $('steps').innerHTML=S.steps.map((st,i)=>`<div class="step">
     <label>Em (anos)<input id="st_anos_${i}" type="number" min="0" max="40" step="1" value="${st.anos}"></label>
     <label>Tipo<select id="st_tipo_${i}">${Object.entries(DEGRAUS).map(([k,d])=>`<option value="${k}"${st.tipo===k?' selected':''}>${d.nome}</option>`).join('')}</select></label>
-    <label>Nova renda<input id="st_val_${i}" type="number" step="100" min="0" value="${st.valor}"></label>
+    <label>Nova renda${S.moedaRenda!==S.moeda?' ('+CUR[S.moedaRenda]+')':''}<input id="st_val_${i}" type="number" step="100" min="0" value="${Math.round(st.valor/fx(S.moedaRenda))}"></label>
     <button type="button" class="link" data-rmstep="${i}" aria-label="Remover salto">✕</button><span class="st-hint" id="st_hint_${i}"></span></div>`).join('') || '<p class="hint">Nenhum salto planejado. O app usa só o reajuste anual.</p>';
   $('addStep').hidden=S.steps.length>=6;
   addInfo($('steps'));
 }
 function fillForm(){
-  NUM_IDS.forEach(id=>{ $(id).value=S[id]; });
+  NUM_IDS.forEach(id=>{ $(id).value=toView(id,S[id]); });
   SEL_IDS.forEach(id=>{ $(id).value=S[id]; });
   renderDreams(); renderExtras(); renderSteps();
 }
 function readForm(){
-  NUM_IDS.forEach(id=>{ const v=parseFloat($(id).value); S[id]=isFinite(v)?v:0; });
+  NUM_IDS.forEach(id=>{ const v=parseFloat($(id).value), n=isFinite(v)?v:0; if(n!==toView(id,S[id])) S[id]=fromView(id,n); }); // sem mudança na tela, mantém o valor exato
   SEL_IDS.forEach(id=>{ S[id]=$(id).value; });
   const est=document.querySelector('input[name=estilo]:checked'); if(est) S.estilo=est.value;
   S.extras=[...document.querySelectorAll('input[name=extra]:checked')].map(i=>i.value);
-  S.steps=S.steps.map((st,i)=>({anos:parseFloat($('st_anos_'+i).value)||0, tipo:$('st_tipo_'+i).value, valor:parseFloat($('st_val_'+i).value)||0}));
+  S.steps=S.steps.map((st,i)=>({anos:parseFloat($('st_anos_'+i).value)||0, tipo:$('st_tipo_'+i).value, valor:(()=>{ const n=parseFloat($('st_val_'+i).value)||0; return n===Math.round(st.valor/fx(S.moedaRenda))?st.valor:n*fx(S.moedaRenda); })()}));
 }
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
 
@@ -590,7 +609,7 @@ function lineChart(svgId,tipId,cfg){
   const bot=minV<0?-Math.ceil(-minV/step)*step:0;
   const x=t=>m.l+(W-m.l-m.r)*t/span, y=v=>m.t+(H-m.t-m.b)*(1-(v-bot)/(top-bot));
   let g='';
-  for(let v=bot;v<=top+1;v+=step) g+=`<line x1="${m.l}" x2="${W-m.r}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${m.l-8}" y="${y(v)+4}" text-anchor="end" font-size="11" fill="var(--ink-3)">${short(v).replace('R$ ','')}</text>`;
+  for(let v=bot;v<=top+1;v+=step) g+=`<line x1="${m.l}" x2="${W-m.r}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${m.l-8}" y="${y(v)+4}" text-anchor="end" font-size="11" fill="var(--ink-3)">${short(v).replace(sym()+' ','')}</text>`;
   const xt=span<=12?1:span<=25?5:10;
   for(let t=0;t<=span;t+=xt) g+=`<text x="${x(t)}" y="${H-m.b+16}" text-anchor="middle" font-size="11" fill="var(--ink-3)">${Y0+t}</text>`;
   ev.forEach((e,j)=>{ g+=`<line x1="${x(e.t)}" x2="${x(e.t)}" y1="${m.t}" y2="${H-m.b}" stroke="var(--ink-3)" stroke-dasharray="2 3" opacity=".6"/><text x="${Math.min(Math.max(x(e.t),m.l+40),W-m.r-40)}" y="${H-m.b+32+(j%2)*12}" text-anchor="middle" font-size="10.5" fill="var(--ink-2)">${e.label}</text>`; });
@@ -650,7 +669,9 @@ function render(){
   $('coreSum').textContent=brl(coreCost(s));
   $('exTag').hidden=!isExample;
   $('desBox').hidden=!unemployed(s);
-  $('rendaLbl').textContent=unemployed(s)?'Renda hoje (bicos, seguro-desemprego, ajuda; pode ser 0)':(s.situacao==='pj'||s.situacao==='empreendedor')?'Renda líquida por mês (pró-labore + lucros)':'Renda líquida por mês';
+  const incSuf=s.moedaRenda!==s.moeda?' em '+CUR[s.moedaRenda]:'';
+  $('voltaLbl').textContent='Salário líquido esperado'+incSuf;
+  $('rendaLbl').textContent=(unemployed(s)?'Renda hoje (bicos, seguro-desemprego, ajuda; pode ser 0)':(s.situacao==='pj'||s.situacao==='empreendedor')?'Renda líquida por mês (pró-labore + lucros)':'Renda líquida por mês')+incSuf;
   $('filhoBox').hidden=!hasKid(s);
   $('shareHint').textContent= sobra0>0?`Hoje isso dá ${brl(aporte0)} por mês investidos.`:'Hoje não sobra dinheiro no mês. Os gastos maiores que a renda saem do patrimônio.';
   renderDreams();
@@ -740,9 +761,10 @@ function renderMoney(R,sobra0,aporte0){
     : (A>0?`Dos ${brl(A)} que você investe por mês, a ordem é: dívidas, reserva, objetivos com data e, por fim, a independência.`:'Hoje não sobra dinheiro para investir. O primeiro passo é abrir espaço no orçamento ou aumentar a renda.');
   $('moneyBar').innerHTML=tot>0?buckets.filter(b=>b.v>0).map(b=>`<span style="width:${b.v/tot*100}%;background:${b.c}" title="${b.t}"></span>`).join(''):'';
   $('buckets').innerHTML=buckets.map(b=>`<div class="bucket"><span class="sw" style="background:${b.c}"></span><div><h3>${b.t}</h3><p>${b.p}</p></div><div class="amt">${b.note?`<span style="font-size:13px">${b.note}</span>`:brl(b.v)+'<small>por mês</small>'}<small>${b.h}</small></div></div>`).join('');
-  const hz=N>=15?'long':N>=8?'mid':'short', mix=ALLOC[hz][s.perfil];
+  const hz=N>=15?'long':N>=8?'mid':'short'; let mix=ALLOC[hz][s.perfil].slice();
+  if(s.moeda!=='BRL'){ const add=Math.min(25,mix[0]+mix[1]-20), a0=Math.round(add*mix[0]/(mix[0]+mix[1])); mix=[mix[0]-a0,mix[1]-(add-a0),mix[2],mix[3]+add]; }
   $('perfilNome').textContent=s.perfil;
-  $('allocLede').textContent=`Para um prazo de ${N} anos. Nos últimos 5 anos antes do sonho, migre aos poucos para Tesouro IPCA+ e trave uma taxa real que pague a renda.`;
+  $('allocLede').textContent=`Para um prazo de ${N} anos. Nos últimos 5 anos antes do sonho, migre aos poucos para Tesouro IPCA+ e trave uma taxa real que pague a renda.`+(s.moeda!=='BRL'?` Como o seu sonho é em ${s.moeda==='EUR'?'euro':'dólar'}, a parte no exterior é maior: o que você vai gastar lá precisa crescer na mesma moeda.`:'');
   $('alloc').innerHTML=mix.map((p,i)=>`<div style="border-top:3px solid ${CLASSES[i][0]}"><span class="p">${p}%</span><span class="t">${CLASSES[i][1]}</span><small>${CLASSES[i][2]}</small>${A>0&&p>0?`<small class="num" style="color:var(--ink-2)">≈ ${brl((buckets.find(b=>b.t==='Independência financeira')||{v:0}).v*p/100)}/mês</small>`:''}</div>`).join('');
 }
 
@@ -775,6 +797,12 @@ function renderPlan(R,sobra0,aporte0,fol){
   if(s.viagensHoje>0) items.push(['info','Todo mês','Manter uma caixa de viagens',`Separe ${brl(s.viagensHoje/12)} por mês numa conta só para viagens. Assim a viagem não sai do aporte nem vira dívida no cartão.`]);
   if(hasKid(s)&&s.anoFilho>=Y0) items.push(['info','Antes de '+s.anoFilho,'Preparar a chegada do filho(a)','Contrate plano de saúde com obstetrícia pelo menos 300 dias antes do parto, faça um seguro de vida e abra a caixa da educação.']);
   if(s.moradia==='aluguel') items.push(['info','Decidir em 2 anos','Pensar na casa',`Pagar aluguel no sonho soma ${short(s.c_aluguel*12/(s.swr/100))} à meta. Compare com comprar uma casa de ${short(s.c_imovel)} antes de ${Y0+N}.`]);
+  if(s.moeda!=='BRL'||s.moedaRenda!=='BRL'){
+    const ganha=s.moedaRenda!=='BRL', gasta=s.moeda!=='BRL', nomeR=s.moedaRenda==='EUR'?'euro':'dólar', nomeP=s.moeda==='EUR'?'euro':'dólar';
+    items.push(['warn','Contínuo','Proteger-se do câmbio', ganha&&!gasta?`Você recebe em ${nomeR} e gasta em reais. Se o real se valorizar, sua renda em reais cai. Mantenha parte dos investimentos em ${nomeR}, declare a renda do exterior no Imposto de Renda (Carnê-Leão) e compare taxas de envio entre bancos e fintechs.`
+      : gasta&&!ganha?`Você ganha em reais e o sonho é em ${nomeP}. Se o real cair, o sonho fica mais caro. Invista uma parte maior no exterior, em ${nomeP}, e acompanhe o câmbio usado nas premissas (no plano, ${CUR[s.moeda]} 1 = R$ ${fx(s.moeda).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}).`
+      : `Renda e sonho em moeda estrangeira. Mantenha a maior parte dos investimentos na moeda do sonho e confira as regras de imposto do país onde você mora.`]);
+  }
   items.push(['info','Todo ano','Revisar o plano','Atualize renda, gastos e patrimônio aqui. Se estiver à frente, dá para antecipar a data. Se estiver atrás, ajuste cedo.']);
   $('plan').innerHTML=items.map(it=>`<li><div><span class="pill ${it[0]}">${it[1]}</span></div><div><h3>${it[2]}</h3><p>${it[3]}</p></div></li>`).join('');
 }
@@ -804,6 +832,10 @@ function renderTable(R){
 
 /* ---------- explicações dos campos ---------- */
 const INFO={
+  moeda:'Moeda em que todos os valores aparecem: gastos, patrimônio, sonho e resultados. Útil se você mora ou quer morar fora.',
+  moedaRenda:'Moeda em que você recebe o salário. Escolha dólar ou euro se trabalha para fora. Os campos de renda e os saltos de carreira passam a ser preenchidos nessa moeda.',
+  fxEUR:'Quantos reais vale 1 euro. Atualize com a cotação do dia.',
+  fxUSD:'Quantos reais vale 1 dólar. Atualize com a cotação do dia.',
   idade:'Sua idade hoje. Serve para mostrar com que idade você chega ao sonho.',
   situacao:'Como você trabalha hoje. Sem emprego, o primeiro degrau da carreira vira o primeiro emprego: em quantos meses e com que salário.',
   renda:'Quanto cai na sua conta por mês, já sem impostos. Some 13º, férias e PLR no ano e divida por 12. Se é PJ, use pró-labore mais os lucros que você retira.',
@@ -881,9 +913,10 @@ $('f').addEventListener('change',e=>{
   const t=e.target;
   if(t.name==='estilo'){ readForm(); S.estilo=t.value; applyDream(S); fillForm(); update(); return; }
   if(t.id&&t.id.startsWith('st_tipo_')){ const i=+t.id.split('_')[2]; readForm(); const st=S.steps[i], prev=S.steps.filter((o,j)=>j!==i&&o.anos<=st.anos); const before=incomeAt(S,Math.max(0,Math.round(st.anos*12)-1),S.reajuste/100,prev); if(DEGRAUS[t.value].pct) st.valor=Math.round(before*(1+DEGRAUS[t.value].pct/100)/100)*100; renderSteps(); update(); return; }
+  if(t.id==='moeda'||t.id==='moedaRenda'){ S[t.id]=t.value; fillForm(); update(); return; } // S já está em reais; só muda a exibição
   if(t.name==='extra'||t.tagName==='SELECT'){ readForm(); fillFormSoft(); update(); }
 });
-function fillFormSoft(){ COST_KEYS.forEach(id=>{ $(id).value=S[id]; }); $('moradia').value=S.moradia; }
+function fillFormSoft(){ COST_KEYS.forEach(id=>{ $(id).value=toView(id,S[id]); }); $('moradia').value=S.moradia; }
 $('f').addEventListener('submit',e=>e.preventDefault());
 $('f').addEventListener('click',e=>{ const b=e.target.closest('[data-rmstep]'); if(b){ readForm(); S.steps.splice(+b.dataset.rmstep,1); renderSteps(); update(); } });
 $('addStep').addEventListener('click',()=>{ readForm(); const last=S.steps.length?Math.max(...S.steps.map(o=>o.anos)):(unemployed(S)?Math.ceil(S.mesesSemRenda/12):0); const anos=last+3, before=incomeAt(S,anos*12-1,S.reajuste/100,S.steps); S.steps.push({anos,tipo:'promocao',valor:Math.round(before*1.2/100)*100}); renderSteps(); update(); });
