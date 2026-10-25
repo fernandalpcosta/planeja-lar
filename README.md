@@ -1,5 +1,7 @@
 # Planeja Lar
 
+📣 **[Veja as novidades](NOVIDADES.md)**
+
 Simulador de planejamento financeiro pessoal. Você escolhe o estilo de vida dos sonhos, conta onde está hoje e o app responde:
 
 - **Quanto minha carreira precisa evoluir** para chegar lá no prazo, considerando reajustes, promoções e grandes saltos, inclusive para quem está sem emprego.
