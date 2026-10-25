@@ -7,161 +7,178 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Young+Serif&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: painel de entradas à esquerda (fixo ao rolar), resultado à direita: veredito → números → gráfico → plano → carteira → alavancas → tabela */
+/* Layout: sonho em cartões no topo; à esquerda "você hoje / carreira / premissas"; à direita o veredito, a carreira necessária, onde investir, o plano e os detalhes */
 :root{
   --bg:#f3f6f5; --surface:#fcfcfb; --sunk:#e8eeec; --ink:#14272b; --ink-2:#4a5d61; --ink-3:#7a8b8e; --line:#d5dfdd;
   --accent:#008a7c; --accent-ink:#00695f; --accent-soft:#d9efeb;
-  --amber:#b4651e; --amber-soft:#f6e6d6;
+  --amber:#b4651e; --amber-soft:#f6e6d6; --slate:#5a6f86;
   --good:#1f7a3f; --good-soft:#dcf0e2; --warn:#a15c00; --warn-soft:#fbecd3; --bad:#b3261e; --bad-soft:#f9dedb;
   --f-display:"Young Serif", Georgia, "Times New Roman", serif;
   --f-body:"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --f-mono:"IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+  color-scheme:light;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#0b1416; --surface:#0f1a1d; --sunk:#16252a; --ink:#e4eeec; --ink-2:#a9bbbc; --ink-3:#768a8c; --line:#24363b;
-  --accent:#2aa598; --accent-ink:#5cc4b8; --accent-soft:#123a37; --amber:#cf7f35; --amber-soft:#3a2716;
+  --accent:#2aa598; --accent-ink:#5cc4b8; --accent-soft:#123a37; --amber:#cf7f35; --amber-soft:#3a2716; --slate:#8fa3bb;
   --good:#5cc27f; --good-soft:#163222; --warn:#e3a34a; --warn-soft:#3a2a12; --bad:#ef7b72; --bad-soft:#3d1a18; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#0b1416; --surface:#0f1a1d; --sunk:#16252a; --ink:#e4eeec; --ink-2:#a9bbbc; --ink-3:#768a8c; --line:#24363b;
-  --accent:#2aa598; --accent-ink:#5cc4b8; --accent-soft:#123a37; --amber:#cf7f35; --amber-soft:#3a2716;
+  --accent:#2aa598; --accent-ink:#5cc4b8; --accent-soft:#123a37; --amber:#cf7f35; --amber-soft:#3a2716; --slate:#8fa3bb;
   --good:#5cc27f; --good-soft:#163222; --warn:#e3a34a; --warn-soft:#3a2a12; --bad:#ef7b72; --bad-soft:#3d1a18; color-scheme:dark}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
 .wrap{max-width:1280px;margin:0 auto;padding-block:24px 64px;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
-header.top{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:12px;margin-bottom:20px}
+header.top{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:12px;margin-bottom:16px}
 h1{font-family:var(--f-display);font-weight:400;font-size:clamp(28px,4vw,40px);line-height:1.1;margin:0;text-wrap:balance}
-.sub{color:var(--ink-2);margin:6px 0 0;max-width:60ch}
-.grid{display:grid;grid-template-columns:minmax(300px,380px) minmax(0,1fr);gap:24px;align-items:start}
-@media (max-width:900px){.grid{grid-template-columns:minmax(0,1fr)}}
-aside.inputs{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px);max-height:calc(100vh - 24px);overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:4px 0}
-@media (max-width:900px){aside.inputs{position:static;max-height:none}}
-fieldset{border:0;border-bottom:1px solid var(--line);margin:0;padding:16px 18px;display:grid;gap:10px}
+.sub{color:var(--ink-2);margin:6px 0 0;max-width:62ch}
+.actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.notice{display:flex;gap:10px;align-items:flex-start;background:var(--warn-soft);color:var(--ink);border-radius:8px;padding:10px 14px;font-size:13px;margin:0 0 16px}
+.notice b{color:var(--warn)} .notice a{color:var(--accent-ink)}
+.layout{display:grid;grid-template-columns:minmax(300px,370px) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:920px){.layout{grid-template-columns:minmax(0,1fr)}}
+.full{grid-column:1/-1;min-width:0}
+aside.inputs{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px);max-height:calc(100vh - 24px);overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+@media (max-width:920px){aside.inputs{position:static;max-height:none}}
+fieldset{border:0;border-bottom:1px solid var(--line);margin:0;padding:16px 18px;display:grid;gap:10px;min-width:0}
 fieldset:last-of-type{border-bottom:0}
 legend{float:left;width:100%;padding:0;margin-bottom:4px;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--accent-ink)}
-legend span{color:var(--ink-3);font-weight:500;margin-right:6px}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-label{display:grid;gap:3px;font-size:13px;color:var(--ink-2);min-width:0}
+label{display:grid;gap:3px;font-size:13px;color:var(--ink-2);min-width:0;align-content:start}
 input,select{font:inherit;font-size:14px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:7px 9px;width:100%;min-width:0;font-variant-numeric:tabular-nums}
 input:focus-visible,select:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
-.check{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink)}
-.check input{width:auto;accent-color:var(--accent)}
 .hint{font-size:12px;color:var(--ink-3);margin:0}
-.kid{border:1px dashed var(--line);border-radius:8px;padding:10px;display:grid;gap:8px}
-.kid-h{display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:600}
 button{font:inherit;font-size:13px;cursor:pointer;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:6px 10px}
 button.link{border:0;background:none;color:var(--accent-ink);padding:2px 4px}
 button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
-.styles{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.style-card{position:relative;border:1px solid var(--line);border-radius:8px;padding:10px;cursor:pointer;display:grid;gap:2px;align-content:start;background:var(--bg)}
-.style-card input{position:absolute;opacity:0;pointer-events:none;width:1px;height:1px}
-.style-card:has(input:checked){border-color:var(--accent);background:var(--accent-soft);box-shadow:inset 0 0 0 1px var(--accent)}
-.style-card:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:1px}
-.style-card .n{font-weight:600;color:var(--ink);font-size:13.5px}
-.style-card .c{font-family:var(--f-mono);font-size:13px;color:var(--accent-ink)}
-.style-card .d{font-size:12px;color:var(--ink-3);line-height:1.35}
-.style-card.wide{grid-column:1/-1}
-.share{margin-bottom:20px;display:grid;gap:10px}
-.share h2{margin:0}
-.share .lede{margin:0}
-.share-row{display:flex;gap:10px;align-items:end;flex-wrap:wrap}
-.share-row label{flex:1 1 220px}
-.share .err{color:var(--bad)}
-.share .ok{color:var(--good)}
-.inc-hero{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:4px}
-@media (max-width:700px){.inc-hero{grid-template-columns:minmax(0,1fr)}}
-.inc-hero>div{background:var(--sunk);border-radius:8px;padding:14px;display:grid;gap:2px;align-content:start}
-.inc-hero .k{font-size:12px;color:var(--ink-2)}
-.inc-hero .v{font-family:var(--f-mono);font-size:24px;font-variant-numeric:tabular-nums}
-.inc-hero .d{font-size:12px;color:var(--ink-3)}
-.inc-hero .main{background:var(--accent-soft)}
-.inc-hero .main .v{color:var(--accent-ink)}
-td.gap-bad{color:var(--bad)} td.gap-ok{color:var(--good)}
-.split{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:16px 0 4px}
-@media (max-width:640px){.split{grid-template-columns:minmax(0,1fr)}}
-.person{border:1px solid var(--line);border-radius:8px;padding:14px;display:grid;gap:8px}
-.person h3{margin:0;font-size:15px;font-weight:600;display:flex;justify-content:space-between;gap:8px;align-items:center}
-.person .big{font-family:var(--f-mono);font-size:24px;color:var(--accent-ink)}
-.person dl{margin:0;display:grid;grid-template-columns:1fr auto;gap:4px 12px;font-size:13px}
-.person dt{color:var(--ink-2)} .person dd{margin:0;font-family:var(--f-mono);text-align:right;font-variant-numeric:tabular-nums}
+.ex{font-size:12px;background:var(--warn-soft);color:var(--warn);padding:2px 8px;border-radius:4px;font-weight:600}
 .lbl-row{display:flex;align-items:center;gap:6px}
 .info{width:18px;height:18px;border-radius:50%;padding:0;font:600 11px/16px var(--f-body);text-align:center;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);flex:none;cursor:help}
 .info:hover,.info[aria-expanded="true"]{background:var(--accent);color:#fff;border-color:var(--accent)}
 .info-pop{position:fixed;z-index:50;max-width:min(300px,calc(100vw - 32px));background:var(--ink);color:var(--bg);font-size:13px;line-height:1.45;padding:10px 12px;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.2)}
-details.costs summary{cursor:pointer;font-size:13px;color:var(--accent-ink);font-weight:500}
-details.costs .row{margin-top:8px}
 
-main{display:grid;gap:20px;min-width:0}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:20px;min-width:0}
-.card h2{font-family:var(--f-display);font-weight:400;font-size:22px;margin:0 0 4px}
-.card .lede{color:var(--ink-2);margin:0 0 16px;font-size:14px}
+.card h2{font-family:var(--f-display);font-weight:400;font-size:22px;margin:0 0 4px;text-wrap:balance}
+.card .lede{color:var(--ink-2);margin:0 0 16px;font-size:14px;max-width:75ch}
+main{display:grid;gap:20px;min-width:0}
+
+/* sonho */
+.dreams{display:grid;grid-template-columns:repeat(auto-fill,minmax(178px,1fr));gap:10px}
+.dream{position:relative;border:1px solid var(--line);border-radius:10px;padding:12px;cursor:pointer;display:grid;gap:3px;align-content:start;background:var(--bg);min-width:0}
+.dream input{position:absolute;opacity:0;pointer-events:none;width:1px;height:1px}
+.dream:has(input:checked){border-color:var(--accent);background:var(--accent-soft);box-shadow:inset 0 0 0 1px var(--accent)}
+.dream:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:1px}
+.dream .tag{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+.dream .n{font-weight:600;color:var(--ink);font-size:14.5px}
+.dream .c{font-family:var(--f-mono);font-size:13px;color:var(--accent-ink)}
+.dream .m{font-size:12px;color:var(--ink-2)}
+.dream .d{font-size:12px;color:var(--ink-3);line-height:1.35}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{position:relative;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:13px;color:var(--ink);background:var(--bg);cursor:pointer}
+.chip input{position:absolute;opacity:0;pointer-events:none;width:1px;height:1px}
+.chip:has(input:checked){background:var(--accent);border-color:var(--accent);color:#fff}
+.chip:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:1px}
+.chip small{opacity:.75;font-family:var(--f-mono);font-size:11.5px}
+.dream-opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-top:16px}
+.subh{font-size:13px;font-weight:600;color:var(--ink-2);margin:18px 0 8px}
+details.costs{margin-top:14px}
+details.costs summary{cursor:pointer;font-size:13px;color:var(--accent-ink);font-weight:500}
+details.costs .grid4{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:10px}
+
+/* carreira */
+.steps{display:grid;gap:8px}
+.step{display:grid;grid-template-columns:70px minmax(0,1fr) 76px auto;gap:6px;align-items:end;border:1px dashed var(--line);border-radius:8px;padding:8px}
+.step label{font-size:12px}
+.step button{padding:6px 8px}
+
+/* resultados */
 .verdict{display:grid;grid-template-columns:auto minmax(0,1fr);gap:20px;align-items:center}
 @media (max-width:560px){.verdict{grid-template-columns:minmax(0,1fr)}}
-.ring{width:132px;height:132px}
-.verdict h2{font-size:26px;line-height:1.2;text-wrap:balance}
-.verdict p{margin:6px 0 0;color:var(--ink-2);max-width:62ch}
+.ring{width:128px;height:128px}
+.verdict h2{font-size:25px;line-height:1.2}
+.verdict p{margin:6px 0 0;color:var(--ink-2);max-width:66ch}
 .pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:3px 9px;border-radius:999px;white-space:nowrap}
 .pill.good{background:var(--good-soft);color:var(--good)} .pill.warn{background:var(--warn-soft);color:var(--warn)} .pill.bad{background:var(--bad-soft);color:var(--bad)} .pill.info{background:var(--accent-soft);color:var(--accent-ink)}
 .kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden}
 @media (max-width:760px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
-.kpi{background:var(--surface);padding:14px 16px;display:grid;gap:2px;align-content:start}
+.kpi{background:var(--surface);padding:14px 16px;display:grid;gap:2px;align-content:start;min-width:0}
 .kpi .k{font-size:12px;color:var(--ink-2)}
-.kpi .v{font-family:var(--f-mono);font-size:22px;font-weight:500;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.kpi .v{font-family:var(--f-mono);font-size:21px;font-weight:500;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
 .kpi .d{font-size:12px;color:var(--ink-3)}
-.chart-wrap{position:relative}
-.legend{display:flex;flex-wrap:wrap;gap:16px;font-size:13px;color:var(--ink-2);margin-bottom:8px}
+.tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:760px){.tiles{grid-template-columns:minmax(0,1fr)}}
+.tile{background:var(--sunk);border-radius:8px;padding:14px;display:grid;gap:4px;align-content:start;min-width:0}
+.tile .k{font-size:12px;color:var(--ink-2);font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+.tile .v{font-family:var(--f-mono);font-size:24px;font-variant-numeric:tabular-nums}
+.tile p{margin:0;font-size:13px;color:var(--ink-2)}
+.tile.main{background:var(--accent-soft)} .tile.main .v{color:var(--accent-ink)}
+.translate{margin:14px 0 0;padding:12px 14px;border-left:3px solid var(--accent);background:var(--bg);font-size:14px;color:var(--ink-2)}
+.translate b{color:var(--ink)}
+.legend{display:flex;flex-wrap:wrap;gap:16px;font-size:13px;color:var(--ink-2);margin:16px 0 8px}
 .legend i{display:inline-block;width:18px;height:0;border-top:2px solid;vertical-align:middle;margin-right:6px}
+.chart-wrap{position:relative}
 svg text{font-family:var(--f-body)}
-.tip{position:absolute;pointer-events:none;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:12px;box-shadow:0 6px 20px rgba(0,0,0,.12);min-width:180px}
+.tip{position:absolute;pointer-events:none;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:12px;box-shadow:0 6px 20px rgba(0,0,0,.12);min-width:190px;z-index:2}
 .tip b{font-family:var(--f-mono);font-weight:500}
 .tip .r{display:flex;justify-content:space-between;gap:12px}
-.plan{list-style:none;margin:0;padding:0;display:grid;gap:0}
-.plan li{display:grid;grid-template-columns:110px minmax(0,1fr);gap:14px;padding:14px 0;border-top:1px solid var(--line)}
+.tbl{overflow-x:auto;margin-top:12px}
+table{border-collapse:collapse;width:100%;font-size:13px;font-variant-numeric:tabular-nums;min-width:560px}
+th,td{padding:6px 8px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+th:first-child,td:first-child,td.ev,th.ev{text-align:left}
+th{font-weight:600;color:var(--ink-2);font-size:12px}
+td.ev{color:var(--ink-2);white-space:normal;min-width:120px}
+tr.ret td{background:var(--accent-soft)}
+td.ok{color:var(--good)} td.no{color:var(--bad)}
+.money-bar{display:flex;height:16px;border-radius:8px;overflow:hidden;gap:2px;margin:8px 0 14px;background:var(--surface)}
+.money-bar span{display:block;height:100%;min-width:3px}
+.buckets{display:grid;gap:0}
+.bucket{display:grid;grid-template-columns:14px minmax(0,1fr) auto;gap:10px;padding:12px 0;border-top:1px solid var(--line);align-items:start}
+.bucket:first-child{border-top:0}
+.bucket .sw{width:12px;height:12px;border-radius:3px;margin-top:4px}
+.bucket h3{margin:0;font-size:15px;font-weight:600}
+.bucket p{margin:2px 0 0;font-size:13px;color:var(--ink-2)}
+.bucket .amt{font-family:var(--f-mono);text-align:right;white-space:nowrap}
+.bucket .amt small{display:block;color:var(--ink-3);font-family:var(--f-body);font-size:12px}
+.alloc{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:8px}
+@media (max-width:900px){.alloc{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.alloc div{border:1px solid var(--line);border-radius:8px;padding:12px;display:grid;gap:2px}
+.alloc .p{font-family:var(--f-mono);font-size:20px}
+.alloc .t{font-weight:600;font-size:14px}
+.alloc small{color:var(--ink-3);font-size:12px}
+.plan{list-style:none;margin:0;padding:0}
+.plan li{display:grid;grid-template-columns:120px minmax(0,1fr);gap:14px;padding:14px 0;border-top:1px solid var(--line)}
 .plan li:first-child{border-top:0}
 @media (max-width:560px){.plan li{grid-template-columns:minmax(0,1fr);gap:6px}}
 .plan h3{margin:0;font-size:15px;font-weight:600}
 .plan p{margin:3px 0 0;color:var(--ink-2);font-size:14px}
 .num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;color:var(--ink)}
-.alloc-bar{display:flex;height:14px;border-radius:7px;overflow:hidden;gap:2px;margin:6px 0 14px;background:var(--surface)}
-.alloc-bar span{display:block;height:100%}
-.alloc{display:grid;gap:8px}
-.alloc div{display:grid;grid-template-columns:14px 52px minmax(0,1fr);gap:10px;align-items:baseline;font-size:14px}
-.alloc .sw{width:12px;height:12px;border-radius:3px;align-self:center}
-.alloc .p{font-family:var(--f-mono)}
-.alloc small{color:var(--ink-3);display:block}
 .levers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 @media (max-width:640px){.levers{grid-template-columns:minmax(0,1fr)}}
 .lever{background:var(--sunk);border-radius:8px;padding:14px}
 .lever .k{font-size:13px;color:var(--ink-2)}
 .lever .v{font-family:var(--f-mono);font-size:20px;margin:2px 0}
 .lever p{margin:0;font-size:13px;color:var(--ink-2)}
-.tbl{overflow-x:auto;margin-top:12px}
-table{border-collapse:collapse;width:100%;font-size:13px;font-variant-numeric:tabular-nums;min-width:640px}
-th,td{padding:6px 8px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
-th:first-child,td:first-child,th:nth-child(2),td:nth-child(2){text-align:left}
-th{font-weight:600;color:var(--ink-2);font-size:12px}
-td.ev{color:var(--ink-2);white-space:normal;min-width:140px}
-tr.ret td{background:var(--accent-soft)}
-.foot{font-size:12px;color:var(--ink-3);max-width:80ch}
-.notice{display:flex;gap:10px;align-items:flex-start;background:var(--warn-soft);color:var(--ink);border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:20px}
-.notice b{color:var(--warn)}
-.notice a{color:var(--accent-ink)}
+.share{display:grid;gap:10px}
+.share h2{margin:0} .share .lede{margin:0}
+.share-row{display:flex;gap:10px;align-items:end;flex-wrap:wrap}
+.share-row label{flex:1 1 220px}
+.err{color:var(--bad)!important} .okmsg{color:var(--good)!important}
 .legal{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px 20px;font-size:13px;color:var(--ink-2)}
 .legal h2{font-family:var(--f-display);font-weight:400;font-size:18px;color:var(--ink);margin:0 0 8px}
 .legal ul{margin:0;padding-left:18px;display:grid;gap:6px;max-width:85ch}
-.ex{font-size:12px;background:var(--warn-soft);color:var(--warn);padding:2px 8px;border-radius:4px;font-weight:600}
+.foot{font-size:12px;color:var(--ink-3);max-width:80ch;margin:0}
 @media (prefers-reduced-motion:no-preference){.ring circle.fg{transition:stroke-dashoffset .5s ease}}
 </style>
 </head>
 <body>
-
 <div class="wrap">
   <header class="top">
     <div>
       <h1>Planeja Lar</h1>
-      <p class="sub">Conte onde vocês estão hoje e como querem viver. O app calcula quanto patrimônio o sonho exige, se o ritmo atual chega lá e o que fazer a partir deste mês.</p>
+      <p class="sub">Escolha o sonho, conte onde você está hoje e veja quanto sua carreira precisa evoluir, onde colocar o dinheiro e o que fazer a partir deste mês.</p>
     </div>
-    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <div class="actions">
       <span class="ex" id="exTag">Dados de exemplo</span>
       <button id="reset" type="button">Voltar ao exemplo</button>
       <button id="shareBtn" type="button" class="primary">Compartilhar plano</button>
@@ -169,10 +186,9 @@ tr.ret td{background:var(--accent-soft)}
   </header>
 
   <p class="notice" role="note"><b>Aviso:</b><span>As projeções e o plano são simulações hipotéticas e não garantem nenhum resultado. Não são recomendação de investimento. <a href="#aviso-legal">Leia o aviso completo</a>.</span></p>
-
   <p class="notice" id="restoreBar" hidden><b>Plano compartilhado:</b><span>Você está vendo o plano que recebeu. As mudanças ficam salvas só neste navegador. <button type="button" class="link" id="restoreBtn">Voltar aos meus dados</button></span></p>
 
-  <section class="card share" id="openPanel" hidden>
+  <section class="card share" id="openPanel" hidden style="margin-bottom:16px">
     <h2>Abrir plano compartilhado</h2>
     <p class="lede">Alguém compartilhou um plano do Planeja Lar com você. Digite a senha que essa pessoa passou.</p>
     <div class="share-row">
@@ -183,7 +199,7 @@ tr.ret td{background:var(--accent-soft)}
     <p class="hint">O plano recebido substitui os dados mostrados aqui. Os seus dados anteriores ficam guardados e podem ser restaurados.</p>
   </section>
 
-  <section class="card share" id="sharePanel" hidden>
+  <section class="card share" id="sharePanel" hidden style="margin-bottom:16px">
     <h2>Compartilhar este plano</h2>
     <p class="lede">Crie um link protegido por senha. Só quem tiver o link e a senha consegue ver o plano. Os dados vão criptografados dentro do próprio link e não são enviados a nenhum servidor, nem ao GitHub.</p>
     <div class="share-row">
@@ -194,147 +210,116 @@ tr.ret td{background:var(--accent-soft)}
     <div id="shareOut" hidden style="display:grid;gap:8px">
       <label>Link do plano<input id="shareLink" readonly></label>
       <div class="share-row"><button type="button" id="shareCopy">Copiar link</button><span class="hint" id="copyMsg" aria-live="polite"></span></div>
-      <p class="hint">Mandem a senha por outro caminho, pessoalmente ou numa ligação, e não junto com o link. O link guarda o plano como está agora: se mudarem algo, gerem um link novo. Quem abrir recebe uma cópia e pode editar sem mudar o plano de vocês.</p>
+      <p class="hint">Mande a senha por outro caminho, pessoalmente ou numa ligação, e não junto com o link. O link guarda o plano como está agora: se mudar algo, gere um link novo. Quem abrir recebe uma cópia e pode editar sem mudar o seu plano.</p>
     </div>
     <div><button type="button" class="link" id="shareClose">Fechar</button></div>
   </section>
 
-  <div class="grid">
+  <form id="f" class="layout" autocomplete="off">
+    <section class="card full" aria-labelledby="dreamH">
+      <h2 id="dreamH">Qual é o seu sonho?</h2>
+      <p class="lede">Escolha o estilo de vida que você quer bancar só com a renda dos investimentos. Os valores são para uma pessoa, em reais de hoje, e dá para ajustar tudo em "Ajustar os custos".</p>
+      <div class="dreams" id="dreams" role="radiogroup" aria-label="Estilo de vida"></div>
+      <p class="subh">Quer somar algo ao sonho?</p>
+      <div class="chips" id="extras"></div>
+      <div class="dream-opts">
+        <label>Viver de renda em (anos)<input id="anos" type="number" min="3" max="45"></label>
+        <label>Moradia no sonho
+          <select id="moradia"><option value="comprar">Comprar a casa com este plano</option><option value="propria">Já tenho ou vou ganhar a casa</option><option value="aluguel">Morar de aluguel</option></select>
+        </label>
+        <label id="filhoBox">Ano em que o filho(a) nasce<input id="anoFilho" type="number" min="2000" max="2070"></label>
+      </div>
+      <details class="costs" id="costsBox">
+        <summary>Ajustar os custos: <span id="coreSum" class="num"></span>/mês no sonho</summary>
+        <div class="grid4">
+          <label>Contas e condomínio<input id="c_contas" type="number" step="100" min="0"></label>
+          <label>Mercado e casa<input id="c_mercado" type="number" step="100" min="0"></label>
+          <label>Saúde<input id="c_saude" type="number" step="100" min="0"></label>
+          <label>Transporte<input id="c_transp" type="number" step="100" min="0"></label>
+          <label>Lazer e restaurantes<input id="c_lazer" type="number" step="100" min="0"></label>
+          <label>Outros e imprevistos<input id="c_outros" type="number" step="100" min="0"></label>
+          <label>Viagens por ano<input id="c_viagens" type="number" step="1000" min="0"></label>
+          <label>Aluguel (se alugar)<input id="c_aluguel" type="number" step="100" min="0"></label>
+          <label>Preço da casa (se comprar)<input id="c_imovel" type="number" step="10000" min="0"></label>
+        </div>
+      </details>
+    </section>
+
     <aside class="inputs" aria-label="Seus dados">
-      <form id="f" autocomplete="off">
-        <fieldset>
-          <legend><span>1</span>Situação hoje</legend>
-          <div class="row">
-            <label>Sua idade<input id="idade1" type="number" min="18" max="80"></label>
-            <label>Idade do(a) parceiro(a)<input id="idade2" type="number" min="18" max="80"></label>
-          </div>
-          <div class="row">
-            <label>Sua renda líquida/mês<input id="renda1" type="number" step="100" min="0"></label>
-            <label>Renda líquida do(a) parceiro(a)<input id="renda2" type="number" step="100" min="0"></label>
-          </div>
-          <div class="row">
-            <label>Seu vínculo<select id="vinc1"><option value="clt">CLT</option><option value="pj">PJ / empresa própria</option><option value="autonomo">Autônomo</option><option value="servidor">Servidor público</option></select></label>
-            <label>Vínculo do(a) parceiro(a)<select id="vinc2"><option value="clt">CLT</option><option value="pj">PJ / empresa própria</option><option value="autonomo">Autônomo</option><option value="servidor">Servidor público</option></select></label>
-          </div>
-          <div class="row">
-            <label>Seu aumento esperado (% acima da inflação/ano)<input id="cresc1" type="number" step="0.5" min="-10" max="30"></label>
-            <label>Do(a) parceiro(a) (% acima da inflação/ano)<input id="cresc2" type="number" step="0.5" min="-10" max="30"></label>
-          </div>
-          <p class="hint" id="rendaHint">Inclua 13º, férias e PLR divididos por 12.</p>
-          <label>Vocês já moram juntos(as)?
-            <select id="juntas"><option value="nao">Ainda não, cada um tem sua casa</option><option value="sim">Sim, já moramos juntos(as)</option></select>
-          </label>
-          <div id="sepBox" style="display:grid;gap:10px">
-            <div class="row">
-              <label>Seus gastos mensais hoje<input id="gastos1" type="number" step="100" min="0"></label>
-              <label>Gastos do(a) parceiro(a) hoje<input id="gastos2" type="number" step="100" min="0"></label>
-            </div>
-            <div class="row">
-              <label>Vão morar juntos(as) em (ano)<input id="anoJuntas" type="number" min="2026" max="2060"></label>
-              <label>Custo para montar a casa (uma vez)<input id="custoMudanca" type="number" step="1000" min="0"></label>
-            </div>
-          </div>
-          <label><span id="gastosLbl">Gastos mensais atuais (sem financiamento)</span><input id="gastos" type="number" step="100" min="0"></label>
-          <div class="row">
-            <label>Parcela de financiamento/mês<input id="parcela" type="number" step="100" min="0"></label>
-            <label>Anos restantes<input id="parcelaAnos" type="number" min="0" max="35"></label>
-          </div>
-          <div class="row">
-            <label>Seu patrimônio investido<input id="patrimonio1" type="number" step="1000" min="0"></label>
-            <label>Patrimônio do(a) parceiro(a)<input id="patrimonio2" type="number" step="1000" min="0"></label>
-          </div>
-          <div class="row">
-            <label>Você investe por mês hoje<input id="aporte1" type="number" step="100" min="0"></label>
-            <label>Parceiro(a) investe por mês hoje<input id="aporte2" type="number" step="100" min="0"></label>
-          </div>
-          <div class="row">
-            <label>Reserva em liquidez diária (do casal)<input id="liquidez" type="number" step="1000" min="0"></label>
-            <label>Dívidas caras (cartão, cheque especial)<input id="dividas" type="number" step="500" min="0"></label>
-          </div>
-          <label>Gasto com viagens por ano hoje<input id="viagensHoje" type="number" step="1000" min="0"></label>
-          <p class="hint">Fora dos gastos mensais. O app separa esse valor numa caixa de viagens.</p>
-          <label class="check"><input id="seguro" type="checkbox">Temos seguro de vida</label>
-          <label class="check"><input id="plano" type="checkbox">Temos plano de saúde</label>
-          <label class="check"><input id="irCompleta" type="checkbox">Fazemos a declaração completa do IR</label>
-        </fieldset>
-
-        <fieldset>
-          <legend><span>2</span>Filhos</legend>
-          <div id="kids" style="display:grid;gap:10px"></div>
-          <button type="button" id="addKid">+ Adicionar filho(a)</button>
-          <p class="hint">Para filhos que já nasceram, use o ano de nascimento real e não conte os custos deles nos gastos atuais.</p>
-        </fieldset>
-
-        <fieldset>
-          <legend><span>3</span>O sonho</legend>
-          <label>Onde querem viver
-            <select id="cidade">
-              <option value="litnorte">Litoral Norte (Ubatuba, Caraguá, S. Sebastião)</option>
-              <option value="baixada">Baixada Santista (Santos, Guarujá)</option>
-              <option value="litsul">Litoral Sul (Itanhaém, Peruíbe)</option>
-              <option value="interior">Interior (Campinas, S. J. Campos, Ribeirão)</option>
-              <option value="capital">Capital (São Paulo)</option>
+      <fieldset>
+        <legend>Você hoje</legend>
+        <div class="row">
+          <label>Idade<input id="idade" type="number" min="16" max="80"></label>
+          <label>Situação
+            <select id="situacao">
+              <option value="clt">Empregado(a) CLT</option>
+              <option value="servidor">Servidor(a) público(a)</option>
+              <option value="pj">PJ ou autônomo(a)</option>
+              <option value="empreendedor">Empreendedor(a)</option>
+              <option value="desempregado">Sem emprego no momento</option>
             </select>
           </label>
-          <div>
-            <p class="hint" style="margin-bottom:6px;color:var(--ink-2);font-size:13px">Estilo de vida</p>
-            <div class="styles" id="styles" role="radiogroup" aria-label="Estilo de vida"></div>
-          </div>
-          <label>Viagens por ano no sonho<input id="viagens" type="number" step="1000" min="0"></label>
-          <div class="row">
-            <label>Viver de renda em (anos)<input id="anos" type="number" min="3" max="40"></label>
-            <label>Moradia no futuro
-              <select id="moradia"><option value="propria">Casa própria quitada</option><option value="aluguel">Aluguel</option></select>
-            </label>
-          </div>
-          <details class="costs" id="costsBox">
-            <summary>Custo de vida do casal no destino: <span id="coreSum" class="num"></span>/mês</summary>
-            <div class="row">
-              <label>Moradia e contas<input id="c_moradia" type="number" step="100"></label>
-              <label>Mercado e casa<input id="c_mercado" type="number" step="100"></label>
-              <label>Plano de saúde (casal)<input id="c_saude" type="number" step="100"></label>
-              <label>Carros e transporte<input id="c_transp" type="number" step="100"></label>
-              <label>Lazer e restaurantes<input id="c_lazer" type="number" step="100"></label>
-              <label>Outros e imprevistos<input id="c_outros" type="number" step="100"></label>
-              <label>Aluguel (se alugar)<input id="c_aluguel" type="number" step="100"></label>
-              <label>Custo extra por filho/mês<input id="c_filho" type="number" step="100"></label>
-            </div>
-            <p class="hint" style="margin-top:8px">Mensalidade escolar (particular)</p>
-            <div class="row" style="grid-template-columns:1fr 1fr 1fr">
-              <label>Infantil<input id="e_inf" type="number" step="100"></label>
-              <label>Fundamental<input id="e_fund" type="number" step="100"></label>
-              <label>Médio<input id="e_med" type="number" step="100"></label>
-            </div>
-            <p class="hint" style="margin-top:8px">Valores de referência estimados para 2026. Ajuste com orçamentos reais das escolas e corretoras.</p>
-          </details>
-        </fieldset>
+        </div>
+        <label><span id="rendaLbl">Renda líquida por mês</span><input id="renda" type="number" step="100" min="0"></label>
+        <div id="desBox" class="row">
+          <label>Meses até voltar a ter renda<input id="mesesSemRenda" type="number" min="0" max="36"></label>
+          <label>Renda esperada ao voltar<input id="rendaVolta" type="number" step="100" min="0"></label>
+        </div>
+        <div class="row">
+          <label>Gastos por mês hoje<input id="gastos" type="number" step="100" min="0"></label>
+          <label>Viagens por ano hoje<input id="viagensHoje" type="number" step="1000" min="0"></label>
+        </div>
+        <div class="row">
+          <label>Patrimônio investido<input id="patrimonio" type="number" step="1000" min="0"></label>
+          <label>…disso, com saque no dia<input id="liquidez" type="number" step="1000" min="0"></label>
+        </div>
+        <div class="row">
+          <label>Dívidas caras<input id="dividas" type="number" step="500" min="0"></label>
+          <label>Do que sobra, investe (%)<input id="share" type="number" step="5" min="0" max="100"></label>
+        </div>
+        <p class="hint" id="shareHint"></p>
+      </fieldset>
 
-        <fieldset>
-          <legend><span>4</span>Premissas</legend>
-          <div class="row">
-            <label>Rendimento real (% a.a.)<input id="retorno" type="number" step="0.5" min="0" max="15"></label>
-            <label>Retirada segura (% a.a.)<input id="swr" type="number" step="0.25" min="2" max="8"></label>
-          </div>
-          <div class="row">
-            <label>Do aumento, quanto vira gasto (%)<input id="creep" type="number" step="5" min="0" max="100"></label>
-            <label>Volatilidade da carteira (%)<input id="vol" type="number" step="1" min="0" max="30"></label>
-          </div>
-          <div class="row">
-            <label>INSS do casal/mês (hoje)<input id="inss" type="number" step="100" min="0"></label>
-            <label>A partir da sua idade<input id="inssIdade" type="number" min="55" max="75"></label>
-          </div>
-          <p class="hint">Tudo é calculado em dinheiro de hoje: o rendimento é o que sobra acima do IPCA, já sem imposto. Tesouro IPCA+ tem pago 6–7% real bruto.</p>
-        </fieldset>
-      </form>
+      <fieldset>
+        <legend>Carreira</legend>
+        <div class="row">
+          <label>Reajuste por ano (% acima da inflação)<input id="reajuste" type="number" step="0.5" min="-10" max="30"></label>
+          <label>Do aumento, vira gasto (%)<input id="creep" type="number" step="5" min="0" max="100"></label>
+        </div>
+        <p class="subh" style="margin:6px 0 0">Saltos que você planeja</p>
+        <p class="hint">Promoções, troca de empresa, gestão, mudança de área. Diga daqui a quantos anos e quanto a renda sobe. O aumento pode ser negativo, como numa mudança de área que começa ganhando menos.</p>
+        <div class="steps" id="steps"></div>
+        <button type="button" id="addStep">+ Adicionar salto de carreira</button>
+        <label>Simular um grande salto daqui a (anos)<input id="saltoAno" type="number" min="1" max="30"></label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Premissas</legend>
+        <div class="row">
+          <label>Perfil de investidor
+            <select id="perfil"><option value="conservador">Conservador</option><option value="moderado">Moderado</option><option value="arrojado">Arrojado</option></select>
+          </label>
+          <label>Rendimento (% acima da inflação)<input id="retorno" type="number" step="0.5" min="0" max="15"></label>
+        </div>
+        <div class="row">
+          <label>Retirada segura (% ao ano)<input id="swr" type="number" step="0.25" min="2" max="8"></label>
+          <label>Oscilação da carteira (%)<input id="vol" type="number" step="1" min="0" max="30"></label>
+        </div>
+        <div class="row">
+          <label>INSS esperado por mês<input id="inss" type="number" step="100" min="0"></label>
+          <label>A partir da idade<input id="inssIdade" type="number" min="55" max="75"></label>
+        </div>
+        <p class="hint">Tudo é calculado em reais de hoje, já descontada a inflação.</p>
+      </fieldset>
     </aside>
 
     <main>
       <section class="card verdict" aria-live="polite">
-        <svg class="ring" viewBox="0 0 132 132" role="img" aria-label="Progresso até a meta">
+        <svg class="ring" viewBox="0 0 132 132" role="img" aria-label="Progresso até o sonho">
           <circle cx="66" cy="66" r="56" fill="none" stroke="var(--sunk)" stroke-width="12"/>
           <circle class="fg" id="ringFg" cx="66" cy="66" r="56" fill="none" stroke="var(--accent)" stroke-width="12" stroke-linecap="round" transform="rotate(-90 66 66)" stroke-dasharray="351.86" stroke-dashoffset="351.86"/>
           <text id="ringTxt" x="66" y="70" text-anchor="middle" font-size="26" fill="var(--ink)" style="font-family:var(--f-mono)">0%</text>
-          <text x="66" y="90" text-anchor="middle" font-size="11" fill="var(--ink-3)">da meta</text>
+          <text x="66" y="90" text-anchor="middle" font-size="11" fill="var(--ink-3)">do sonho</text>
         </svg>
         <div>
           <div id="vPill"></div>
@@ -343,40 +328,40 @@ tr.ret td{background:var(--accent-soft)}
         </div>
       </section>
 
-      <section class="card" id="incomeCard">
-        <h2>Quanto a renda precisa crescer</h2>
-        <p class="lede" id="incLede"></p>
-        <div class="inc-hero" id="incHero"></div>
-        <div class="tbl"><table id="incTbl"></table></div>
-        <p class="hint" style="margin-top:10px">Valores em reais de hoje: um aumento de 3% acima da inflação significa ganhar 3% a mais de poder de compra por ano. O cálculo mantém o hábito atual de vocês: investir a mesma parte da sobra e transformar em gasto a parte do aumento definida nas premissas.</p>
-      </section>
-
-      <section class="card" id="splitCard">
-        <div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;align-items:end">
-          <div style="min-width:0;flex:1 1 320px"><h2>Quanto cada um investe</h2><p class="lede" id="splitLede" style="margin:0"></p></div>
-          <label style="flex:0 1 240px">Como dividir o esforço
-            <select id="divisao"><option value="proporcional">Proporcional ao salário</option><option value="sobra">Proporcional à sobra de cada um</option><option value="igual">Meio a meio</option></select>
-          </label>
-        </div>
-        <div class="split" id="splitCols"></div>
-        <div class="tbl"><table id="splitTbl"></table></div>
-        <p class="hint" style="margin-top:10px" id="splitHint">Os gastos da casa e dos filhos são do casal. Na divisão proporcional, cada um investe o mesmo percentual do próprio salário, o jeito mais comum de dividir de forma justa quando as rendas são diferentes. Os valores seguem o ritmo necessário para a meta, ano a ano.</p>
-      </section>
-
       <section class="kpis" id="kpis"></section>
 
       <section class="card">
-        <h2>Caminho do patrimônio</h2>
-        <p class="lede">Em reais de hoje. A linha cheia mostra onde vocês chegam no ritmo atual. A tracejada mostra o ritmo que fecha a meta.</p>
+        <h2>Quanto sua carreira precisa evoluir</h2>
+        <p class="lede" id="carLede"></p>
+        <div class="tiles" id="carTiles"></div>
+        <p class="translate" id="carTranslate"></p>
         <div class="legend">
-          <span><i style="border-color:var(--accent)"></i>Ritmo atual</span>
-          <span><i style="border-color:var(--amber);border-top-style:dashed"></i>Ritmo necessário</span>
+          <span><i style="border-color:var(--accent)"></i>Seu plano de carreira</span>
+          <span><i style="border-color:var(--amber);border-top-style:dashed"></i>Renda necessária</span>
+        </div>
+        <div class="chart-wrap"><svg id="incChart" width="100%" height="280" role="img" aria-label="Renda mensal: plano contra o necessário"></svg><div class="tip" id="incTip" hidden></div></div>
+        <div class="tbl"><table id="carTbl"></table></div>
+      </section>
+
+      <section class="card">
+        <h2>Onde colocar o seu dinheiro</h2>
+        <p class="lede" id="moneyLede"></p>
+        <div class="money-bar" id="moneyBar"></div>
+        <div class="buckets" id="buckets"></div>
+        <p class="subh">Carteira de longo prazo, perfil <span id="perfilNome"></span></p>
+        <p class="hint" id="allocLede" style="font-size:13px;color:var(--ink-2)"></p>
+        <div class="alloc" id="alloc"></div>
+      </section>
+
+      <section class="card">
+        <h2>Caminho do patrimônio</h2>
+        <p class="lede">Em reais de hoje. A linha cheia segue o seu plano de carreira. A tracejada segue a renda necessária.</p>
+        <div class="legend" style="margin-top:0">
+          <span><i style="border-color:var(--accent)"></i>Seu plano</span>
+          <span><i style="border-color:var(--amber);border-top-style:dashed"></i>Com a renda necessária</span>
           <span><i style="border-color:var(--ink-3);border-top-style:dotted"></i>Meta</span>
         </div>
-        <div class="chart-wrap" id="chartWrap">
-          <svg id="chart" width="100%" height="320" role="img" aria-label="Gráfico da evolução do patrimônio"></svg>
-          <div class="tip" id="tip" hidden></div>
-        </div>
+        <div class="chart-wrap"><svg id="patChart" width="100%" height="300" role="img" aria-label="Evolução do patrimônio"></svg><div class="tip" id="patTip" hidden></div></div>
       </section>
 
       <section class="card">
@@ -386,16 +371,8 @@ tr.ret td{background:var(--accent-soft)}
       </section>
 
       <section class="card">
-        <h2>Onde investir</h2>
-        <p class="lede" id="allocLede"></p>
-        <div class="alloc-bar" id="allocBar"></div>
-        <div class="alloc" id="alloc"></div>
-        <div id="eduBox" style="margin-top:16px"></div>
-      </section>
-
-      <section class="card">
-        <h2>Se não fechar, mexa em uma destas alavancas</h2>
-        <p class="lede">Cada alavanca sozinha leva o plano até 100% da meta.</p>
+        <h2>Outras alavancas</h2>
+        <p class="lede">Cada uma sozinha leva o seu plano até 100% do sonho.</p>
         <div class="levers" id="levers"></div>
       </section>
 
@@ -409,543 +386,431 @@ tr.ret td{background:var(--accent-soft)}
       <section class="legal" id="aviso-legal">
         <h2>Aviso legal</h2>
         <ul>
-          <li><b>Simulação hipotética.</b> Os números são estimativas feitas a partir dos dados que você digita e de premissas simplificadas: rendimento, inflação, custos de cidades e escolas, regras de impostos e do INSS. A realidade vai ser diferente.</li>
-          <li><b>Sem garantia.</b> Rentabilidade passada não garante rentabilidade futura. Todo investimento tem risco, inclusive de perda. Nada aqui garante que a meta será atingida.</li>
-          <li><b>Não é recomendação.</b> O plano de ação e a sugestão de carteira têm caráter educativo e genérico. Não são recomendação, oferta ou consultoria de investimento, contábil, tributária, jurídica ou previdenciária, e não consideram seu perfil de investidor (suitability).</li>
+          <li><b>Simulação hipotética.</b> Os números são estimativas feitas a partir dos dados que você digita e de premissas simplificadas: rendimento, inflação, salários, custos de vida, regras de impostos e do INSS. A realidade vai ser diferente.</li>
+          <li><b>Sem garantia.</b> Rentabilidade passada não garante rentabilidade futura. Todo investimento tem risco, inclusive de perda. Nada aqui garante que a meta será atingida, nem que promoções ou aumentos vão acontecer.</li>
+          <li><b>Não é recomendação.</b> O plano de ação e a sugestão de carteira têm caráter educativo e genérico. Não são recomendação, oferta ou consultoria de investimento, carreira, contábil, tributária, jurídica ou previdenciária, e não substituem a análise do seu perfil de investidor (suitability).</li>
           <li><b>Regras mudam.</b> Leis de impostos, regras do INSS e produtos financeiros podem mudar. Confira as informações nas fontes oficiais.</li>
           <li><b>Antes de decidir</b>, procure profissionais habilitados: um planejador financeiro certificado (CFP), um consultor de valores mobiliários registrado na CVM e um contador.</li>
           <li><b>Responsabilidade.</b> As decisões tomadas com base neste app são de responsabilidade de quem o usa. Os autores não se responsabilizam por perdas ou danos decorrentes do uso dessas informações.</li>
-          <li><b>Privacidade.</b> Os dados digitados ficam só no seu navegador e não são enviados a nenhum servidor. Links de compartilhamento levam os dados criptografados com a senha que você escolher. Quem tiver o link e a senha consegue ver o plano, então guarde os dois com cuidado.</li>
+          <li><b>Privacidade.</b> Os dados digitados ficam só no seu navegador e não são enviados a nenhum servidor. Links de compartilhamento levam os dados criptografados com a senha que você escolher.</li>
         </ul>
       </section>
-      <p class="foot">Valores em reais de 2026, corrigidos pela inflação. A meta usa a regra de retirada segura sobre o custo do casal e soma, à parte, o custo restante dos filhos e do financiamento após a data de viver de renda.</p>
+      <p class="foot">Valores em reais de 2026, corrigidos pela inflação. A meta é o custo do sonho por ano dividido pela retirada segura, mais a casa (se for comprar) e o custo restante do filho, menos o valor do INSS.</p>
     </main>
-  </div>
+  </form>
 </div>
 
 <script>
 (function(){
 const Y0 = 2026;
-const CIDADES = {
-  litnorte:{c_moradia:2300,c_mercado:3200,c_saude:2400,c_transp:2200,c_lazer:2000,c_outros:1500,c_aluguel:4500,e_inf:2200,e_fund:2800,e_med:3300},
-  baixada: {c_moradia:2500,c_mercado:3000,c_saude:2600,c_transp:2000,c_lazer:2500,c_outros:1500,c_aluguel:5000,e_inf:2800,e_fund:3500,e_med:4200},
-  litsul:  {c_moradia:1800,c_mercado:2700,c_saude:2200,c_transp:1800,c_lazer:1700,c_outros:1200,c_aluguel:2800,e_inf:1500,e_fund:1900,e_med:2300},
-  interior:{c_moradia:2400,c_mercado:2900,c_saude:2500,c_transp:2000,c_lazer:2300,c_outros:1500,c_aluguel:4200,e_inf:2800,e_fund:3600,e_med:4300},
-  capital: {c_moradia:3000,c_mercado:3300,c_saude:3000,c_transp:2000,c_lazer:3000,c_outros:1800,c_aluguel:7000,e_inf:4500,e_fund:6000,e_med:7000}
+
+/* ---------- dados de referência ---------- */
+// valores mensais para uma pessoa, reais de 2026; viagens e imóvel em valor total
+const SONHOS = {
+  minimalista:{tag:'Simples', nome:'Minimalista', desc:'Pouco consumo, cidade média, uma viagem curta por ano.', c:{contas:900,mercado:1200,saude:700,transp:500,lazer:500,outros:400}, viagens:4000, aluguel:1800, imovel:350000},
+  essencial:  {tag:'Simples', nome:'Essencial', desc:'Conforto sem luxo, uma viagem nacional por ano.', c:{contas:1200,mercado:1500,saude:900,transp:900,lazer:800,outros:600}, viagens:8000, aluguel:2500, imovel:450000},
+  interior:   {tag:'Lugar', nome:'Interior tranquilo', desc:'Cidade pequena, natureza perto, vida sem trânsito.', c:{contas:1100,mercado:1500,saude:1000,transp:1200,lazer:900,outros:600}, viagens:8000, aluguel:2200, imovel:500000},
+  sitio:      {tag:'Lugar', nome:'Sítio ou chácara', desc:'Terra, horta e bicho. Carro é obrigatório.', c:{contas:1000,mercado:1200,saude:1000,transp:1400,lazer:600,outros:800}, viagens:5000, aluguel:1500, imovel:600000},
+  litoral:    {tag:'Lugar', nome:'Vida no litoral', desc:'Perto da praia, ritmo calmo, duas viagens por ano.', c:{contas:1500,mercado:2000,saude:1100,transp:1200,lazer:1200,outros:800}, viagens:10000, aluguel:3800, imovel:750000},
+  confortavel:{tag:'Conforto', nome:'Confortável', desc:'Restaurantes toda semana, duas viagens nacionais e uma curta para fora.', c:{contas:1600,mercado:1900,saude:1200,transp:1300,lazer:1400,outros:900}, viagens:15000, aluguel:3500, imovel:700000},
+  cidade:     {tag:'Lugar', nome:'Cidade grande', desc:'Capital, cultura, shows e bons restaurantes.', c:{contas:2000,mercado:2200,saude:1400,transp:1000,lazer:2500,outros:1200}, viagens:15000, aluguel:5000, imovel:1000000},
+  viajante:   {tag:'Experiências', nome:'Viajante', desc:'Base simples e três viagens por ano, uma delas internacional.', c:{contas:1300,mercado:1600,saude:1100,transp:900,lazer:1000,outros:800}, viagens:45000, aluguel:2800, imovel:450000},
+  nomade:     {tag:'Experiências', nome:'Nômade digital', desc:'Sem casa fixa, temporadas em lugares diferentes do mundo.', c:{contas:300,mercado:2000,saude:900,transp:600,lazer:1500,outros:800}, viagens:30000, aluguel:4500, imovel:0, moradia:'aluguel'},
+  portugal:   {tag:'Exterior', nome:'Morar em Portugal', desc:'Custos de Lisboa ou Porto em reais. Câmbio pesa.', c:{contas:1800,mercado:2500,saude:1000,transp:800,lazer:1500,outros:1000}, viagens:15000, aluguel:6000, imovel:1600000},
+  alto:       {tag:'Conforto', nome:'Alto padrão', desc:'Casa grande, saúde premium, viagens internacionais frequentes.', c:{contas:3000,mercado:3000,saude:2200,transp:2500,lazer:3500,outros:2000}, viagens:50000, aluguel:8000, imovel:2000000}
 };
-const FACUL = {publica:2000, particular:5500, top:9000};
-const ESTILOS = {
-  essencial:  {nome:'Essencial',   desc:'Vida simples e sem aperto. Uma viagem nacional por ano.', mult:0.8, alug:0.8, viagens:8000},
-  confortavel:{nome:'Confortável', desc:'Restaurantes de vez em quando. Duas viagens nacionais por ano.', mult:1, alug:1, viagens:20000},
-  viajante:   {nome:'Viajante',    desc:'Dia a dia confortável, uma viagem internacional e duas nacionais por ano.', mult:1, alug:1, viagens:45000},
-  alto:       {nome:'Alto padrão', desc:'Casa maior, mais lazer e duas viagens internacionais por ano.', mult:1.4, alug:1.5, viagens:70000}
+const EXTRAS = {
+  filho:  {nome:'Filho(a)', mes:3500, temp:true, info:'Escola particular e gastos do filho até os 22 anos, a partir do ano de nascimento.'},
+  pet:    {nome:'Pet', mes:400, info:'Ração, veterinário e plano pet.'},
+  pais:   {nome:'Ajudar os pais', mes:1500, info:'Uma ajuda mensal para pai e mãe.'},
+  carro:  {nome:'Carro novo a cada 5 anos', mes:1200, info:'O quanto o carro perde de valor e precisa ser reposto.'},
+  saude:  {nome:'Plano de saúde top', mes:900, info:'Plano com reembolso e rede ampla, além do custo de saúde do sonho.'},
+  intl:   {nome:'Viagem internacional extra', mes:1500, info:'Mais uma viagem para fora por ano.'},
+  hobby:  {nome:'Hobby caro', mes:1000, info:'Vela, mergulho, golfe, ciclismo de estrada e afins.'},
+  estudos:{nome:'Estudar a vida toda', mes:600, info:'Cursos, idiomas e eventos.'},
+  casa2:  {nome:'Casa de temporada', mes:2000, info:'Manter uma segunda casa para férias.'},
+  doacao: {nome:'Doações', mes:500, info:'Apoio mensal a causas e pessoas.'}
 };
-const BASE_KEYS = ['c_moradia','c_mercado','c_saude','c_transp','c_lazer','c_outros'];
-const COST_KEYS = BASE_KEYS.concat(['c_aluguel','e_inf','e_fund','e_med','viagens']);
-const r100 = v => Math.round(v/100)*100;
-function applyStyle(s){
-  const st=ESTILOS[s.estilo]; if(!st) return;
-  const b=CIDADES[s.cidade];
-  BASE_KEYS.forEach(k=>{ s[k]=r100(b[k]*st.mult); });
-  s.c_aluguel=r100(b.c_aluguel*st.alug); s.e_inf=b.e_inf; s.e_fund=b.e_fund; s.e_med=b.e_med; s.viagens=st.viagens;
+const DEGRAUS = {
+  promocao:{nome:'Promoção', pct:20}, troca:{nome:'Trocar de empresa', pct:25}, gestao:{nome:'Virar gestor(a)', pct:40},
+  especialista:{nome:'Especialização ou certificação', pct:15}, area:{nome:'Mudar de área', pct:-10}, empresa:{nome:'Abrir empresa ou virar PJ', pct:30},
+  exterior:{nome:'Trabalhar para fora', pct:80}, outro:{nome:'Outro', pct:10}
+};
+const COST_KEYS = ['c_contas','c_mercado','c_saude','c_transp','c_lazer','c_outros','c_viagens','c_aluguel','c_imovel'];
+
+const EXEMPLO = {
+  idade:30, situacao:'clt', renda:10000, mesesSemRenda:4, rendaVolta:9000, gastos:5500, viagensHoje:6000,
+  patrimonio:60000, liquidez:20000, dividas:0, share:80,
+  reajuste:0.5, creep:30, saltoAno:3,
+  steps:[{anos:2,tipo:'promocao',pct:20},{anos:5,tipo:'troca',pct:25},{anos:9,tipo:'gestao',pct:40}],
+  perfil:'moderado', retorno:5, swr:4.5, vol:10, inss:0, inssIdade:65,
+  estilo:'litoral', extras:['pet'], anos:20, moradia:'comprar', anoFilho:2031
+};
+function applyDream(s){
+  const d=SONHOS[s.estilo]; if(!d) return;
+  s.c_contas=d.c.contas; s.c_mercado=d.c.mercado; s.c_saude=d.c.saude; s.c_transp=d.c.transp; s.c_lazer=d.c.lazer; s.c_outros=d.c.outros;
+  s.c_viagens=d.viagens; s.c_aluguel=d.aluguel; s.c_imovel=d.imovel;
+  if(d.moradia) s.moradia=d.moradia;
 }
-const EXEMPLO = Object.assign({
-  idade1:32, idade2:31, renda1:12000, renda2:10000, gastos:10000, juntas:'nao', gastos1:6000, gastos2:5000, anoJuntas:2028, custoMudanca:30000, parcela:0, parcelaAnos:0,
-  patrimonio1:180000, patrimonio2:120000, patrimonio:300000, liquidez:60000, dividas:0, aporte1:4000, aporte2:3000, aporte:7000, divisao:'proporcional', seguro:false, plano:true, irCompleta:false,
-  cidade:'litnorte', anos:20, moradia:'propria', c_filho:1500,
-  vinc1:'clt', vinc2:'clt', estilo:'confortavel', viagens:20000, viagensHoje:12000, retorno:5, swr:4.5, cresc1:2, cresc2:2, creep:30, vol:9, inss:0, inssIdade:65,
-  kids:[{ano:2031, escola:'particular', facul:'particular'}]
-}, CIDADES.litnorte);
-const KEY = 'planeja-lar-v1';
-let S;
-try{ S = JSON.parse(localStorage.getItem(KEY)) || null; }catch(e){ S = null; }
-let isExample = !S;
-if(S){ if(S.patrimonio1===undefined){ S.patrimonio1=Math.round((S.patrimonio||0)/2); S.patrimonio2=(S.patrimonio||0)-S.patrimonio1; S.aporte1=Math.round((S.aporte||0)/2); S.aporte2=(S.aporte||0)-S.aporte1; }
-  S.divisao=S.divisao||'proporcional';
-  if(!S.juntas){ S.juntas='sim'; S.gastos1=Math.round(S.gastos/2); S.gastos2=S.gastos-S.gastos1; S.anoJuntas=Y0+1; S.custoMudanca=0; }
-  if(S.cresc1===undefined){ S.cresc1=S.cresc2=(S.crescRenda!==undefined?S.crescRenda:1); S.creep=0; }
-  S.vinc1 = S.vinc1||'clt'; S.vinc2 = S.vinc2||'clt'; if(!S.estilo){ S.estilo='custom'; S.viagens=S.viagens||0; S.viagensHoje=S.viagensHoje||0; } }
-if(!S) S = JSON.parse(JSON.stringify(EXEMPLO));
+applyDream(EXEMPLO);
 
-const $ = id => document.getElementById(id);
-const NUM_IDS = ['idade1','idade2','renda1','renda2','gastos','gastos1','gastos2','anoJuntas','custoMudanca','parcela','parcelaAnos','patrimonio1','patrimonio2','liquidez','dividas','aporte1','aporte2','anos','retorno','swr','cresc1','cresc2','creep','vol','inss','inssIdade','c_moradia','c_mercado','c_saude','c_transp','c_lazer','c_outros','c_aluguel','c_filho','e_inf','e_fund','e_med','viagens','viagensHoje'];
-const SEL_IDS = ['cidade','moradia','vinc1','vinc2','divisao','juntas'];
-const CHK_IDS = ['seguro','plano','irCompleta'];
+const KEY='planeja-lar-v2';
+let S; try{ S=JSON.parse(localStorage.getItem(KEY))||null; }catch(e){ S=null; }
+let isExample=!S;
+const fresh=()=>JSON.parse(JSON.stringify(EXEMPLO));
+S = S ? Object.assign(fresh(), S) : fresh();
 
-const brl = v => 'R$ ' + Math.round(v).toLocaleString('pt-BR');
-function short(v){
-  const a = Math.abs(v), s = v<0?'−':'';
-  if(a>=1e6) return s+'R$ '+(a/1e6).toLocaleString('pt-BR',{maximumFractionDigits:2,minimumFractionDigits:1})+' mi';
-  if(a>=1e3) return s+'R$ '+Math.round(a/1e3).toLocaleString('pt-BR')+' mil';
-  return s+'R$ '+Math.round(a);
+const $=id=>document.getElementById(id);
+const NUM_IDS=['idade','renda','mesesSemRenda','rendaVolta','gastos','viagensHoje','patrimonio','liquidez','dividas','share','reajuste','creep','saltoAno','retorno','swr','vol','inss','inssIdade','anos','anoFilho'].concat(COST_KEYS);
+const SEL_IDS=['situacao','perfil','moradia'];
+const brl=v=>'R$ '+Math.round(v).toLocaleString('pt-BR');
+function short(v){ const a=Math.abs(v), s=v<0?'−':''; if(a>=1e6) return s+'R$ '+(a/1e6).toLocaleString('pt-BR',{maximumFractionDigits:2,minimumFractionDigits:1})+' mi'; if(a>=1e3) return s+'R$ '+Math.round(a/1e3).toLocaleString('pt-BR')+' mil'; return s+'R$ '+Math.round(a); }
+const pct=v=>(v*100).toLocaleString('pt-BR',{maximumFractionDigits:0})+'%';
+const pct1=v=>(v>=0?'+':'−')+Math.abs(v*100).toLocaleString('pt-BR',{maximumFractionDigits:1,minimumFractionDigits:1})+'%';
+const anosTxt=n=>n===1?'1 ano':n.toLocaleString('pt-BR',{maximumFractionDigits:1})+' anos';
+
+/* ---------- formulário ---------- */
+function renderDreams(){
+  const N=Math.max(1,Math.round(S.anos));
+  $('dreams').innerHTML=Object.entries(SONHOS).map(([id,d])=>{
+    const t=Object.assign({},S); t.estilo=id; applyDream(t);
+    const m=coreCost(t), T=target(t,N).total;
+    return `<label class="dream"><input type="radio" name="estilo" value="${id}"${S.estilo===id?' checked':''}><span class="tag">${d.tag}</span><span class="n">${d.nome}</span><span class="c">${brl(m)}/mês</span><span class="m">meta ${short(T)}</span><span class="d">${d.desc}</span></label>`;
+  }).join('')+`<label class="dream"><input type="radio" name="estilo" value="custom"${S.estilo==='custom'?' checked':''}><span class="tag">Seu jeito</span><span class="n">Personalizado</span><span class="c">${brl(coreCost(S))}/mês</span><span class="d">Fica marcado quando você ajusta os custos à mão.</span></label>`;
 }
-const pct = v => (v*100).toLocaleString('pt-BR',{maximumFractionDigits:0})+'%';
-
+function renderExtras(){
+  $('extras').innerHTML=Object.entries(EXTRAS).map(([id,x])=>`<label class="chip" title="${x.info}"><input type="checkbox" name="extra" value="${id}"${S.extras.includes(id)?' checked':''}>${x.nome} <small>+${brl(x.mes)}</small></label>`).join('');
+}
+function renderSteps(){
+  $('steps').innerHTML=S.steps.map((st,i)=>`<div class="step">
+    <label>Em (anos)<input id="st_anos_${i}" type="number" min="0" max="40" step="1" value="${st.anos}"></label>
+    <label>Tipo<select id="st_tipo_${i}">${Object.entries(DEGRAUS).map(([k,d])=>`<option value="${k}"${st.tipo===k?' selected':''}>${d.nome}</option>`).join('')}</select></label>
+    <label>Aumento (%)<input id="st_pct_${i}" type="number" step="5" min="-80" max="500" value="${st.pct}"></label>
+    <button type="button" class="link" data-rmstep="${i}" aria-label="Remover salto">✕</button></div>`).join('') || '<p class="hint">Nenhum salto planejado. O app usa só o reajuste anual.</p>';
+  $('addStep').hidden=S.steps.length>=6;
+  addInfo($('steps'));
+}
 function fillForm(){
-  NUM_IDS.forEach(id=>{ $(id).value = S[id]; });
-  SEL_IDS.forEach(id=>{ $(id).value = S[id]; });
-  CHK_IDS.forEach(id=>{ $(id).checked = !!S[id]; });
-  renderKids();
-  renderStyles();
+  NUM_IDS.forEach(id=>{ $(id).value=S[id]; });
+  SEL_IDS.forEach(id=>{ $(id).value=S[id]; });
+  renderDreams(); renderExtras(); renderSteps();
 }
-function renderStyles(){
-  const b=CIDADES[S.cidade];
-  const opts=Object.entries(ESTILOS).map(([id,st])=>{
-    const m=BASE_KEYS.reduce((t,k)=>t+r100(b[k]*st.mult),0)+(S.moradia==='aluguel'?r100(b.c_aluguel*st.alug):0)+st.viagens/12;
-    return `<label class="style-card"><input type="radio" name="estilo" value="${id}" id="est_${id}"${S.estilo===id?' checked':''}><span class="n">${st.nome}</span><span class="c">${brl(m)}/mês</span><span class="d">${st.desc}</span></label>`;
-  });
-  opts.push(`<label class="style-card wide"><input type="radio" name="estilo" value="custom" id="est_custom"${S.estilo==='custom'?' checked':''}><span class="n">Personalizado</span><span class="d">Seus próprios valores. Fica marcado quando vocês editam algum custo.</span></label>`);
-  $('styles').innerHTML=opts.join('');
-}
-function renderKids(){
-  const box = $('kids'); box.innerHTML='';
-  S.kids.forEach((k,i)=>{
-    const d = document.createElement('div'); d.className='kid';
-    d.innerHTML = `<div class="kid-h"><span>Filho(a) ${i+1}</span><button type="button" class="link" data-rm="${i}">Remover</button></div>
-      <div class="row" style="grid-template-columns:1fr 1fr 1fr">
-        <label>Nasce/nasceu em<input id="k_ano_${i}" type="number" min="1995" max="2060" value="${k.ano}"></label>
-        <label>Escola<select id="k_esc_${i}"><option value="publica">Pública</option><option value="particular">Particular</option><option value="bilingue">Bilíngue</option></select></label>
-        <label>Faculdade<select id="k_fac_${i}"><option value="publica">Pública</option><option value="particular">Particular</option><option value="top">Particular top</option></select></label>
-      </div>`;
-    box.appendChild(d);
-    $('k_esc_'+i).value = k.escola; $('k_fac_'+i).value = k.facul;
-  });
-  $('addKid').hidden = S.kids.length>=4;
-  if(typeof addInfo==='function') addInfo(box);
-}
-function updateHint(){ const h=$('rendaHint'); if(h) h.textContent = anyPJ(S)?'Para PJ, use o que entra no bolso por mês: pró-labore + lucros distribuídos, já sem impostos e taxas da empresa, dividido por 12. Para CLT, inclua 13º, férias e PLR.':'Inclua 13º, férias e PLR divididos por 12.'; }
 function readForm(){
-  NUM_IDS.forEach(id=>{ const v = parseFloat($(id).value); S[id] = isFinite(v)?v:0; });
-  SEL_IDS.forEach(id=>{ S[id] = $(id).value; });
-  CHK_IDS.forEach(id=>{ S[id] = $(id).checked; });
-  S.patrimonio = S.patrimonio1+S.patrimonio2; S.aporte = S.aporte1+S.aporte2;
-  S.kids = S.kids.map((k,i)=>({ano:parseInt($('k_ano_'+i).value)||Y0, escola:$('k_esc_'+i).value, facul:$('k_fac_'+i).value}));
+  NUM_IDS.forEach(id=>{ const v=parseFloat($(id).value); S[id]=isFinite(v)?v:0; });
+  SEL_IDS.forEach(id=>{ S[id]=$(id).value; });
+  const est=document.querySelector('input[name=estilo]:checked'); if(est) S.estilo=est.value;
+  S.extras=[...document.querySelectorAll('input[name=extra]:checked')].map(i=>i.value);
+  S.steps=S.steps.map((st,i)=>({anos:parseFloat($('st_anos_'+i).value)||0, tipo:$('st_tipo_'+i).value, pct:parseFloat($('st_pct_'+i).value)||0}));
 }
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
 
 /* ---------- modelo ---------- */
-function coreCost(s){ return (s.viagens||0)/12+s.c_moradia+s.c_mercado+s.c_saude+s.c_transp+s.c_lazer+s.c_outros+(s.moradia==='aluguel'?s.c_aluguel:0); }
-function kidYearCost(s,k,year){
-  const a = year - k.ano; if(a<0||a>22) return 0;
-  let c = 0;
-  if(a===0) c += 15000; // enxoval, parto, adaptação
-  if(a<=17) c += s.c_filho*12;
-  const mult = k.escola==='publica'?0:(k.escola==='bilingue'?1.5:1);
-  let fee = 0;
-  if(a>=2&&a<=5) fee = s.e_inf; else if(a>=6&&a<=14) fee = s.e_fund; else if(a>=15&&a<=17) fee = s.e_med;
-  c += fee*mult*13; // 12 mensalidades + matrícula/material
-  if(a>=18) c += FACUL[k.facul]*12;
+const hasKid=s=>s.extras.includes('filho');
+function kidMonthly(s,year){ if(!hasKid(s)) return 0; const a=year-s.anoFilho; if(a<0||a>22) return 0; return a<2?2500:a<18?EXTRAS.filho.mes:5000; }
+function coreCost(s){
+  let c=s.c_contas+s.c_mercado+s.c_saude+s.c_transp+s.c_lazer+s.c_outros+s.c_viagens/12;
+  if(s.moradia==='aluguel') c+=s.c_aluguel;
+  s.extras.forEach(x=>{ if(EXTRAS[x]&&!EXTRAS[x].temp) c+=EXTRAS[x].mes; });
   return c;
 }
-const isPJ = v => v==='pj'||v==='autonomo';
-const anyPJ = s => isPJ(s.vinc1)||isPJ(s.vinc2);
-const reserveGoal = s => anyPJ(s)?12:6;
-const separadas = (s,y) => s.juntas==='nao' && y < s.anoJuntas;
-const baseGastos = (s,y) => separadas(s,y) ? s.gastos1+s.gastos2 : s.gastos;
-const kidsCost = (s,year) => s.kids.reduce((t,k)=>t+kidYearCost(s,k,year),0);
-
-function target(s,N,r){
-  const core = coreCost(s);
-  const Yn = Y0+N;
-  let edu=0, fin=0;
-  for(let y=Yn; y<Yn+30; y++){ edu += kidsCost(s,y)/Math.pow(1+r,y-Yn); }
-  for(let i=N;i<s.parcelaAnos;i++){ fin += s.parcela*12/Math.pow(1+r,i-N); }
-  const swr = Math.max(s.swr,0.5)/100;
-  let inssPV = 0;
-  if(s.inss>0){ const wait = Math.max(0, s.inssIdade-(s.idade1+N)); inssPV = (s.inss*12/swr)/Math.pow(1+r,wait); }
-  const coreTarget = core*12/swr;
-  return {total: Math.max(0, coreTarget + edu + fin - inssPV), coreTarget, edu, fin, inssPV, core};
+function target(s,N){
+  const r=s.retorno/100, swr=Math.max(s.swr,0.5)/100, core=coreCost(s), Yn=Y0+N;
+  const coreT=core*12/swr, casa=s.moradia==='comprar'?s.c_imovel:0;
+  let edu=0; for(let y=Yn;y<Yn+30;y++) edu+=kidMonthly(s,y)*12/Math.pow(1+r,y-Yn);
+  let inssPV=0; if(s.inss>0){ const wait=Math.max(0,s.inssIdade-(s.idade+N)); inssPV=(s.inss*12/swr)/Math.pow(1+r,wait); }
+  return {total:Math.max(0,coreT+casa+edu-inssPV), core, coreT, casa, edu, inssPV};
 }
-function cashflows(s,years){
-  const out=[]; const g1=s.cresc1/100, g2=s.cresc2/100, inc0=(s.renda1+s.renda2)*12, creep=Math.min(Math.max(s.creep||0,0),100)/100;
-  for(let i=0;i<years;i++){
-    const y=Y0+i;
-    const income=(s.renda1*Math.pow(1+g1,i)+s.renda2*Math.pow(1+g2,i))*12;
-    const exp=Math.max(0,income-inc0)*creep+baseGastos(s,y)*12+(s.juntas==='nao'&&y===s.anoJuntas?(s.custoMudanca||0):0)+(s.viagensHoje||0)+(i<s.parcelaAnos?s.parcela*12:0)+kidsCost(s,y);
-    out.push({i,y,income,exp,surplus:income-exp});
+const unemployed=s=>s.situacao==='desempregado';
+function incomeAt(s,m,g,steps){
+  if(unemployed(s) && m<s.mesesSemRenda) return s.renda;
+  const base=unemployed(s)?s.rendaVolta:s.renda;
+  let inc=base*Math.pow(1+g,m/12);
+  for(const st of steps) if(m>=st.anos*12) inc*=1+st.pct/100;
+  return Math.max(0,inc);
+}
+function sim(s,N,opt={}){
+  const rA=opt.r!==undefined?opt.r:s.retorno/100, share=Math.min(Math.max(opt.share!==undefined?opt.share:s.share/100,0),1);
+  const g=opt.g!==undefined?opt.g:s.reajuste/100, steps=opt.steps||s.steps, creep=Math.min(Math.max(s.creep,0),100)/100;
+  const creepBase=unemployed(s)?s.rendaVolta:s.renda;
+  let P=s.patrimonio-s.dividas, minP=P; const years=[]; let a={inc:0,exp:0,c:0};
+  for(let m=0;m<N*12;m++){
+    const yi=Math.floor(m/12), ra=opt.returns?opt.returns[yi]:rA, rm=Math.pow(1+ra,1/12)-1;
+    const inc=incomeAt(s,m,g,steps);
+    const exp=s.gastos+Math.max(0,inc-creepBase)*creep+s.viagensHoje/12+kidMonthly(s,Y0+yi);
+    const sobra=inc-exp, c=sobra>0?sobra*share:sobra;
+    P=P*(1+rm)+c; if(P<minP) minP=P;
+    a.inc+=inc; a.exp+=exp; a.c+=c;
+    if(m%12===11){ years.push({i:yi,y:Y0+yi,inc:a.inc/12,exp:a.exp/12,c:a.c/12,P}); a={inc:0,exp:0,c:0}; }
   }
-  return out;
+  return {P,years,minP};
 }
-function investShare(s){
-  const sur0=(s.renda1+s.renda2)-baseGastos(s,Y0)-(s.viagensHoje||0)/12-(s.parcelaAnos>0?s.parcela:0)-kidsCost(s,Y0)/12;
-  if(sur0<=0) return {share:0,sur0};
-  return {share:Math.min(1, s.aporte/sur0), sur0};
-}
-function project(s,N,share,r,returns){
-  const cf=cashflows(s,N); let P=s.patrimonio-s.dividas; const path=[{i:0,P}];
-  const rows=[];
-  for(let i=0;i<N;i++){
-    const contrib=Math.max(0,cf[i].surplus*share);
-    const ri = returns?returns[i]:r;
-    P = P*(1+ri)+contrib;
-    rows.push(Object.assign({contrib,P},cf[i]));
-    path.push({i:i+1,P});
-  }
-  return {P,path,rows};
-}
+function bisect(fn,lo,hi,it=32){ for(let k=0;k<it;k++){ const m=(lo+hi)/2; if(fn(m)) hi=m; else lo=m; } return hi; }
 function calc(s){
-  const r=s.retorno/100, N=Math.max(1,Math.round(s.anos));
-  const T=target(s,N,r);
-  const {share,sur0}=investShare(s);
-  const cur=project(s,N,share,r);
-  const A=project(s,N,0,r).P, B=project(s,N,1,r).P-A;
-  const need = B>0?(T.total-A)/B:Infinity; // fração da sobra a investir
-  const needShare = Math.max(0,need);
-  const req=project(s,N,Math.min(needShare,1e6),r);
-  // aporte constante equivalente
-  const fac = r>0?(Math.pow(1+r,N)-1)/r:N;
-  const constMonthly = Math.max(0,(T.total-(s.patrimonio-s.dividas)*Math.pow(1+r,N))/fac/12);
+  const N=Math.max(1,Math.round(s.anos)), T=target(s,N), r=s.retorno/100;
+  const plan=sim(s,N), reach=o=>sim(s,N,o).P>=T.total;
+  // 1. só reajuste: crescimento anual necessário, sem saltos
+  let gReq=null; if(s.share>0 && reach({g:0.6,steps:[]})) gReq = reach({g:-0.1,steps:[]}) ? -0.1 : bisect(g=>reach({g,steps:[]}),-0.1,0.6);
+  // 2. um grande salto no ano escolhido, com o reajuste informado
+  const J=Math.min(Math.max(1,Math.round(s.saltoAno)),N-1||1);
+  let jumpReq=null; if(s.share>0 && reach({steps:[{anos:J,pct:1000}]})) jumpReq = reach({steps:[{anos:J,pct:0}]}) ? 0 : bisect(p=>reach({steps:[{anos:J,pct:p}]}),0,1000);
   // alavancas
-  let delay=null;
-  for(let n=N;n<=N+30;n++){ if(project(s,n,share,r).P>=target(s,n,r).total){delay=n-N;break;} }
-  let firstYear=null;
-  for(let n=1;n<=45;n++){ if(project(s,n,share,r).P>=target(s,n,r).total){firstYear=n;break;} }
-  const swr=Math.max(s.swr,0.5)/100;
-  const sustainCore = Math.max(0,(cur.P-(T.total-T.coreTarget))*swr/12);
-  let lo=-0.05,hi=0.25,reqR=null;
-  if(project(s,N,share,hi).P>=target(s,N,hi).total){
-    for(let k=0;k<50;k++){ const m=(lo+hi)/2; if(project(s,N,share,m).P>=target(s,N,m).total) hi=m; else lo=m; }
-    reqR=hi;
-  }
-  // Monte Carlo
-  const sims=800, vol=s.vol/100; let ok=0;
-  let seed=12345; const rnd=()=>{seed=(seed*1103515245+12345)%2147483648;return seed/2147483648;};
-  const gauss=()=>{let u=0,v=0;while(u===0)u=rnd();v=rnd();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);};
-  for(let k=0;k<sims;k++){ const rets=[]; for(let i=0;i<N;i++) rets.push(r+vol*gauss()); if(project(s,N,share,r,rets).P>=T.total) ok++; }
-  // crescimento de renda necessário (mesmo % para os dois, mantendo o hábito de investir de hoje)
-  const reachG=g=>project(Object.assign({},s,{cresc1:g*100,cresc2:g*100}),N,share,r).P>=T.total;
-  let gReq=null;
-  if(share>0 && reachG(0.30)){
-    let a=-0.10,b=0.30;
-    if(reachG(a)) gReq=a; else { for(let k=0;k<50;k++){ const m=(a+b)/2; if(reachG(m)) b=m; else a=m; } gReq=b; }
-  }
-  const incAt=(g1,g2,i)=>s.renda1*Math.pow(1+g1,i)+s.renda2*Math.pow(1+g2,i);
-  const inc0=s.renda1+s.renda2;
-  const gPlan = inc0>0? Math.pow(incAt(s.cresc1/100,s.cresc2/100,N)/inc0,1/N)-1 : 0;
-  return {r,N,T,share,sur0,cur,req,needShare,constMonthly,delay,firstYear,sustainCore,reqR,prob:ok/sims,gReq,gPlan,incAt,inc0};
+  const shareReq = reach({share:1}) ? bisect(x=>reach({share:x}),0,1) : null;
+  let delay=null; for(let n=N;n<=N+30;n++){ if(sim(s,n).P>=target(s,n).total){ delay=n-N; break; } }
+  const swr=Math.max(s.swr,0.5)/100, sustainCore=Math.max(0,(plan.P-(T.total-T.coreT))*swr/12);
+  // chance de chegar lá
+  const sims=250, vol=s.vol/100; let ok=0, seed=12345;
+  const rnd=()=>{ seed=(seed*1103515245+12345)%2147483648; return seed/2147483648; };
+  const gauss=()=>{ let u=0; while(u===0) u=rnd(); return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*rnd()); };
+  for(let k=0;k<sims;k++){ const rets=[]; for(let i=0;i<N;i++) rets.push(r+vol*gauss()); if(sim(s,N,{returns:rets}).P>=T.total) ok++; }
+  const need = gReq===null?null:sim(s,N,{g:gReq,steps:[]});
+  return {N,T,plan,gReq,J,jumpReq,shareReq,delay,sustainCore,prob:ok/sims,need,progress:T.total>0?plan.P/T.total:1};
+}
+
+/* ---------- desenho ---------- */
+function niceStep(raw){ const p=Math.pow(10,Math.floor(Math.log10(raw||1))); const n=raw/p; return (n<=1?1:n<=2?2:n<=2.5?2.5:n<=5?5:10)*p; }
+function lineChart(svgId,tipId,cfg){
+  const svg=$(svgId), tip=$(tipId), W=svg.clientWidth||700, H=+svg.getAttribute('height'), ev=cfg.events||[];
+  const m={l:64,r:16,t:16,b:ev.length?54:30}, n=cfg.xs.length-1, span=cfg.xs[n]||1;
+  const all=cfg.series.flatMap(s=>s.v).concat(cfg.hline?[cfg.hline.v]:[]);
+  const maxV=Math.max(1,...all)*1.08, step=niceStep(maxV/4), top=Math.ceil(maxV/step)*step, minV=Math.min(0,...all);
+  const bot=minV<0?-Math.ceil(-minV/step)*step:0;
+  const x=t=>m.l+(W-m.l-m.r)*t/span, y=v=>m.t+(H-m.t-m.b)*(1-(v-bot)/(top-bot));
+  let g='';
+  for(let v=bot;v<=top+1;v+=step) g+=`<line x1="${m.l}" x2="${W-m.r}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${m.l-8}" y="${y(v)+4}" text-anchor="end" font-size="11" fill="var(--ink-3)">${short(v).replace('R$ ','')}</text>`;
+  const xt=span<=12?1:span<=25?5:10;
+  for(let t=0;t<=span;t+=xt) g+=`<text x="${x(t)}" y="${H-m.b+16}" text-anchor="middle" font-size="11" fill="var(--ink-3)">${Y0+t}</text>`;
+  ev.forEach((e,j)=>{ g+=`<line x1="${x(e.t)}" x2="${x(e.t)}" y1="${m.t}" y2="${H-m.b}" stroke="var(--ink-3)" stroke-dasharray="2 3" opacity=".6"/><text x="${Math.min(Math.max(x(e.t),m.l+40),W-m.r-40)}" y="${H-m.b+32+(j%2)*12}" text-anchor="middle" font-size="10.5" fill="var(--ink-2)">${e.label}</text>`; });
+  if(cfg.hline) g+=`<line x1="${m.l}" x2="${W-m.r}" y1="${y(cfg.hline.v)}" y2="${y(cfg.hline.v)}" stroke="var(--ink-3)" stroke-width="1.5" stroke-dasharray="1 4" stroke-linecap="round"/><text x="${m.l+6}" y="${y(cfg.hline.v)-6}" font-size="11" fill="var(--ink-2)">${cfg.hline.label}</text>`;
+  const path=v=>v.map((val,i)=>(i?'L':'M')+x(cfg.xs[i]).toFixed(1)+' '+y(val).toFixed(1)).join(' ');
+  cfg.series.slice().reverse().forEach(s=>{ if(!s.v.length) return; if(s.area) g+=`<path d="${path(s.v)} L${x(span)} ${y(Math.max(bot,0))} L${x(0)} ${y(Math.max(bot,0))} Z" fill="${s.color}" opacity=".08"/>`; g+=`<path d="${path(s.v)}" fill="none" stroke="${s.color}" stroke-width="2"${s.dash?` stroke-dasharray="${s.dash}"`:''}/>`; });
+  const s0=cfg.series[0]; g+=`<circle cx="${x(span)}" cy="${y(s0.v[n])}" r="5" fill="${s0.color}" stroke="var(--surface)" stroke-width="2"/>`;
+  g+=`<line class="cross" x1="0" x2="0" y1="${m.t}" y2="${H-m.b}" stroke="var(--ink-2)" visibility="hidden"/>`;
+  cfg.series.forEach((s,k)=>{ g+=`<circle class="dot dot${k}" r="5" fill="${s.color}" stroke="var(--surface)" stroke-width="2" visibility="hidden"/>`; });
+  g+=`<rect class="hit" x="${m.l}" y="${m.t}" width="${W-m.l-m.r}" height="${H-m.t-m.b}" fill="transparent"/>`;
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`); svg.innerHTML=g;
+  const hit=svg.querySelector('.hit'), cross=svg.querySelector('.cross');
+  const move=e=>{
+    const rect=svg.getBoundingClientRect(), px=(e.clientX-rect.left)*(W/rect.width);
+    const t=(px-m.l)/(W-m.l-m.r)*span; let i=0; cfg.xs.forEach((v,k)=>{ if(Math.abs(v-t)<Math.abs(cfg.xs[i]-t)) i=k; });
+    const X=x(cfg.xs[i]); cross.setAttribute('x1',X); cross.setAttribute('x2',X); cross.setAttribute('visibility','visible');
+    cfg.series.forEach((s,k)=>{ const d=svg.querySelector('.dot'+k); if(!s.v.length) return; d.setAttribute('cx',X); d.setAttribute('cy',y(s.v[i])); d.setAttribute('visibility','visible'); });
+    tip.innerHTML=cfg.tip(i); tip.hidden=false;
+    const tw=tip.offsetWidth, cx=X*(rect.width/W); tip.style.left=(cx+tw+16>rect.width?cx-tw-12:cx+12)+'px'; tip.style.top='8px';
+  };
+  hit.addEventListener('pointermove',move); hit.addEventListener('pointerdown',move);
+  hit.addEventListener('pointerleave',()=>{ tip.hidden=true; cross.setAttribute('visibility','hidden'); svg.querySelectorAll('.dot').forEach(d=>d.setAttribute('visibility','hidden')); });
 }
 
 /* ---------- render ---------- */
+const reserveGoal=s=>(s.situacao==='pj'||s.situacao==='empreendedor')?12:unemployed(s)?6:6;
 function render(){
-  const s=S, R=calc(s);
-  const progress = R.T.total>0?R.cur.P/R.T.total:1;
-  const p=Math.max(0,Math.min(progress,1));
-  $('ringFg').setAttribute('stroke-dashoffset', (351.86*(1-p)).toFixed(1));
-  $('ringFg').setAttribute('stroke', progress>=1?'var(--good)':progress>=0.75?'var(--accent)':progress>=0.5?'var(--warn)':'var(--bad)');
-  $('ringTxt').textContent = pct(Math.min(progress,9.99));
-  const Yr=Y0+R.N;
-  let pill, title, text;
-  const kidsTxt = s.kids.length? (s.kids.length===1?' com um filho':' com '+s.kids.length+' filhos') : '';
-  if(progress>=1){
-    pill='<span class="pill good">✓ No caminho</span>';
-    title=`No ritmo atual, vocês vivem de renda em ${Yr}${kidsTxt}.`;
-    text=`O patrimônio projetado (${short(R.cur.P)}) passa da meta de ${short(R.T.total)}. ${R.firstYear&&R.firstYear<R.N?`A meta já seria atingida em ${Y0+R.firstYear}. `:''}Mantenham o aporte e revisem uma vez por ano.`;
-  } else if(R.needShare<=1){
-    pill='<span class="pill warn">! Ajuste necessário</span>';
-    title=`Dá para chegar em ${Yr}, mas é preciso investir mais.`;
-    text=`Hoje vocês investem ${pct(R.share)} do que sobra no mês. Para a meta de ${short(R.T.total)}, precisam investir ${pct(R.needShare)} da sobra, ou seja, ${brl(R.needShare*R.sur0)} por mês a partir de agora.`;
-  } else {
-    pill='<span class="pill bad">✕ Fora de alcance com a renda atual</span>';
-    title=`Mesmo investindo toda a sobra, faltam ${short(R.T.total-project(s,R.N,1,R.r).P)} em ${Yr}.`;
-    text=`O sonho pede ${short(R.T.total)}. Use as alavancas abaixo: mais prazo, custo de vida menor, mais renda ou escola diferente.`;
-  }
+  const s=S, R=calc(s), N=R.N, Yr=Y0+N, p=Math.max(0,Math.min(R.progress,1));
+  $('ringFg').setAttribute('stroke-dashoffset',(351.86*(1-p)).toFixed(1));
+  $('ringFg').setAttribute('stroke',R.progress>=1?'var(--good)':R.progress>=0.75?'var(--accent)':R.progress>=0.5?'var(--warn)':'var(--bad)');
+  $('ringTxt').textContent=pct(Math.min(R.progress,9.99));
+  const dname=s.estilo==='custom'?'o seu sonho':'o sonho "'+SONHOS[s.estilo].nome+'"', dnameDe=s.estilo==='custom'?'do seu sonho':'do sonho "'+SONHOS[s.estilo].nome+'"';
+  let pill,title,text;
+  if(R.progress>=1){ pill='<span class="pill good">✓ No caminho</span>'; title=`Com o seu plano de carreira, você vive ${dname} em ${Yr}.`; text=`O patrimônio projetado (${short(R.plan.P)}) passa da meta de ${short(R.T.total)}, aos ${s.idade+N} anos. Mantenha o hábito de investir ${s.share}% do que sobra e revise uma vez por ano.`; }
+  else { pill=`<span class="pill ${R.progress>=0.6?'warn':'bad'}">${R.progress>=0.6?'! Ajuste necessário':'✕ Longe do sonho'}</span>`; title=`Seu plano chega a ${pct(R.progress)} ${dnameDe} em ${Yr}.`;
+    const opts=[]; if(R.gReq!==null) opts.push(`uma renda crescendo ${pct1(R.gReq)} ao ano acima da inflação`); if(R.jumpReq!==null) opts.push(`um salto de ${Math.round(R.jumpReq).toLocaleString('pt-BR')}% na renda em ${Y0+R.J}`);
+    text=`A meta é ${short(R.T.total)}. ${opts.length?'Para fechar, você precisa de '+opts.join(' ou ')+'. ':''}Os detalhes estão em "Quanto sua carreira precisa evoluir".`; }
+  if(R.plan.minP<0){ text+=` Atenção: no caminho o patrimônio fica negativo (${short(R.plan.minP)}), ou seja, faltaria dinheiro para as contas.`; }
   $('vPill').innerHTML=pill; $('vTitle').textContent=title; $('vText').textContent=text;
 
-  const g0=baseGastos(s,Y0); const reserveMonths = g0>0? s.liquidez/(g0+s.parcela):0;
-  const savingRate = (s.renda1+s.renda2)>0? s.aporte/(s.renda1+s.renda2):0;
-  $('kpis').innerHTML = [
-    ['Meta de patrimônio', short(R.T.total), `para ${brl(R.T.core)}/mês do casal`],
-    ['Projeção no ritmo atual', short(R.cur.P), `em ${Yr}`],
-    ['Aporte necessário hoje', brl(Math.max(R.needShare*R.sur0,0)), R.needShare>1?'maior que a sobra do mês':`investem ${brl(s.aporte)} hoje`],
-    ['Chance de chegar lá', pct(R.prob), `simulando anos bons e ruins`],
-    ['Sobra mensal hoje', brl(R.sur0), `taxa de poupança ${pct(savingRate)}`],
-    ['Reserva de emergência', reserveMonths.toLocaleString('pt-BR',{maximumFractionDigits:1})+' meses', reserveMonths>=reserveGoal(s)?'ok, meta de '+reserveGoal(s)+' meses':'meta: '+reserveGoal(s)+' meses'+(anyPJ(s)?' (renda PJ varia)':'')],
-    ['Parte da educação', short(R.T.edu), 'custo dos filhos após '+Yr],
-    ['Idade ao viver de renda', (s.idade1+R.N)+' e '+(s.idade2+R.N), 'anos']
+  const inc0=incomeAt(s,unemployed(s)?s.mesesSemRenda:0,s.reajuste/100,[]);
+  const sobra0=s.renda-s.gastos-s.viagensHoje/12, aporte0=Math.max(0,sobra0)*s.share/100;
+  const fol = unemployed(s) ? (s.gastos+s.viagensHoje/12-s.renda>0 ? s.liquidez/(s.gastos+s.viagensHoje/12-s.renda) : Infinity) : (s.gastos>0?s.liquidez/s.gastos:0);
+  const needFinal = R.gReq===null?null:incomeAt(s,N*12-1,R.gReq,[]);
+  $('kpis').innerHTML=[
+    ['Meta de patrimônio',short(R.T.total),`para ${brl(R.T.core)}/mês${R.T.casa?' + casa':''}`],
+    ['Projeção do seu plano',short(R.plan.P),`em ${Yr}, aos ${s.idade+N} anos`],
+    ['Renda necessária em '+Yr,needFinal===null?'—':brl(needFinal),'por mês, só com reajustes'],
+    ['Chance de chegar lá',pct(R.prob),'simulando anos bons e ruins'],
+    [unemployed(s)?'Fôlego da reserva':'Reserva de emergência', fol===Infinity?'sem prazo':fol.toLocaleString('pt-BR',{maximumFractionDigits:1})+' meses', unemployed(s)?`você volta a ter renda em ${s.mesesSemRenda} meses`:`meta: ${reserveGoal(s)} meses`],
+    ['Sobra por mês hoje',brl(sobra0),'renda − gastos − viagens'],
+    ['Investe por mês hoje',brl(aporte0),`${s.share}% da sobra`],
+    ['Renda hoje',brl(s.renda),unemployed(s)?`depois: ${brl(s.rendaVolta)}`:'líquida por mês']
   ].map(k=>`<div class="kpi"><span class="k">${k[0]}</span><span class="v">${k[1]}</span><span class="d">${k[2]}</span></div>`).join('');
 
-  drawChart(R);
-  renderPlan(R,reserveMonths);
-  renderAlloc(R);
-  renderLevers(R);
-  renderIncome(R);
-  renderSplit(R);
-  renderTable(R);
-  $('coreSum').textContent = brl(coreCost(s));
-  $('exTag').hidden = !isExample;
-  updateHint();
-  const sep=S.juntas==='nao'; $('sepBox').hidden=!sep; $('gastosLbl').textContent= sep?'Gastos da casa quando morarem juntos(as)/mês':'Gastos mensais atuais da casa (sem financiamento)';
-  if(!window.__splitHint) window.__splitHint=$('splitHint').textContent;
-  $('splitHint').textContent = sep ? 'Enquanto cada um mora na sua casa, a sobra de cada um vem da própria renda menos os próprios gastos, e a opção "Proporcional à sobra" divide o aporte por ela. Depois da mudança, os gastos da casa e dos filhos passam a ser do casal, e a divisão segue o salário.' : window.__splitHint;
+  renderCareer(R); renderMoney(R,sobra0,aporte0); renderPatChart(R); renderPlan(R,sobra0,aporte0,fol); renderLevers(R); renderTable(R);
+  $('coreSum').textContent=brl(coreCost(s));
+  $('exTag').hidden=!isExample;
+  $('desBox').hidden=!unemployed(s);
+  $('rendaLbl').textContent=unemployed(s)?'Renda hoje (bicos, seguro-desemprego)':(s.situacao==='pj'||s.situacao==='empreendedor')?'Renda líquida por mês (pró-labore + lucros)':'Renda líquida por mês';
+  $('filhoBox').hidden=!hasKid(s);
+  $('shareHint').textContent= sobra0>0?`Hoje isso dá ${brl(aporte0)} por mês investidos.`:'Hoje não sobra dinheiro no mês. Os gastos maiores que a renda saem do patrimônio.';
+  renderDreams();
 }
 
-function drawChart(R){
-  const svg=$('chart'), W=svg.clientWidth||700, H=320, m={l:64,r:16,t:16,b:52};
-  const cur=R.cur.path, req=R.req.path, N=R.N;
-  const maxV=Math.max(R.T.total*1.1, ...cur.map(d=>d.P), ...req.map(d=>d.P), 1);
-  const step=niceStep(maxV/4); const top=Math.ceil(maxV/step)*step;
-  const x=i=>m.l+(W-m.l-m.r)*i/N, y=v=>m.t+(H-m.t-m.b)*(1-Math.max(v,0)/top);
-  let g='';
-  for(let v=0; v<=top+1; v+=step){ g+=`<line x1="${m.l}" x2="${W-m.r}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)" stroke-width="1"/><text x="${m.l-8}" y="${y(v)+4}" text-anchor="end" font-size="11" fill="var(--ink-3)">${short(v).replace('R$ ','')}</text>`; }
-  const xt = N<=12?1:N<=25?5:10;
-  for(let i=0;i<=N;i+=xt){ g+=`<text x="${x(i)}" y="${H-m.b+16}" text-anchor="middle" font-size="11" fill="var(--ink-3)">${Y0+i}</text>`; }
-  // eventos
-  const evs=[];
-  S.kids.forEach((k,i)=>{ const a=k.ano-Y0; if(a>=0&&a<=N) evs.push([a,'Nasce '+(S.kids.length>1?'filho '+(i+1):'filho(a)')]); const f=k.ano+18-Y0; if(f>=0&&f<=N) evs.push([f,'Faculdade']); });
-  if(S.parcelaAnos>0&&S.parcelaAnos<=N) evs.push([S.parcelaAnos,'Fim do financiamento']);
-  if(S.juntas==='nao'&&S.anoJuntas>Y0&&S.anoJuntas-Y0<=N) evs.push([S.anoJuntas-Y0,'Moram juntos(as)']);
-  evs.forEach((e,j)=>{ g+=`<line x1="${x(e[0])}" x2="${x(e[0])}" y1="${m.t}" y2="${H-m.b}" stroke="var(--ink-3)" stroke-width="1" stroke-dasharray="2 3" opacity=".6"/><text x="${Math.min(Math.max(x(e[0]),m.l+30),W-m.r-30)}" y="${H-m.b+32+(j%2)*12}" text-anchor="middle" font-size="10.5" fill="var(--ink-2)">${e[1]}</text>`; });
-  // meta
-  g+=`<line x1="${m.l}" x2="${W-m.r}" y1="${y(R.T.total)}" y2="${y(R.T.total)}" stroke="var(--ink-3)" stroke-width="1.5" stroke-dasharray="1 4" stroke-linecap="round"/>`;
-  g+=`<text x="${m.l+6}" y="${y(R.T.total)-6}" font-size="11" fill="var(--ink-2)">Meta ${short(R.T.total)}</text>`;
-  const line=(pts)=>pts.map((d,i)=>(i?'L':'M')+x(d.i).toFixed(1)+' '+y(d.P).toFixed(1)).join(' ');
-  const area=line(cur)+` L${x(N)} ${y(0)} L${x(0)} ${y(0)} Z`;
-  g+=`<path d="${area}" fill="var(--accent)" opacity=".08"/>`;
-  if(R.needShare>0) g+=`<path d="${line(req)}" fill="none" stroke="var(--amber)" stroke-width="2" stroke-dasharray="6 4"/>`;
-  g+=`<path d="${line(cur)}" fill="none" stroke="var(--accent)" stroke-width="2"/>`;
-  const end=cur[cur.length-1];
-  g+=`<circle cx="${x(N)}" cy="${y(end.P)}" r="5" fill="var(--accent)" stroke="var(--surface)" stroke-width="2"/>`;
-  g+=`<line id="cross" x1="0" x2="0" y1="${m.t}" y2="${H-m.b}" stroke="var(--ink-2)" stroke-width="1" visibility="hidden"/>`;
-  g+=`<circle id="dotA" r="5" fill="var(--accent)" stroke="var(--surface)" stroke-width="2" visibility="hidden"/><circle id="dotB" r="5" fill="var(--amber)" stroke="var(--surface)" stroke-width="2" visibility="hidden"/>`;
-  g+=`<rect x="${m.l}" y="${m.t}" width="${W-m.l-m.r}" height="${H-m.t-m.b}" fill="transparent" id="hit"/>`;
-  svg.setAttribute('viewBox',`0 0 ${W} ${H}`); svg.innerHTML=g;
-  const tip=$('tip'), hit=$('hit');
-  const move=ev=>{
-    const rect=svg.getBoundingClientRect(); const px=(ev.clientX-rect.left)*(W/rect.width);
-    const i=Math.max(0,Math.min(N,Math.round((px-m.l)/(W-m.l-m.r)*N)));
-    const X=x(i);
-    $('cross').setAttribute('x1',X); $('cross').setAttribute('x2',X); $('cross').setAttribute('visibility','visible');
-    $('dotA').setAttribute('cx',X); $('dotA').setAttribute('cy',y(cur[i].P)); $('dotA').setAttribute('visibility','visible');
-    if(R.needShare>0){ $('dotB').setAttribute('cx',X); $('dotB').setAttribute('cy',y(req[i].P)); $('dotB').setAttribute('visibility','visible'); }
-    tip.innerHTML=`<div style="font-weight:600;margin-bottom:4px">${Y0+i} · vocês com ${S.idade1+i} e ${S.idade2+i}</div>
-      <div class="r"><span>Ritmo atual</span><b>${short(cur[i].P)}</b></div>
-      ${R.needShare>0?`<div class="r"><span>Ritmo necessário</span><b>${short(req[i].P)}</b></div>`:''}
-      <div class="r"><span>Meta final</span><b>${short(R.T.total)}</b></div>`;
-    tip.hidden=false;
-    const tw=tip.offsetWidth, cx=X*(rect.width/W);
-    tip.style.left=(cx+tw+16>rect.width? cx-tw-12 : cx+12)+'px'; tip.style.top='8px';
-  };
-  hit.addEventListener('pointermove',move); hit.addEventListener('pointerdown',move);
-  hit.addEventListener('pointerleave',()=>{ tip.hidden=true; ['cross','dotA','dotB'].forEach(id=>$(id).setAttribute('visibility','hidden')); });
+function renderCareer(R){
+  const s=S, N=R.N, Yr=Y0+N, g0=s.reajuste/100;
+  const planFinal=incomeAt(s,N*12-1,g0,s.steps);
+  let lede;
+  if(R.progress>=1) lede=`O seu plano de carreira já basta: com reajuste de ${pct1(g0)} ao ano e os saltos planejados, você chega a ${brl(planFinal)} por mês em ${Yr}. Abaixo está o mínimo necessário, para você saber quanta folga tem.`;
+  else if(s.share<=0) lede='Você não investe nada do que sobra, então aumentar a renda não muda o resultado. Defina um percentual em "Do que sobra, investe".';
+  else lede=`O seu plano leva a renda a ${brl(planFinal)} por mês em ${Yr} e chega a ${pct(R.progress)} do sonho. Há três caminhos para fechar a conta, mantendo o hábito de investir ${s.share}% do que sobra:`;
+  $('carLede').textContent=lede;
+  const jumpTxt=R.jumpReq===null?'mais de 1.000%':R.jumpReq<=0?'nenhum':'+'+Math.round(R.jumpReq).toLocaleString('pt-BR')+'%';
+  const baseJ=incomeAt(s,R.J*12-1,g0,[]);
+  $('carTiles').innerHTML=`
+    <div class="tile main"><span class="k">Só com aumentos anuais</span><span class="v">${R.gReq===null?'não basta':pct1(R.gReq)+'/ano'}</span><p>${R.gReq===null?'Nem 60% ao ano fecha. Combine com outra alavanca.':`acima da inflação, todo ano, sem saltos. Em ${Yr} você estaria ganhando ${brl(incomeAt(s,N*12-1,R.gReq,[]))}.`}</p></div>
+    <div class="tile"><span class="k">Um grande salto em ${Y0+R.J}</span><span class="v">${jumpTxt}</span><p>${R.jumpReq===null?'Um salto só não resolve.':R.jumpReq<=0?'O reajuste anual já basta.':`de ${brl(baseJ)} para ${brl(baseJ*(1+R.jumpReq/100))} por mês, depois só reajuste de ${pct1(g0)}.`}</p></div>
+    <div class="tile"><span class="k">O seu plano</span><span class="v">${pct(R.progress)}</span><p>do sonho, com ${s.steps.length?s.steps.length+(s.steps.length>1?' saltos':' salto')+' e ':''}reajuste de ${pct1(g0)}. Renda final: ${brl(planFinal)}.</p></div>`;
+  // tradução em linguagem de carreira
+  let tr='';
+  if(R.gReq!==null && R.gReq>g0+0.0005){
+    const extra=(1+R.gReq)/(1+g0)-1, every=Math.log(1.2)/Math.log(1+extra);
+    tr=`<b>Em linguagem de carreira:</b> além do reajuste de ${pct1(g0)}, isso equivale a `+(every>=1?`<b>uma promoção de 20% a cada ${anosTxt(Math.round(every*10)/10)}</b>`:`<b>mais de uma promoção de 20% por ano</b>, o que pede saltos maiores, como virar gestor(a), mudar para uma área mais bem paga ou trabalhar para fora`)+`. Para comparar: promoção costuma render de 10% a 30%, trocar de empresa de 15% a 40%, e virar gestor(a) de 30% a 60%.`;
+  } else if(R.gReq!==null){
+    tr=`<b>Em linguagem de carreira:</b> só o reajuste anual já sustenta o sonho. Cada promoção vira folga ou antecipa a data.`;
+  } else tr=`<b>Em linguagem de carreira:</b> nem uma carreira muito acelerada fecha a conta sozinha. Combine com um sonho mais enxuto, mais prazo ou investir uma parte maior da sobra.`;
+  if(unemployed(s)) tr+=` Como você está sem emprego, o cálculo considera ${s.mesesSemRenda} meses com ${brl(s.renda)} e depois ${brl(s.rendaVolta)} por mês.`;
+  $('carTranslate').innerHTML=tr;
+  // gráfico de renda (trimestral, para mostrar os saltos)
+  const xs=[], vPlan=[], vNeed=[];
+  for(let q=0;q<=N*4;q++){ const mth=Math.min(q*3,N*12-1); xs.push(q/4); vPlan.push(incomeAt(s,mth,g0,s.steps)); if(R.gReq!==null) vNeed.push(incomeAt(s,mth,R.gReq,[])); }
+  const ev=s.steps.filter(st=>st.anos<N).map(st=>({t:st.anos,label:DEGRAUS[st.tipo]?DEGRAUS[st.tipo].nome:'Salto'}));
+  if(unemployed(s)&&s.mesesSemRenda>0) ev.unshift({t:s.mesesSemRenda/12,label:'Volta a trabalhar'});
+  lineChart('incChart','incTip',{xs,series:[{v:vPlan,color:'var(--accent)'},{v:vNeed,color:'var(--amber)',dash:'6 4'}],events:ev.slice(0,6),
+    tip:i=>`<div style="font-weight:600;margin-bottom:4px">${Y0+Math.floor(xs[i])} · ${s.idade+Math.floor(xs[i])} anos</div><div class="r"><span>Seu plano</span><b>${brl(vPlan[i])}</b></div>${vNeed.length?`<div class="r"><span>Necessária</span><b>${brl(vNeed[i])}</b></div>`:''}`});
+  // marcos
+  const marks=[...new Set([1,3,5,10,15,N].filter(i=>i<=N))];
+  let h='<thead><tr><th>Ano</th><th>Idade</th><th>Renda necessária</th><th>Seu plano</th><th>Diferença</th></tr></thead><tbody>';
+  marks.forEach(i=>{ const mth=Math.min(i*12,N*12-1), nd=R.gReq===null?null:incomeAt(s,mth,R.gReq,[]), pl=incomeAt(s,mth,g0,s.steps), d=nd===null?null:pl-nd;
+    h+=`<tr${i===N?' class="ret"':''}><td>${Y0+i}</td><td>${s.idade+i}</td><td>${nd===null?'—':brl(nd)}</td><td>${brl(pl)}</td><td class="${d===null?'':d>=-1?'ok':'no'}">${d===null?'—':Math.abs(d)<1?'em dia':(d>0?'folga ':'faltam ')+brl(Math.abs(d))}</td></tr>`; });
+  $('carTbl').innerHTML=h+'</tbody>';
 }
-function niceStep(raw){ const p=Math.pow(10,Math.floor(Math.log10(raw||1))); const n=raw/p; return (n<=1?1:n<=2?2:n<=2.5?2.5:n<=5?5:10)*p; }
 
-function renderPlan(R,reserveMonths){
-  const s=S, items=[];
-  const firstBirth = s.kids.map(k=>k.ano).filter(a=>a>Y0).sort((a,b)=>a-b)[0];
-  if(s.dividas>0) items.push(['bad','Urgente','Quitar as dívidas caras',`São ${brl(s.dividas)} a juros que nenhum investimento cobre. Use parte da reserva ou renegocie antes de investir.`]);
-  const rg=reserveGoal(s), resTarget=(baseGastos(s,Y0)+s.parcela)*rg;
-  if(reserveMonths<rg) items.push(['bad','Agora','Completar a reserva de emergência',`Faltam ${brl(resTarget-s.liquidez)} para ${rg} meses de gastos${anyPJ(s)?'. Como PJ não tem FGTS nem seguro-desemprego, a reserva é a sua rede de proteção':''}. Deixem em Tesouro Selic ou CDB com liquidez diária a 100% do CDI.`]);
-  if(R.needShare>0){
-    const cf=cashflows(s,R.N);
-    const ns=Math.min(R.needShare,1);
-    let txt=`Programem a transferência para o dia do salário e corrijam pelo IPCA todo ano. `;
-    if(firstBirth && firstBirth-Y0<R.N){
-      const before=cf[0].surplus*ns, after=cf[Math.min(firstBirth-Y0+3,R.N-1)].surplus*ns;
-      txt+=`Até ${firstBirth}, invistam cerca de <span class="num">${brl(before/12)}</span>/mês. Com o bebê e a escola, o aporte cai para uns <span class="num">${brl(Math.max(after,0)/12)}</span>/mês. É por isso que os anos antes do nascimento valem mais: cada real investido agora rende por ${R.N} anos.`;
-    } else {
-      txt+=`O equivalente a um aporte fixo seria <span class="num">${brl(R.constMonthly)}</span>/mês.`;
-    }
-    { const sp=splitPath(R)[0]; if(sp) txt+=` Divisão: você <span class="num">${brl(sp.c1)}</span> (${pctSal(sp.c1,sp.sal1)} do salário) e parceiro(a) <span class="num">${brl(sp.c2)}</span> (${pctSal(sp.c2,sp.sal2)}).`; }
-    items.push([R.needShare>Math.max(R.share,0.001)?'warn':'good','Este mês',`Investir ${pct(ns)} do que sobra, ${brl(ns*R.sur0)}/mês hoje`,txt]);
+const ALLOC={
+  long:{conservador:[60,15,15,10],moderado:[45,10,25,20],arrojado:[30,5,35,30]},
+  mid:{conservador:[65,20,10,5],moderado:[50,15,20,15],arrojado:[40,10,25,25]},
+  short:{conservador:[70,25,5,0],moderado:[65,15,10,10],arrojado:[55,10,20,15]}
+};
+const CLASSES=[
+  ['var(--accent)','Tesouro IPCA+ e RendA+','Protege da inflação e trava um ganho real. O RendA+ paga uma renda mensal por 20 anos a partir da data escolhida.'],
+  ['var(--slate)','Pós-fixado','Tesouro Selic e CDBs de bancos sólidos. Estabilidade e dinheiro à mão para rebalancear.'],
+  ['var(--amber)','Ações e FIIs no Brasil','ETFs como BOVA11 e fundos imobiliários. Crescem mais no longo prazo e oscilam mais.'],
+  ['var(--accent-ink)','Exterior','ETFs globais, como IVVB11 ou por corretora lá fora. Protegem contra o real fraco.']
+];
+function renderMoney(R,sobra0,aporte0){
+  const s=S, N=R.N, rg=reserveGoal(s), resT=rg*(s.gastos+s.viagensHoje/12), gap=Math.max(0,resT-s.liquidez);
+  const inc=unemployed(s)?incomeAt(s,s.mesesSemRenda,s.reajuste/100,[]):s.renda;
+  const futAporte=unemployed(s)?Math.max(0,inc-s.gastos-s.viagensHoje/12)*s.share/100:aporte0;
+  const A=futAporte;
+  const buckets=[];
+  if(s.dividas>0) buckets.push({c:'var(--bad)',t:'Quitar dívidas caras',p:`Faltam ${brl(s.dividas)}. Nenhum investimento rende os juros do cartão ou do cheque especial. Enquanto houver dívida, todo o aporte vai para ela.`,v:A,h:'agora'});
+  else {
+    const toRes=gap>0?Math.min(A,Math.max(A*0.5,0)):0;
+    const eduShare=R.T.total>0?R.T.edu/R.T.total:0;
+    const rest=A-toRes, toEdu=rest*eduShare, toLong=rest-toEdu;
+    if(gap>0) buckets.push({c:'var(--slate)',t:'Reserva de emergência',p:`Faltam ${brl(gap)} para ${rg} meses de gastos. Tesouro Selic ou CDB com liquidez diária a 100% do CDI. ${toRes>0?`Completa em uns ${Math.ceil(gap/toRes)} meses, e aí esse valor vai para o longo prazo.`:''}`,v:toRes,h:'saque no dia'});
+    if(s.viagensHoje>0) buckets.push({c:'var(--amber)',t:'Caixa de viagens',p:`Separe ${brl(s.viagensHoje/12)} por mês numa conta só para viagens, em CDB de liquidez diária. Esse valor já sai dos gastos, não do aporte.`,v:0,h:'até 1 ano',note:brl(s.viagensHoje/12)+' à parte'});
+    if(toEdu>0) buckets.push({c:'var(--good)',t:'Educação do filho(a)',p:`Tesouro Educa+ ou Tesouro IPCA+ com vencimento perto de ${s.anoFilho+18}, quando começa a faculdade.`,v:toEdu,h:'até '+(s.anoFilho+18)});
+    if(s.moradia==='comprar'&&R.T.casa>0) buckets.push({c:'var(--ink-3)',t:'A casa do sonho',p:`A casa (${short(R.T.casa)}) entra na meta. Se quiser comprar antes de ${Y0+N}, crie uma caixa própria em Tesouro IPCA+ com vencimento na data da compra.`,v:0,h:'quando decidir',note:'dentro do longo prazo'});
+    buckets.push({c:'var(--accent)',t:'Independência financeira',p:`O grosso do dinheiro, para render até ${Y0+N}. Divida conforme a carteira abaixo.`,v:toLong,h:N+' anos'});
   }
-  if(R.gReq!==null && R.gReq>R.gPlan+0.0005){
-    const i5=Math.min(5,R.N), need5=R.incAt(R.gReq,R.gReq,i5);
-    items.push(['warn','Próximos '+i5+' anos','Fazer a renda crescer',`A meta pede a renda do casal em <span class="num">${brl(need5)}</span>/mês até ${Y0+i5}, contra ${brl(R.inc0)} hoje. ${anyPJ(s)?'Para PJ: revisem preços e contratos todo ano acima do IPCA, busquem clientes maiores e reduzam a dependência de um só cliente. ':''}${(s.vinc1==='clt'||s.vinc2==='clt')?'Para CLT: negociem reajustes acima da inflação, mapeiem a próxima promoção e o que ela exige. ':''}Separem o aumento antes de ele virar gasto: direcionem pelo menos ${100-Math.round(s.creep||0)}% de cada aumento para o aporte.`]);
+  const tot=buckets.reduce((t,b)=>t+b.v,0);
+  $('moneyLede').textContent = unemployed(s)
+    ? `Agora o foco é atravessar os ${s.mesesSemRenda} meses sem renda usando a reserva. Quando voltar a trabalhar, você deve investir uns ${brl(A)} por mês, divididos assim:`
+    : (A>0?`Dos ${brl(A)} que você investe por mês, a ordem é: dívidas, reserva, objetivos com data e, por fim, a independência.`:'Hoje não sobra dinheiro para investir. O primeiro passo é abrir espaço no orçamento ou aumentar a renda.');
+  $('moneyBar').innerHTML=tot>0?buckets.filter(b=>b.v>0).map(b=>`<span style="width:${b.v/tot*100}%;background:${b.c}" title="${b.t}"></span>`).join(''):'';
+  $('buckets').innerHTML=buckets.map(b=>`<div class="bucket"><span class="sw" style="background:${b.c}"></span><div><h3>${b.t}</h3><p>${b.p}</p></div><div class="amt">${b.note?`<span style="font-size:13px">${b.note}</span>`:brl(b.v)+'<small>por mês</small>'}<small>${b.h}</small></div></div>`).join('');
+  const hz=N>=15?'long':N>=8?'mid':'short', mix=ALLOC[hz][s.perfil];
+  $('perfilNome').textContent=s.perfil;
+  $('allocLede').textContent=`Para um prazo de ${N} anos. Nos últimos 5 anos antes do sonho, migre aos poucos para Tesouro IPCA+ e trave uma taxa real que pague a renda.`;
+  $('alloc').innerHTML=mix.map((p,i)=>`<div style="border-top:3px solid ${CLASSES[i][0]}"><span class="p">${p}%</span><span class="t">${CLASSES[i][1]}</span><small>${CLASSES[i][2]}</small>${A>0&&p>0?`<small class="num" style="color:var(--ink-2)">≈ ${brl((buckets.find(b=>b.t==='Independência financeira')||{v:0}).v*p/100)}/mês</small>`:''}</div>`).join('');
+}
+
+function renderPatChart(R){
+  const s=S, N=R.N, xs=[0], vp=[s.patrimonio-s.dividas], vn=[s.patrimonio-s.dividas];
+  R.plan.years.forEach(y=>{ xs.push(y.i+1); vp.push(y.P); });
+  if(R.need) R.need.years.forEach(y=>vn.push(y.P));
+  const ev=s.steps.filter(st=>st.anos<N).map(st=>({t:st.anos,label:DEGRAUS[st.tipo]?DEGRAUS[st.tipo].nome:'Salto'}));
+  if(hasKid(s)&&s.anoFilho-Y0>=0&&s.anoFilho-Y0<=N) ev.push({t:s.anoFilho-Y0,label:'Filho(a)'});
+  lineChart('patChart','patTip',{xs,series:[{v:vp,color:'var(--accent)',area:true},{v:R.need?vn:[],color:'var(--amber)',dash:'6 4'}],hline:{v:R.T.total,label:'Meta '+short(R.T.total)},events:ev.slice(0,6),
+    tip:i=>`<div style="font-weight:600;margin-bottom:4px">${Y0+xs[i]} · ${s.idade+xs[i]} anos</div><div class="r"><span>Seu plano</span><b>${short(vp[i])}</b></div>${R.need?`<div class="r"><span>Com a renda necessária</span><b>${short(vn[i])}</b></div>`:''}<div class="r"><span>Meta</span><b>${short(R.T.total)}</b></div>`});
+}
+
+function renderPlan(R,sobra0,aporte0,fol){
+  const s=S, items=[], N=R.N, g0=s.reajuste/100;
+  if(unemployed(s)){
+    const burn=s.gastos+s.viagensHoje/12-s.renda;
+    items.push([fol<s.mesesSemRenda?'bad':'warn','Agora','Atravessar o período sem renda',`Você gasta ${brl(Math.max(burn,0))} a mais do que ganha por mês. ${fol===Infinity?'Sua renda atual cobre os gastos.':`A reserva dura ${fol.toLocaleString('pt-BR',{maximumFractionDigits:1})} meses ${fol<s.mesesSemRenda?`e acaba antes dos ${s.mesesSemRenda} meses previstos: corte gastos já, adie as viagens e veja seguro-desemprego e saque do FGTS se tiver direito.`:`e cobre os ${s.mesesSemRenda} meses previstos. Mesmo assim, corte o que der para preservá-la.`}`} Suspenda os aportes até voltar a ter renda.`]);
+    items.push(['warn','Este mês','Buscar a próxima vaga mirando a renda necessária',`Para o sonho, a vaga ideal paga a partir de <span class="num">${brl(R.gReq===null?s.rendaVolta:Math.max(s.rendaVolta,incomeAt(s,s.mesesSemRenda,R.gReq,[])))}</span>/mês. Atualize currículo e LinkedIn, avise sua rede e considere trabalhos temporários ou como PJ enquanto busca.`]);
   }
-  if(firstBirth && (!s.seguro||!s.plano)) items.push(['warn','Antes de '+firstBirth,'Proteger a família',`${!s.seguro?'Contratem seguro de vida para os dois, cobrindo pelo menos o custo dos filhos até 22 anos. ':''}${!s.plano?'Entrem num plano de saúde com obstetrícia já, porque a carência para parto é de 300 dias.':''}`]);
-  else if(!s.seguro && s.kids.length) items.push(['warn','Agora','Contratar seguro de vida','Com filhos dependentes, a renda de cada um precisa estar protegida. O custo é baixo enquanto vocês são jovens.']);
-  if(anyPJ(s)){
-    const quem = [isPJ(s.vinc1)?{n:'você',r:s.renda1}:null, isPJ(s.vinc2)?{n:'seu parceiro(a)',r:s.renda2}:null].filter(Boolean);
-    items.push(['warn','Este ano','Proteger a renda PJ',`PJ não tem FGTS, 13º, férias pagas nem seguro-desemprego, e o auxílio do INSS é calculado sobre o pró-labore. Com pró-labore de 1 salário mínimo, um afastamento por doença paga só isso. Contratem seguro de vida e seguro de invalidez ou de diária por incapacidade (DIT) que cubra a renda real${quem.length?', de '+quem.map(q=>brl(q.r)).join(' e ')+'/mês':''}.`]);
-    items.push(['warn','Agora','Não contar com INSS acima do mínimo',`Contribuindo sobre 1 salário mínimo, a aposentadoria tende a ser de 1 salário mínimo. ${s.inss>0?'Confiram se o INSS informado nas premissas segue essa lógica.':'O plano já não conta com INSS; se quiserem incluir, informem cerca de 1 salário mínimo por pessoa PJ.'} Vale simular com o contador se aumentar o pró-labore compensa: ele custa INSS e IR hoje, mas melhora aposentadoria, auxílio-doença e licença-maternidade.`]);
-    const fb = s.kids.map(k=>k.ano).filter(a=>a>Y0).sort((a,b)=>a-b)[0];
-    if(fb) items.push(['warn','Antes de '+fb,'Guardar para a licença-maternidade',`O salário-maternidade do INSS é calculado sobre a contribuição. Se quem vai se afastar for PJ com pró-labore de 1 salário mínimo, recebe cerca de 1 salário mínimo por 4 meses. Guardem à parte uns ${quem.map(q=>brl(q.r*4)).join(' ou ')} para cobrir esses meses, além da reserva.`]);
+  if(s.dividas>0) items.push(['bad','Urgente','Quitar as dívidas caras',`São ${brl(s.dividas)} a juros que nenhum investimento cobre. Renegocie e quite antes de investir.`]);
+  const rg=reserveGoal(s), resT=rg*(s.gastos+s.viagensHoje/12);
+  if(!unemployed(s)&&s.liquidez<resT) items.push(['warn','Agora','Completar a reserva de emergência',`Faltam ${brl(resT-s.liquidez)} para ${rg} meses de gastos${rg===12?', porque PJ e empreendedor não têm FGTS nem seguro-desemprego':''}. Deixe em Tesouro Selic ou CDB com liquidez diária.`]);
+  if(!unemployed(s)&&R.shareReq!==null&&R.shareReq>s.share/100+0.005) items.push(['warn','Este mês',`Investir ${pct(R.shareReq)} do que sobra`,`Hoje você investe ${s.share}% (${brl(aporte0)}/mês). Subir para ${pct(R.shareReq)} (${brl(Math.max(0,sobra0)*R.shareReq)}/mês) fecha o sonho sem depender de promoção. Programe a transferência para o dia do pagamento.`]);
+  if(R.gReq!==null&&R.progress<1){
+    const i3=Math.min(3,N), need3=incomeAt(s,i3*12-1,R.gReq,[]);
+    items.push(['warn','Próximos '+i3+' anos','Fazer a renda crescer',`Meta de carreira: chegar a <span class="num">${brl(need3)}</span>/mês até ${Y0+i3}. ${s.situacao==='clt'||s.situacao==='servidor'?'Converse com sua liderança sobre o caminho para a próxima promoção e o que ela exige. Pesquise quanto o mercado paga para o seu cargo: trocar de empresa costuma dar os maiores saltos. ':''}${s.situacao==='pj'||s.situacao==='empreendedor'?'Reajuste seus preços todo ano acima da inflação, busque clientes maiores e não dependa de um só. ':''}Guarde cada aumento antes de ele virar gasto.`]);
   }
-  if(anyPJ(s) && !(s.vinc1==='clt'||s.vinc1==='servidor'||s.vinc2==='clt'||s.vinc2==='servidor')) items.push(['info','Este ano','PGBL quase não ajuda com pró-labore baixo','O desconto do PGBL é de até 12% da renda tributável, que para PJ é só o pró-labore. Com 1 salário mínimo, o benefício é mínimo. Prefiram VGBL (bom para sucessão) ou investir direto no Tesouro e em ETFs. Atenção às regras novas de dividendos: desde 2026 há retenção de 10% sobre lucros acima de R$ 50 mil por mês da mesma empresa e IR mínimo para quem ganha acima de R$ 600 mil por ano. Revisem com o contador.']);
-  else if(s.irCompleta) items.push(['info','Este ano','Usar PGBL para reduzir o IR','Na declaração completa, aportes em PGBL de até 12% da renda bruta tributável abatem o imposto. Escolham tabela regressiva (10% após 10 anos) e fundos com taxa de administração abaixo de 1%.']);
-  else if(!anyPJ(s)) items.push(['info','Este ano','Comparar declaração simples e completa','Com plano de saúde, escola e dependentes, a completa pode valer a pena. Ela também libera o benefício do PGBL.']);
-  s.kids.forEach((k,i)=>{ if(k.ano+18>Y0) items.push(['info','Contínuo',`Caixa da educação${s.kids.length>1?' do filho '+(i+1):''}`,`Separem o dinheiro da faculdade em Tesouro Educa+ ou IPCA+ com vencimento perto de ${k.ano+18}, para não misturar com a aposentadoria.`]); });
-  if(s.moradia==='aluguel') items.push(['warn','Decidir em 2 anos','Avaliar casa própria',`Pagar aluguel no futuro soma ${short(s.c_aluguel*12/(s.swr/100))} à meta. Comparem com comprar à vista ou quitar um imóvel antes de ${Y0+R.N}.`]);
-  if(s.parcelaAnos>R.N) items.push(['warn','Contínuo','Amortizar o financiamento','O financiamento termina depois da data de viver de renda e encarece a meta. Amortizem e reduzam o prazo, não a parcela.']);
-  if(s.viagensHoje>0||s.viagens>0) items.push(['info','Todo mês','Manter uma caixa de viagens',`${s.viagensHoje>0?`Separem <span class="num">${brl(s.viagensHoje/12)}</span>/mês numa conta só para viagens, em CDB de liquidez diária ou Tesouro Selic, fora da reserva de emergência. Assim a viagem não sai do aporte nem vira dívida no cartão. Para viagens ao exterior, comprem a moeda aos poucos ao longo do ano. `:''}${s.viagens>0?`No sonho, o plano reserva <span class="num">${brl(s.viagens)}</span> por ano para viagens, já incluídos na meta.`:''}`]);
-  items.push(['info','Próximos anos','Testar o destino','Passem temporadas na cidade fora da alta estação. Visitem escolas e confiram hospitais e o tempo de deslocamento.']);
-  items.push(['info','Todo ano','Revisar o plano','Atualizem patrimônio, renda e custos aqui. Se a meta ficar à frente, dá para antecipar a data. Se ficar atrás, ajustem cedo.']);
+  if(s.situacao==='pj'||s.situacao==='empreendedor') items.push(['info','Este ano','Proteger a renda de PJ','O INSS paga sobre o pró-labore. Se ele for baixo, a aposentadoria e o auxílio-doença também serão. Tenha seguro de vida e de invalidez que cubram a renda real, e veja com o contador se vale aumentar o pró-labore.']);
+  if(s.viagensHoje>0) items.push(['info','Todo mês','Manter uma caixa de viagens',`Separe ${brl(s.viagensHoje/12)} por mês numa conta só para viagens. Assim a viagem não sai do aporte nem vira dívida no cartão.`]);
+  if(hasKid(s)&&s.anoFilho>=Y0) items.push(['info','Antes de '+s.anoFilho,'Preparar a chegada do filho(a)','Contrate plano de saúde com obstetrícia pelo menos 300 dias antes do parto, faça um seguro de vida e abra a caixa da educação.']);
+  if(s.moradia==='aluguel') items.push(['info','Decidir em 2 anos','Pensar na casa',`Pagar aluguel no sonho soma ${short(s.c_aluguel*12/(s.swr/100))} à meta. Compare com comprar uma casa de ${short(s.c_imovel)} antes de ${Y0+N}.`]);
+  items.push(['info','Todo ano','Revisar o plano','Atualize renda, gastos e patrimônio aqui. Se estiver à frente, dá para antecipar a data. Se estiver atrás, ajuste cedo.']);
   $('plan').innerHTML=items.map(it=>`<li><div><span class="pill ${it[0]}">${it[1]}</span></div><div><h3>${it[2]}</h3><p>${it[3]}</p></div></li>`).join('');
 }
 
-function renderAlloc(R){
-  const n=R.N; let mix, phase;
-  if(n>=15){ phase='crescimento'; mix=[40,10,25,25]; }
-  else if(n>=8){ phase='equilíbrio'; mix=[50,10,20,20]; }
-  else { phase='travar a renda'; mix=[65,15,10,10]; }
-  const cats=[
-    ['var(--accent)','Tesouro IPCA+ e RendA+','Núcleo da aposentadoria. RendA+ paga renda mensal por 20 anos a partir do vencimento escolhido.'],
-    ['var(--ink-3)','Pós-fixado','Tesouro Selic e CDBs. Flexibilidade além da reserva.'],
-    ['var(--amber)','Ações e FIIs no Brasil','ETFs como BOVA11 e fundos imobiliários para renda mensal.'],
-    ['var(--accent-ink)','Exterior','ETFs globais (IVVB11 ou corretora no exterior). Protege contra o real fraco.']
-  ];
-  $('allocLede').textContent=`Faltam ${n} anos, então a fase é de ${phase}. Nos últimos 5 anos, migrem aos poucos para IPCA+ e travem uma taxa real que pague a renda.`;
-  $('allocBar').innerHTML=mix.map((p,i)=>`<span style="width:${p}%;background:${cats[i][0]}" title="${cats[i][1]} ${p}%"></span>`).join('');
-  $('alloc').innerHTML=mix.map((p,i)=>`<div><span class="sw" style="background:${cats[i][0]}"></span><span class="p">${p}%</span><span>${cats[i][1]}<small>${cats[i][2]}</small></span></div>`).join('');
-  const share = R.T.total>0? R.T.edu/R.T.total : 0;
-  $('eduBox').innerHTML = S.kids.length? `<p class="hint" style="font-size:13px;color:var(--ink-2)">Fora dessa divisão: a reserva de emergência${S.viagensHoje>0?', a caixa de viagens':''} e o caixa da educação (${short(R.T.edu)}, cerca de ${pct(share)} da meta), em títulos com vencimento casado com a faculdade.${S.irCompleta?' Uma parte do núcleo pode ficar em PGBL pelo benefício fiscal.':''}</p>`:'';
-}
-
-const pctReal = g => (g>=0?'+':'−')+Math.abs(g*100).toLocaleString('pt-BR',{maximumFractionDigits:1,minimumFractionDigits:1})+'%';
-function renderIncome(R){
-  const s=S, N=R.N, Yr=Y0+N;
-  let lede, pillCls;
-  if(R.share<=0){
-    lede='Hoje vocês não investem nada da sobra, então aumento de renda sozinho não muda o resultado. Comecem definindo um aporte mensal em "Você investe por mês hoje" e "Parceiro(a) investe por mês hoje".'; pillCls='bad';
-  } else if(R.gReq===null){
-    lede=`Mesmo com a renda crescendo 30% acima da inflação por ano, o hábito atual não chega à meta de ${short(R.T.total)}. Combinem aumento de renda com investir uma parte maior da sobra ou com um sonho mais enxuto.`; pillCls='bad';
-  } else if(R.gReq<=R.gPlan+0.0005){
-    lede=`A carreira que vocês planejaram já basta. Com a renda crescendo ${pctReal(R.gReq)} ao ano acima da inflação, vocês chegam à meta em ${Yr}. O que passar disso é folga ou antecipa a data.`; pillCls='good';
-  } else {
-    const mult=Math.pow(1+R.gReq,N);
-    lede=`Para viver de renda em ${Yr} sem mudar o hábito de investir, a renda do casal precisa crescer ${pctReal(R.gReq)} ao ano acima da inflação. Em ${N} anos, isso é ganhar ${mult.toLocaleString('pt-BR',{maximumFractionDigits:1})} vezes o poder de compra de hoje.`; pillCls=R.gReq-R.gPlan>0.03?'bad':'warn';
-  }
-  $('incLede').textContent=lede;
-  const g=R.gReq, finalReq = g===null?null:R.incAt(g,g,N), finalPlan=R.incAt(s.cresc1/100,s.cresc2/100,N);
-  $('incHero').innerHTML=`
-    <div class="main"><span class="k">Aumento necessário por ano</span><span class="v">${g===null?'—':pctReal(g)}</span><span class="d">acima da inflação, para os dois</span></div>
-    <div><span class="k">Renda do casal em ${Yr}</span><span class="v">${finalReq===null?'—':brl(finalReq)}</span><span class="d">hoje: ${brl(R.inc0)}/mês</span></div>
-    <div><span class="k">Carreira planejada</span><span class="v">${pctReal(R.gPlan)}</span><span class="d"><span class="pill ${pillCls}">${pillCls==='good'?'✓ basta':pillCls==='warn'?'! um pouco abaixo':'✕ bem abaixo'}</span> chega a ${brl(finalPlan)}/mês</span></div>`;
-  const marks=[...new Set([0,5,10,15,N].filter(i=>i<=N))];
-  let h=`<thead><tr><th>Ano</th><th>Idades</th><th>Você precisa</th><th>Parceiro(a) precisa</th><th>Casal precisa</th><th>Casal planejado</th><th>Diferença</th></tr></thead><tbody>`;
-  marks.forEach(i=>{
-    const req1=g===null?null:s.renda1*Math.pow(1+g,i), req2=g===null?null:s.renda2*Math.pow(1+g,i);
-    const plan=R.incAt(s.cresc1/100,s.cresc2/100,i), need=g===null?null:req1+req2, diff=need===null?null:plan-need;
-    h+=`<tr${i===N?' class="ret"':''}><td>${Y0+i}</td><td>${s.idade1+i}/${s.idade2+i}</td><td>${req1===null?'—':brl(req1)}</td><td>${req2===null?'—':brl(req2)}</td><td>${need===null?'—':brl(need)}</td><td>${brl(plan)}</td><td class="${diff===null?'':diff>=-1?'gap-ok':'gap-bad'}">${diff===null?'—':Math.abs(diff)<1?'em dia':(diff>0?'folga ':'faltam ')+brl(Math.abs(diff))}</td></tr>`;
-  });
-  $('incTbl').innerHTML=h+'</tbody>';
-}
-function personWeights(s,i){
-  if(s.divisao==='igual') return [0.5,0.5];
-  if(s.divisao==='sobra' && separadas(s,Y0+i)){
-    const a=Math.max(0,s.renda1*Math.pow(1+s.cresc1/100,i)-s.gastos1), b=Math.max(0,s.renda2*Math.pow(1+s.cresc2/100,i)-s.gastos2);
-    if(a+b>0) return [a/(a+b),b/(a+b)];
-  }
-  const a=s.renda1*Math.pow(1+s.cresc1/100,i), b=s.renda2*Math.pow(1+s.cresc2/100,i);
-  return a+b>0?[a/(a+b),b/(a+b)]:[0.5,0.5];
-}
-function splitPath(R){
-  const s=S; let P1=s.patrimonio1-s.dividas*(s.patrimonio>0?s.patrimonio1/s.patrimonio:0.5), P2=s.patrimonio-s.dividas-P1;
-  return R.req.rows.map(row=>{
-    const w=personWeights(s,row.i), c1=row.contrib*w[0], c2=row.contrib*w[1];
-    P1=P1*(1+R.r)+c1; P2=P2*(1+R.r)+c2;
-    const sal1=s.renda1*Math.pow(1+s.cresc1/100,row.i), sal2=s.renda2*Math.pow(1+s.cresc2/100,row.i);
-    return {i:row.i,y:row.y,c1:c1/12,c2:c2/12,sal1,sal2,P1,P2};
-  });
-}
-const pctSal=(v,sal)=>sal>0?pct(v/sal):'—';
-function renderSplit(R){
-  const s=S, path=splitPath(R), N=R.N, first=path[0], last=path[path.length-1];
-  const names=['Você','Parceiro(a)'], cur=[s.aporte1,s.aporte2], sal=[s.renda1,s.renda2], need=[first.c1,first.c2], fin=[last.P1,last.P2];
-  const totalNeed=first.c1+first.c2;
-  $('splitLede').textContent = R.needShare>1
-    ? `Mesmo investindo toda a sobra do casal a meta não fecha. Os valores abaixo mostram o esforço que ela pediria.`
-    : (s.divisao==='igual'
-      ? `Para a meta, o casal precisa investir ${brl(totalNeed)} por mês hoje, metade para cada um.`
-      : `Para a meta, o casal precisa investir ${brl(totalNeed)} por mês hoje, o equivalente a ${pctSal(totalNeed,s.renda1+s.renda2)} da renda de cada um.`);
-  $('splitCols').innerHTML=[0,1].map(k=>{
-    const diff=need[k]-cur[k];
-    const st=Math.abs(diff)<50?['good','✓ em dia']:diff>0?['warn','+'+brl(diff)+'/mês']:['good','folga de '+brl(-diff)];
-    return `<div class="person"><h3>${names[k]}<span class="pill ${st[0]}">${st[1]}</span></h3>
-      <div><span class="big">${brl(need[k])}</span><span class="hint" style="display:inline"> /mês, ${pctSal(need[k],sal[k])} do salário</span></div>
-      <dl><dt>Investe hoje</dt><dd>${brl(cur[k])} (${pctSal(cur[k],sal[k])})</dd>
-      ${separadas(s,Y0)?`<dt>Sobra hoje (renda − seus gastos)</dt><dd>${brl(sal[k]-(k?s.gastos2:s.gastos1))}</dd><dt>Precisa investir da sobra</dt><dd>${sal[k]-(k?s.gastos2:s.gastos1)>0?pct(need[k]/(sal[k]-(k?s.gastos2:s.gastos1))):'—'}</dd>`:''}
-      <dt>Patrimônio hoje</dt><dd>${short(k?s.patrimonio2:s.patrimonio1)}</dd>
-      <dt>Patrimônio em ${Y0+N}</dt><dd>${short(fin[k])}</dd></dl></div>`;
-  }).join('');
-  const marks=[...new Set([0,5,10,15,N-1].filter(i=>i>=0&&i<N))];
-  let h='<thead><tr><th>Ano</th><th>Fase</th><th>Você investe</th><th>% do salário</th><th>Parceiro(a) investe</th><th>% do salário</th></tr></thead><tbody>';
-  marks.forEach(i=>{
-    const r=path[i]; const ev=[];
-    if(separadas(s,r.y)) ev.push('cada um na sua casa'); else if(s.juntas==='nao'&&r.y===s.anoJuntas) ev.push('mudança');
-    s.kids.forEach(k=>{ const a=r.y-k.ano; if(a<0) ev.push('antes do bebê'); else if(a<=1) ev.push('bebê'); else if(a<=5) ev.push('educação infantil'); else if(a<=14) ev.push('fundamental'); else if(a<=17) ev.push('ensino médio'); else if(a<=22) ev.push('faculdade'); });
-    h+=`<tr><td>${r.y}</td><td class="ev">${[...new Set(ev)].join(', ')||'—'}</td><td>${brl(r.c1)}</td><td>${pctSal(r.c1,r.sal1)}</td><td>${brl(r.c2)}</td><td>${pctSal(r.c2,r.sal2)}</td></tr>`;
-  });
-  $('splitTbl').innerHTML=h+'</tbody>';
-}
 function renderLevers(R){
   const s=S, L=[];
-  const extra = Math.max(0,R.needShare*R.sur0 - s.aporte);
-  L.push(['Investir mais por mês', extra>0? '+'+brl(extra) : 'já basta', extra>0? `Total de ${brl(R.needShare*R.sur0)}/mês hoje, ajustado à sobra de cada ano.` : 'O aporte atual já fecha a meta.']);
-  L.push(['Adiar a data', R.delay===null?'mais de 30 anos':R.delay===0?'nenhum ano':'+'+R.delay+(R.delay===1?' ano':' anos'), R.delay?`Viver de renda em ${Y0+R.N+R.delay}, com ${s.idade1+R.N+R.delay} anos.`:'No ritmo atual vocês chegam no prazo.']);
-  L.push(['Custo de vida possível', brl(R.sustainCore)+'/mês', `É o que o patrimônio projetado sustenta para o casal. O plano atual pede ${brl(R.T.core)}.`]);
-  L.push(['Aumentar a renda', R.gReq===null?'não basta sozinho':pctReal(R.gReq)+' ao ano', R.gReq===null?'Combine com outra alavanca.':`Acima da inflação, chegando a ${brl(R.incAt(R.gReq,R.gReq,R.N))}/mês de renda do casal em ${Y0+R.N}.`]);
-  L.push(['Rendimento necessário', R.reqR===null?'acima de 25%':(R.reqR*100).toLocaleString('pt-BR',{maximumFractionDigits:1})+'% real', R.reqR!==null&&R.reqR>0.07?'Acima do que títulos públicos pagam. Prefira as outras alavancas.':'Rendimento acima da inflação que fecha a meta no ritmo atual.']);
+  L.push(['Investir mais do que sobra',R.shareReq===null?'não basta':R.shareReq<=s.share/100+0.005?'já basta':pct(R.shareReq)+' da sobra',R.shareReq===null?'Nem investindo tudo o que sobra o plano fecha.':`Hoje você investe ${s.share}%.`]);
+  L.push(['Adiar a data',R.delay===null?'mais de 30 anos':R.delay===0?'nenhum ano':'+'+anosTxt(R.delay),R.delay?`Viver de renda em ${Y0+R.N+R.delay}, aos ${s.idade+R.N+R.delay} anos.`:'Você chega no prazo.']);
+  L.push(['Sonho que cabe no plano',brl(R.sustainCore)+'/mês',`É o custo de vida que o patrimônio projetado sustenta. O sonho escolhido custa ${brl(R.T.core)}.`]);
+  const cheaper=Object.entries(SONHOS).map(([id,d])=>{ const t=Object.assign({},s,{estilo:id}); applyDream(t); return {id,d,T:target(t,R.N).total}; }).filter(o=>o.T<=R.plan.P).sort((a,b)=>b.T-a.T)[0];
+  L.push(['Cartão que já cabe',cheaper?cheaper.d.nome:'nenhum',cheaper?`Com o plano atual, o sonho "${cheaper.d.nome}" (meta ${short(cheaper.T)}) já fecha.`:'Nenhum cartão fecha só com o plano atual.']);
   $('levers').innerHTML=L.map(l=>`<div class="lever"><div class="k">${l[0]}</div><div class="v">${l[1]}</div><p>${l[2]}</p></div>`).join('');
 }
 
 function renderTable(R){
   const s=S;
-  let h='<thead><tr><th>Ano</th><th>Eventos</th><th>Idades</th><th>Renda/mês</th><th>Gastos/mês</th><th>Aporte/mês</th><th>Patrimônio</th></tr></thead><tbody>';
-  R.cur.rows.forEach(r=>{
-    const ev=[];
-    s.kids.forEach((k,i)=>{ const a=r.y-k.ano; const nm=s.kids.length>1?'F'+(i+1):'Filho(a)'; if(a===0)ev.push(nm+' nasce'); if(a===2)ev.push(nm+' na escola'); if(a===15)ev.push(nm+' no ensino médio'); if(a===18)ev.push(nm+' na faculdade'); });
-    if(s.parcelaAnos>0&&r.i===s.parcelaAnos) ev.push('Financiamento quitado');
-    if(s.juntas==='nao'&&r.y===s.anoJuntas) ev.push('Vão morar juntos(as)');
-    h+=`<tr><td>${r.y}</td><td class="ev">${ev.join(', ')}</td><td>${s.idade1+r.i}/${s.idade2+r.i}</td><td>${brl(r.income/12)}</td><td>${brl(r.exp/12)}</td><td>${brl(r.contrib/12)}</td><td>${short(r.P)}</td></tr>`;
+  let h='<thead><tr><th>Ano</th><th class="ev">Eventos</th><th>Idade</th><th>Renda/mês</th><th>Gastos/mês</th><th>Investe/mês</th><th>Patrimônio</th></tr></thead><tbody>';
+  R.plan.years.forEach(r=>{
+    const ev=[]; s.steps.forEach(st=>{ if(Math.floor(st.anos)===r.i) ev.push(DEGRAUS[st.tipo]?DEGRAUS[st.tipo].nome:'Salto'); });
+    if(unemployed(s)&&r.i===Math.floor(s.mesesSemRenda/12)) ev.push('volta a trabalhar');
+    if(hasKid(s)&&r.y===s.anoFilho) ev.push('filho(a) nasce');
+    h+=`<tr><td>${r.y}</td><td class="ev">${ev.join(', ')}</td><td>${s.idade+r.i}</td><td>${brl(r.inc)}</td><td>${brl(r.exp)}</td><td>${brl(r.c)}</td><td>${short(r.P)}</td></tr>`;
   });
-  h+=`<tr class="ret"><td>${Y0+R.N}</td><td class="ev">Viver de renda</td><td>${s.idade1+R.N}/${s.idade2+R.N}</td><td colspan="3">Meta: ${brl(R.T.total)}</td><td>${short(R.cur.P)}</td></tr></tbody>`;
+  h+=`<tr class="ret"><td>${Y0+R.N}</td><td class="ev">Viver de renda</td><td>${s.idade+R.N}</td><td colspan="3">Meta: ${brl(R.T.total)}</td><td>${short(R.plan.P)}</td></tr></tbody>`;
   $('tbl').innerHTML=h;
 }
 
-const INFO = {
-  idade1:'Sua idade hoje. Serve para mostrar com que idade você vai viver de renda e quando o INSS começa.',
-  idade2:'Idade do(a) parceiro(a) hoje.',
-  renda1:'Quanto cai na sua conta por mês, já sem impostos. Se recebe 13º, férias ou PLR, some tudo no ano e divida por 12. Se é PJ, use pró-labore mais os lucros que você retira.',
-  renda2:'Quanto cai na conta do(a) parceiro(a) por mês, já sem impostos, do mesmo jeito que a sua renda.',
-  vinc1:'Como você trabalha. CLT tem FGTS e 13º. PJ e autônomo não têm, então o app pede uma reserva maior e mostra cuidados com o INSS.',
-  vinc2:'Como o(a) parceiro(a) trabalha: CLT, PJ, autônomo ou servidor.',
-  cresc1:'Quanto você espera que sua renda suba por ano além da inflação. 0 só repõe a inflação. 2 a 3 é uma carreira crescendo bem. Com 3%, R$ 10 mil hoje viram cerca de R$ 13,4 mil em 10 anos, em dinheiro de hoje.',
-  cresc2:'Quanto a renda do(a) parceiro(a) deve subir por ano além da inflação.',
-  juntas:'Se ainda não moram juntos(as), o app usa os gastos de cada um até a data da mudança e, depois dela, os gastos da casa.',
-  gastos1:'Tudo o que você gasta por mês hoje: aluguel, contas, mercado, transporte e lazer. Não inclua viagens nem financiamento, que têm campos próprios.',
-  gastos2:'Tudo o que o(a) parceiro(a) gasta por mês hoje, sem viagens e sem financiamento.',
-  anoJuntas:'Ano em que pretendem morar na mesma casa. A partir dele, valem os gastos da casa.',
-  custoMudanca:'Gasto único para começar a vida juntos(as): móveis, eletrodomésticos, mudança e pequenas reformas. Entra no ano da mudança.',
-  gastos:'Gastos mensais da casa toda: moradia, contas, mercado, transporte e lazer. Filhos, viagens e financiamento ficam de fora, porque o app calcula à parte.',
-  viagensHoje:'Quanto gastam com viagens num ano normal hoje. O app tira esse valor da sobra e sugere uma caixa só para viagens.',
-  parcela:'Valor mensal de um financiamento de imóvel ou carro, se tiverem.',
-  parcelaAnos:'Quantos anos faltam para quitar o financiamento. Depois disso, a parcela vira sobra.',
-  patrimonio1:'Tudo o que você já tem investido: Tesouro, CDB, ações, fundos e previdência. Não conte o imóvel onde mora nem o carro.',
-  patrimonio2:'Tudo o que o(a) parceiro(a) já tem investido.',
-  aporte1:'Quanto você investe por mês hoje, em média.',
-  aporte2:'Quanto o(a) parceiro(a) investe por mês hoje, em média.',
-  liquidez:'Dinheiro que dá para sacar no mesmo dia, como Tesouro Selic ou CDB de liquidez diária. É a reserva de emergência.',
-  dividas:'Dívidas com juros altos, como rotativo do cartão, cheque especial e empréstimo pessoal. Vale quitar antes de investir.',
-  seguro:'Seguro que paga um valor à família se um de vocês morrer ou ficar inválido. Importante quando há filhos.',
-  plano:'Plano de saúde. Para parto, a carência é de 300 dias, então vale contratar antes da gravidez.',
-  irCompleta:'Na declaração completa do Imposto de Renda, gastos com saúde, educação e previdência PGBL reduzem o imposto.',
-  cidade:'Região onde querem morar no futuro. Ela preenche custos de referência de moradia, escola e saúde, que vocês podem ajustar.',
-  viagens:'Quanto querem gastar com viagens por ano quando viverem de renda.',
-  anos:'Daqui a quantos anos querem parar de depender do salário.',
-  moradia:'Com casa própria quitada, a meta fica bem menor. Com aluguel, o valor do aluguel entra no custo de vida.',
-  c_moradia:'Condomínio, IPTU, luz, água, gás, internet e manutenção da casa.',
-  c_mercado:'Supermercado, feira, farmácia e produtos de casa.',
-  c_saude:'Plano de saúde do casal. O dos filhos entra no custo extra por filho.',
-  c_transp:'Combustível, seguro, IPVA, manutenção e a troca do carro de tempos em tempos, ou aplicativo e transporte público.',
-  c_lazer:'Restaurantes, delivery, passeios, assinaturas e academia.',
-  c_outros:'Roupas, presentes, cuidados pessoais e imprevistos.',
-  c_aluguel:'Só é usado se escolherem aluguel em "Moradia no futuro".',
-  c_filho:'Gasto mensal de cada filho fora a escola: roupas, alimentação, atividades e saúde. Vale até os 17 anos.',
-  e_inf:'Mensalidade da escola particular dos 2 aos 5 anos. O app conta 13 parcelas por ano por causa da matrícula e do material.',
-  e_fund:'Mensalidade do 1º ao 9º ano, dos 6 aos 14 anos.',
-  e_med:'Mensalidade do ensino médio, dos 15 aos 17 anos.',
+/* ---------- explicações dos campos ---------- */
+const INFO={
+  idade:'Sua idade hoje. Serve para mostrar com que idade você chega ao sonho.',
+  situacao:'Como você trabalha hoje. Se estiver sem emprego, o app pergunta quanto tempo deve levar para voltar e quanto espera ganhar.',
+  renda:'Quanto cai na sua conta por mês, já sem impostos. Some 13º, férias e PLR no ano e divida por 12. Se é PJ, use pró-labore mais os lucros que você retira.',
+  mesesSemRenda:'Quantos meses você acha que leva para voltar a ter renda.',
+  rendaVolta:'Quanto espera ganhar por mês, líquido, quando voltar a trabalhar.',
+  gastos:'Tudo o que você gasta por mês hoje: moradia, contas, mercado, transporte e lazer. Viagens têm campo próprio.',
+  viagensHoje:'Quanto você gasta com viagens num ano normal hoje.',
+  patrimonio:'Tudo o que você já tem investido, incluindo a reserva: Tesouro, CDB, ações, fundos e previdência. Não conte o imóvel onde mora nem o carro.',
+  liquidez:'A parte do patrimônio que dá para sacar no mesmo dia, como Tesouro Selic ou CDB de liquidez diária. É a sua reserva de emergência.',
+  dividas:'Dívidas com juros altos, como rotativo do cartão, cheque especial e empréstimo pessoal.',
+  share:'Da sobra do mês (renda menos gastos e viagens), quanto vai para investimentos. Esse hábito vale também para os aumentos futuros.',
+  reajuste:'Quanto sua renda sobe por ano além da inflação, sem contar promoções. 0 só repõe a inflação. Entre 0,5 e 1 é o comum.',
+  creep:'Quando a renda sobe, parte costuma virar gasto: carro melhor, mais lazer. Com 30%, de cada R$ 1.000 de aumento, R$ 300 viram gasto.',
+  saltoAno:'Daqui a quantos anos você imagina dar um grande salto, como uma promoção grande ou uma troca de empresa. O app calcula de quanto ele precisa ser.',
+  perfil:'O quanto você aceita ver o dinheiro oscilar. Conservador evita sustos, arrojado aceita mais altos e baixos para crescer mais.',
   retorno:'Quanto os investimentos rendem por ano acima da inflação, já sem imposto. De 4 a 5% é um valor prudente.',
   swr:'Quanto do patrimônio dá para tirar por ano sem que ele acabe. Quanto menor, mais seguro, e maior fica a meta. De 4 a 4,5% é o usual.',
-  creep:'Quando a renda sobe, parte costuma virar gasto: carro melhor, mais lazer. Com 30%, de cada R$ 1.000 de aumento, R$ 300 viram gasto.',
-  vol:'Quanto a carteira sobe e desce de um ano para o outro. Serve para calcular a chance de chegar lá. Mais ações deixam esse número maior.',
-  inss:'Aposentadoria do INSS que o casal espera receber por mês, em dinheiro de hoje. Na dúvida, deixe 0.',
-  inssIdade:'Sua idade quando o INSS começa a pagar.',
-  divisao:'Como repartir o aporte entre vocês. Proporcional ao salário: cada um investe o mesmo % do que ganha. Proporcional à sobra: quem sobra mais investe mais. Meio a meio: o mesmo valor em reais.',
-  k_ano:'Ano em que o bebê nasce, ou nasceu.',
-  k_esc:'Tipo de escola. A bilíngue custa cerca de 50% a mais que a particular.',
-  k_fac:'Pública: só custos de moradia e material. Particular: mensalidade média. Particular top: as universidades mais caras.'
+  vol:'Quanto a carteira sobe e desce de um ano para o outro. Serve para calcular a chance de chegar lá.',
+  inss:'Aposentadoria do INSS que você espera receber por mês, em dinheiro de hoje. Na dúvida, deixe 0.',
+  inssIdade:'Idade em que o INSS começa a pagar.',
+  anos:'Daqui a quantos anos você quer parar de depender do salário.',
+  moradia:'Comprar a casa soma o preço dela à meta. Se você já tem ou vai herdar a casa, ela fica de fora. Com aluguel, o aluguel entra no custo mensal.',
+  anoFilho:'Ano em que o filho(a) nasce, ou nasceu.',
+  c_contas:'Condomínio, IPTU, luz, água, gás, internet e manutenção.',
+  c_mercado:'Supermercado, feira, farmácia e produtos de casa.',
+  c_saude:'Plano de saúde e gastos médicos.',
+  c_transp:'Combustível, seguro, IPVA e manutenção, ou aplicativo e transporte público.',
+  c_lazer:'Restaurantes, passeios, assinaturas e academia.',
+  c_outros:'Roupas, presentes, cuidados pessoais e imprevistos.',
+  c_viagens:'Quanto quer gastar com viagens por ano no sonho.',
+  c_aluguel:'Só entra se a moradia no sonho for aluguel.',
+  c_imovel:'Só entra se escolher comprar a casa com este plano.'
 };
 function addInfo(root){
   root.querySelectorAll('label').forEach(l=>{
@@ -954,9 +819,8 @@ function addInfo(root){
     const text=INFO[c.id]||INFO[c.id.replace(/_\d+$/,'')]; if(!text) return;
     const b=document.createElement('button'); b.type='button'; b.className='info'; b.textContent='i';
     b.setAttribute('aria-label','O que é este campo?'); b.setAttribute('aria-expanded','false'); b.dataset.tip=text;
-    if(l.classList.contains('check')){ l.appendChild(b); return; }
     const row=document.createElement('span'); row.className='lbl-row';
-    while(l.firstChild && l.firstChild!==c) row.appendChild(l.firstChild);
+    while(l.firstChild&&l.firstChild!==c) row.appendChild(l.firstChild);
     row.appendChild(b); l.insertBefore(row,c);
   });
 }
@@ -971,9 +835,8 @@ document.addEventListener('click',e=>{
   infoPop=document.createElement('div'); infoPop.className='info-pop'; infoPop.setAttribute('role','tooltip'); infoPop.textContent=b.dataset.tip;
   document.body.appendChild(infoPop); infoBtn=b; b.setAttribute('aria-expanded','true');
   const r=b.getBoundingClientRect(), w=infoPop.offsetWidth, h=infoPop.offsetHeight;
-  let left=Math.min(Math.max(16,r.left+r.width/2-w/2), innerWidth-w-16);
-  let top=r.bottom+8; if(top+h>innerHeight-8) top=Math.max(8,r.top-h-8);
-  infoPop.style.left=left+'px'; infoPop.style.top=top+'px';
+  infoPop.style.left=Math.min(Math.max(16,r.left+r.width/2-w/2),innerWidth-w-16)+'px';
+  let top=r.bottom+8; if(top+h>innerHeight-8) top=Math.max(8,r.top-h-8); infoPop.style.top=top+'px';
 });
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeInfo(); });
 window.addEventListener('scroll',closeInfo,true);
@@ -981,22 +844,26 @@ window.addEventListener('resize',closeInfo);
 
 /* ---------- eventos ---------- */
 let raf;
-function onChange(e){
-  if(e && e.target.name==='estilo'){ readForm(); S.estilo=e.target.value; applyStyle(S); fillForm(); }
-  else if(e && e.target.id==='cidade'){ readForm(); if(S.estilo==='custom'){ const v=S.viagens; Object.assign(S, CIDADES[S.cidade]); S.viagens=v; } else applyStyle(S); fillForm(); }
-  else { readForm(); if(e && COST_KEYS.includes(e.target.id) && S.estilo!=='custom'){ S.estilo='custom'; renderStyles(); } if(e && e.target.id==='moradia') renderStyles(); }
-  isExample=false; save();
-  cancelAnimationFrame(raf); raf=requestAnimationFrame(render);
-}
-$('f').addEventListener('input', e=>{ if(e.target.tagName!=='SELECT' && e.target.name!=='estilo') onChange(e); });
-$('f').addEventListener('change', e=>{ if(e.target.name==='estilo') onChange(e); });
-$('f').addEventListener('change', e=>{ if(e.target.tagName==='SELECT') onChange(e); });
-$('f').addEventListener('submit', e=>e.preventDefault());
-$('divisao').addEventListener('change', onChange);
-$('kids').addEventListener('click', e=>{ const i=e.target.dataset.rm; if(i!==undefined){ readForm(); S.kids.splice(+i,1); renderKids(); onChange(); }});
-$('addKid').addEventListener('click', ()=>{ readForm(); S.kids.push({ano:Y0+3, escola:'particular', facul:'particular'}); renderKids(); onChange(); });
-$('reset').addEventListener('click', ()=>{ S=JSON.parse(JSON.stringify(EXEMPLO)); isExample=true; try{localStorage.removeItem(KEY);}catch(e){} fillForm(); render(); });
-let rt; window.addEventListener('resize', ()=>{ clearTimeout(rt); rt=setTimeout(render,120); });
+function update(){ isExample=false; save(); cancelAnimationFrame(raf); raf=requestAnimationFrame(render); }
+$('f').addEventListener('input',e=>{
+  const t=e.target;
+  if(t.name==='estilo'||t.name==='extra'||t.tagName==='SELECT') return;
+  readForm();
+  if(COST_KEYS.includes(t.id)&&S.estilo!=='custom') S.estilo='custom';
+  update();
+});
+$('f').addEventListener('change',e=>{
+  const t=e.target;
+  if(t.name==='estilo'){ readForm(); S.estilo=t.value; applyDream(S); fillForm(); update(); return; }
+  if(t.id&&t.id.startsWith('st_tipo_')){ const i=+t.id.split('_')[2]; readForm(); S.steps[i].pct=DEGRAUS[t.value].pct; renderSteps(); update(); return; }
+  if(t.name==='extra'||t.tagName==='SELECT'){ readForm(); fillFormSoft(); update(); }
+});
+function fillFormSoft(){ COST_KEYS.forEach(id=>{ $(id).value=S[id]; }); $('moradia').value=S.moradia; }
+$('f').addEventListener('submit',e=>e.preventDefault());
+$('f').addEventListener('click',e=>{ const b=e.target.closest('[data-rmstep]'); if(b){ readForm(); S.steps.splice(+b.dataset.rmstep,1); renderSteps(); update(); } });
+$('addStep').addEventListener('click',()=>{ readForm(); const last=S.steps.length?S.steps[S.steps.length-1].anos:0; S.steps.push({anos:last+3,tipo:'promocao',pct:20}); renderSteps(); update(); });
+$('reset').addEventListener('click',()=>{ S=fresh(); isExample=true; try{ localStorage.removeItem(KEY); }catch(e){} fillForm(); render(); });
+let rt; window.addEventListener('resize',()=>{ clearTimeout(rt); rt=setTimeout(render,150); });
 
 /* ---------- compartilhar ---------- */
 const enc=new TextEncoder(), dec=new TextDecoder();
@@ -1021,9 +888,9 @@ async function unseal(t,pw){
   if(u[0]===1) data=await pipe(data,DecompressionStream);
   return JSON.parse(dec.decode(data));
 }
-const canCrypto = !!(window.crypto && crypto.subtle);
+const canCrypto=!!(window.crypto&&crypto.subtle);
 $('shareBtn').addEventListener('click',()=>{
-  $('sharePanel').hidden=false; $('shareOut').hidden=true; $('shareMsg').textContent='';
+  $('sharePanel').hidden=false; $('shareOut').hidden=true; $('shareMsg').textContent=''; $('shareMsg').className='hint';
   if(!canCrypto){ $('shareMsg').textContent='Este navegador não permite criptografia. Abra o app pelo endereço https para compartilhar.'; $('shareMsg').className='hint err'; }
   $('sharePanel').scrollIntoView({behavior:'smooth',block:'start'}); $('sharePw').focus({preventScroll:true});
 });
@@ -1032,40 +899,26 @@ async function makeLink(){
   const pw=$('sharePw').value, msg=$('shareMsg');
   if(pw.length<8){ msg.textContent='A senha precisa ter pelo menos 8 caracteres.'; msg.className='hint err'; return; }
   msg.textContent='Gerando link…'; msg.className='hint';
-  try{
-    readForm();
-    const t=await seal(S,pw);
-    $('shareLink').value=location.origin+location.pathname+'#p='+t;
-    $('shareOut').hidden=false; msg.textContent='Link pronto.'; msg.className='hint ok'; $('copyMsg').textContent='';
-  }catch(e){ msg.textContent='Não foi possível gerar o link neste navegador. Tente pelo Chrome, Safari ou Firefox atualizados.'; msg.className='hint err'; }
+  try{ readForm(); const t=await seal(S,pw); $('shareLink').value=location.origin+location.pathname+'#p='+t; $('shareOut').hidden=false; msg.textContent='Link pronto.'; msg.className='hint okmsg'; $('copyMsg').textContent=''; }
+  catch(e){ msg.textContent='Não foi possível gerar o link neste navegador. Tente pelo Chrome, Safari ou Firefox atualizados.'; msg.className='hint err'; }
 }
 $('shareGo').addEventListener('click',makeLink);
 $('sharePw').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); makeLink(); } });
 $('shareCopy').addEventListener('click',()=>{
-  const inp=$('shareLink');
-  const done=()=>{ $('copyMsg').textContent='Link copiado.'; };
-  const fallback=()=>{ inp.focus(); inp.select(); $('copyMsg').textContent='Link selecionado. Copie com Ctrl+C ou Cmd+C.'; };
+  const inp=$('shareLink'), done=()=>{ $('copyMsg').textContent='Link copiado.'; }, fallback=()=>{ inp.focus(); inp.select(); $('copyMsg').textContent='Link selecionado. Copie com Ctrl+C ou Cmd+C.'; };
   if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(inp.value).then(done,fallback); else fallback();
 });
 const BACKUP=KEY+'-backup';
 let sharedToken=null;
-function checkHash(){
-  sharedToken=(location.hash.match(/^#p=([A-Za-z0-9_-]+)$/)||[])[1]||null;
-  if(sharedToken){ $('openPanel').hidden=false; $('openMsg').textContent=''; window.scrollTo(0,0); setTimeout(()=>$('openPw').focus(),0); }
-}
-checkHash();
-window.addEventListener('hashchange',checkHash);
+function checkHash(){ sharedToken=(location.hash.match(/^#p=([A-Za-z0-9_-]+)$/)||[])[1]||null; if(sharedToken){ $('openPanel').hidden=false; $('openMsg').textContent=''; window.scrollTo(0,0); setTimeout(()=>$('openPw').focus(),0); } }
 async function openShared(){
   const msg=$('openMsg');
   if(!canCrypto){ msg.textContent='Este navegador não permite abrir planos protegidos. Abra o link pelo endereço https.'; msg.className='hint err'; return; }
   msg.textContent='Abrindo…'; msg.className='hint';
-  let data;
-  try{ data=await unseal(sharedToken,$('openPw').value); }
-  catch(e){ msg.textContent='Senha incorreta ou link incompleto. Confira com quem enviou e tente de novo.'; msg.className='hint err'; return; }
-  if(!data||typeof data!=='object'||!Array.isArray(data.kids)){ msg.textContent='Este link não contém um plano válido.'; msg.className='hint err'; return; }
-  if(!isExample){ try{ localStorage.setItem(BACKUP, JSON.stringify(S)); }catch(e){} }
-  S=Object.assign(JSON.parse(JSON.stringify(EXEMPLO)), data);
-  isExample=false; save(); fillForm(); render();
+  let data; try{ data=await unseal(sharedToken,$('openPw').value); }catch(e){ msg.textContent='Senha incorreta ou link incompleto. Confira com quem enviou e tente de novo.'; msg.className='hint err'; return; }
+  if(!data||typeof data!=='object'||!Array.isArray(data.steps)){ msg.textContent='Este link não contém um plano válido desta versão do app.'; msg.className='hint err'; return; }
+  if(!isExample){ try{ localStorage.setItem(BACKUP,JSON.stringify(S)); }catch(e){} }
+  S=Object.assign(fresh(),data); isExample=false; save(); fillForm(); render();
   $('openPanel').hidden=true; $('openPw').value=''; $('restoreBar').hidden=false;
   try{ history.replaceState(null,'',location.pathname+location.search); }catch(e){}
 }
@@ -1073,12 +926,12 @@ $('openGo').addEventListener('click',openShared);
 $('openPw').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); openShared(); } });
 $('restoreBtn').addEventListener('click',()=>{
   let prev=null; try{ prev=JSON.parse(localStorage.getItem(BACKUP)); localStorage.removeItem(BACKUP); }catch(e){}
-  if(prev){ S=Object.assign(JSON.parse(JSON.stringify(EXEMPLO)), prev); isExample=false; save(); }
-  else { S=JSON.parse(JSON.stringify(EXEMPLO)); isExample=true; try{ localStorage.removeItem(KEY); }catch(e){} }
+  if(prev){ S=Object.assign(fresh(),prev); isExample=false; save(); } else { S=fresh(); isExample=true; try{ localStorage.removeItem(KEY); }catch(e){} }
   fillForm(); render(); $('restoreBar').hidden=true;
 });
+window.addEventListener('hashchange',checkHash);
 
-fillForm(); addInfo(document); render();
+fillForm(); addInfo(document); render(); checkHash();
 })();
 </script>
 </body>

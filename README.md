@@ -1,6 +1,10 @@
 # Planeja Lar
 
-Simulador para planejar a independência financeira de uma família no Brasil: parte da situação de hoje e desenha um plano para viver de renda, com filhos em escola particular, no litoral ou interior de São Paulo.
+Simulador de planejamento financeiro pessoal. Você escolhe o estilo de vida dos sonhos, conta onde está hoje e o app responde:
+
+- **Quanto minha carreira precisa evoluir** para chegar lá no prazo, considerando reajustes, promoções e grandes saltos, inclusive para quem está sem emprego.
+- **Onde colocar o meu dinheiro** para garantir o sonho.
+- **O que fazer a partir deste mês.**
 
 > ⚠️ **Aviso:** as projeções e recomendações deste app são simulações hipotéticas e não garantem nenhum resultado. Não são recomendação de investimento. Veja o [aviso legal](#aviso-legal).
 
@@ -8,27 +12,23 @@ Simulador para planejar a independência financeira de uma família no Brasil: p
 
 ## O que você informa
 
-1. **Situação hoje:** idades, vínculo de cada um (CLT, PJ, autônomo ou servidor), renda líquida e aumento esperado de cada um, gastos (separados por pessoa enquanto cada um mora na sua casa, com o ano da mudança e o custo de montar a casa), gasto anual com viagens, financiamento, patrimônio e aporte mensal de cada um (investimentos separados), reserva do casal e dívidas.
-2. **Filhos:** ano de nascimento, escola (pública, particular ou bilíngue) e faculdade.
-3. **O sonho:** cidade de destino, estilo de vida pré-definido (Essencial, Confortável, Viajante ou Alto padrão, com custos editáveis), orçamento anual de viagens, em quantos anos quer viver de renda e se terá casa própria ou aluguel.
-4. **Premissas:** quanto de cada aumento vira gasto, rendimento real, taxa de retirada segura, aumento real da renda e INSS.
+1. **O sonho:** 11 estilos de vida em cartões (Minimalista, Essencial, Interior tranquilo, Sítio ou chácara, Vida no litoral, Confortável, Cidade grande, Viajante, Nômade digital, Morar em Portugal, Alto padrão) ou um personalizado. Dá para somar extras (filho, pet, ajudar os pais, carro novo, viagem internacional, hobby, casa de temporada…), escolher entre comprar a casa, já ter a casa ou morar de aluguel, e definir em quantos anos quer viver de renda.
+2. **Você hoje:** idade, situação de trabalho (CLT, servidor, PJ, empreendedor ou sem emprego), renda, gastos, viagens, patrimônio, reserva, dívidas e quanto da sobra você investe. Sem emprego, o app pergunta em quantos meses você volta a ter renda e quanto espera ganhar.
+3. **Carreira:** reajuste anual acima da inflação, quanto de cada aumento vira gasto e os saltos que você planeja (promoção, troca de empresa, virar gestor, especialização, mudar de área, abrir empresa, trabalhar para fora), cada um com ano e percentual.
+4. **Premissas:** perfil de investidor, rendimento real, retirada segura, oscilação da carteira e INSS.
 
-Cada campo tem um botão **i** com uma explicação simples do que preencher.
+Cada campo tem um botão **i** com uma explicação simples.
 
 ## O que o app devolve
 
-- **Quanto a renda precisa crescer:** o aumento anual acima da inflação que o casal precisa ter, com marcos a cada 5 anos para cada pessoa, comparado com a carreira planejada
-- **Quanto cada um investe:** o aporte necessário de cada pessoa, em reais e em % do salário, dividido proporcionalmente ao salário, à sobra de cada um ou meio a meio, com o patrimônio de cada um no ano da meta
-- Meta de patrimônio e quanto dela o ritmo atual alcança
-- Aporte mensal necessário, antes e depois da chegada dos filhos
-- Chance de sucesso (simulação Monte Carlo)
-- Gráfico do patrimônio com os eventos da família
-- Plano de ação em ordem de prioridade, incluindo uma caixa de viagens separada da reserva de emergência
-- Sugestão de carteira conforme o prazo
-- Alavancas: aportar mais, adiar, reduzir o custo de vida ou buscar mais rendimento
-- Tabela ano a ano
-
-Para quem é PJ ou autônomo, o plano pede reserva de 12 meses, alerta que o INSS e a licença-maternidade seguem o pró-labore e indica seguros para proteger a renda.
+- **Veredito:** quanto do sonho o seu plano alcança.
+- **Quanto sua carreira precisa evoluir:** três caminhos para fechar a conta.
+  - **Só com aumentos anuais:** o crescimento de renda necessário por ano.
+  - **Um grande salto:** de quanto precisa ser um salto no ano que você escolher.
+  - **O seu plano:** quanto do sonho os seus saltos planejados alcançam.
+  - Tudo traduzido em linguagem de carreira ("equivale a uma promoção de 20% a cada 3 anos"), com gráfico e marcos de renda ano a ano.
+- **Onde colocar o seu dinheiro:** para onde vai cada real do aporte mensal, em ordem (dívidas, reserva de emergência, caixa de viagens, educação do filho, independência), e a carteira de longo prazo conforme o perfil e o prazo.
+- **Caminho do patrimônio**, **plano de ação**, **outras alavancas** (investir mais, adiar a data, sonho que cabe no plano, cartão que já cabe) e **tabela ano a ano**.
 
 ## Compartilhar um plano
 
@@ -44,14 +44,15 @@ O link guarda o plano como estava na hora. Se algo mudar, gere um link novo.
 
 ## Como a conta funciona
 
-Tudo é calculado em reais de hoje, já descontada a inflação.
+Tudo é calculado mês a mês, em reais de hoje, já descontada a inflação.
 
-- **Meta** = custo mensal do casal × 12 ÷ taxa de retirada segura + valor presente do custo dos filhos depois da data de viver de renda + parcelas restantes do financiamento − valor presente do INSS.
-- **Projeção:** a cada ano, a renda de cada pessoa cresce no ritmo informado, uma parte do aumento vira gasto, e o patrimônio rende a taxa real e recebe a mesma parte da sobra (renda − gastos − viagens − filhos − financiamento) que vocês investem hoje.
-- **Aumento necessário:** o app busca o crescimento anual de renda, igual para os dois, que faz a projeção alcançar a meta mantendo esse hábito.
-- **Custo dos filhos:** custo extra mensal até os 17 anos, mensalidade escolar × 13 por fase (infantil, fundamental, médio) e 5 anos de faculdade.
+- **Meta** = custo mensal do sonho × 12 ÷ taxa de retirada segura + preço da casa (se for comprar) + valor presente do custo restante do filho − valor presente do INSS.
+- **Renda:** parte da renda atual (ou da renda esperada ao voltar a trabalhar), cresce pelo reajuste anual e dá um salto em cada degrau de carreira.
+- **Projeção:** a cada mês, a sobra (renda − gastos − viagens − filho − a parte dos aumentos que vira gasto) é investida no percentual informado. Se faltar dinheiro, ele sai do patrimônio. O patrimônio rende a taxa real.
+- **Carreira necessária:** o app busca o crescimento anual de renda, ou o tamanho do salto, que faz a projeção alcançar a meta mantendo o mesmo hábito de investir.
+- **Chance de chegar lá:** simulação com anos bons e ruins de mercado.
 
-Os dados ficam salvos apenas no navegador de quem usa (localStorage).
+Os dados ficam salvos apenas no navegador de quem usa.
 
 ## Aviso legal
 
